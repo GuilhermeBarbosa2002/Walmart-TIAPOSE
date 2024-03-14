@@ -13,3 +13,25 @@ summary(d)
 
 # Ter em atenção o horizonte temporal, que deverá envolveruma previsão até 1 “mês” (quatro semanas) - 4 linhas 
 
+#Instalar bibliotecas
+
+library(ggplot2)
+
+#library(lubridate)
+
+
+d$Week <- week(as.Date(d$Date))
+
+d$Month <- month(as.Date(d$Date))
+
+head(d)
+
+ggplot(d, aes(x = seq_along(WSdep1), y = WSdep1)) +
+  geom_line(color = "blue") +
+  geom_line(aes(y = WSdep2), color = "red") +
+  geom_line(aes(y = WSdep3), color = "green") +
+  geom_line(aes(y = WSdep4), color = "orange") +
+  labs(x = "Índice", y = "Valor", title = "Variação de WSdep1, WSdep2, WSdep3 e WSdep4") +
+  theme_minimal()
+
+
