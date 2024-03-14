@@ -1,9 +1,7 @@
 libs <- c("ggplot2")
 
-for(lib in libs)
-    if(!require(lib)){
+for(lib in libs){
+    if(!require(lib))
         install.packages(lib)
-        library(lib)
-    }else {
-       library(lib)
-    }
+    library(lib)
+}
