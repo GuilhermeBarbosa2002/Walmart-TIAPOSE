@@ -1,3 +1,6 @@
+#Instalar bibliotecas
+source("LibrariesConnections.R")
+
 d=read.table("walmart.csv",sep=",",header=TRUE)
 summary(d)
 
@@ -12,13 +15,6 @@ summary(d)
 
 
 # Ter em atenção o horizonte temporal, que deverá envolveruma previsão até 1 “mês” (quatro semanas) - 4 linhas 
-
-#Instalar bibliotecas
-
-library(ggplot2)
-
-library(lubridate)
-
 
 d$Week <- week(as.Date(d$Date))
 
