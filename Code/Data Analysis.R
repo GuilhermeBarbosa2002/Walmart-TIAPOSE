@@ -17,14 +17,14 @@ summary(d)
 
 library(ggplot2)
 
-#library(lubridate)
+library(lubridate)
 
 
 d$Week <- week(as.Date(d$Date))
 
 d$Month <- month(as.Date(d$Date))
 
-head(d)
+head(d, 143)
 
 ggplot(d, aes(x = seq_along(WSdep1), y = WSdep1)) +
   geom_line(color = "blue") +
