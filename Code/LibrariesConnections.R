@@ -1,4 +1,4 @@
-libs <- c("ggplot2", "rminer", "lubridate")
+libs <- c("this.path","ggplot2", "rminer",)
 
 for(lib in libs){
     if(!require(lib, character.only = T))
