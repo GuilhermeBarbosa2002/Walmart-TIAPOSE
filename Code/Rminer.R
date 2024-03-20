@@ -7,7 +7,7 @@ library(rminer) # by Simão Dias
 cat("read passenger time series:")
 d=read.csv("walmart.csv",header=TRUE,sep=",")
 
-d1=d[,4] # d1 -departamento 1
+d1=d[,4] # d1 departamento 1
 d2=d[,5] # d2 departamento 2
 d3=d[,6] # d1 departamento 3
 d4=d[,7] # d1 departamento 4
@@ -82,13 +82,25 @@ Rminer <- function(departamento, numeroDepartamento){
   cat("RRSE:",mmetric(Y,PRF,metric="RRSE"),"\n")
   cat("R2:",mmetric(Y,PRF,metric="R22"),"\n") # press R measure
   
-  # graph: REG - simple Regression Plot
+  # graph: REG - simple Regression Plot For Neural Network
   mae=mmetric(Y,PNN,metric="MAE")
-  nmae=mmetric(Y,PRF,metric="NMAE",val=srange)
+  nmae=mmetric(Y,PNN,metric="NMAE",val=srange)
   r2=mmetric(Y,PNN,metric="R22")
   print("Graph with NN predictions (1-ahead):")
-  main=paste("Numero do Departamento", numeroDepartamento, "\n NN pred. (MAE=",round(mae,digits=1),", NMAE=",round(nmae,digits=0),"%, R^2=",round(r2,digits=2),")",sep="")
+  main=paste("Numero do Departamento", numeroDepartamento, "\n NEURAL NETWORK pred. (MAE=",round(mae,digits=1),", NMAE=",round(nmae,digits=0),"%, R^2=",round(r2,digits=2),")",sep="")
   mgraph(Y,PNN,main=main,graph="REG",Grid=10,lty=1,col=c("black","blue"),leg=list(pos="topright",leg=c("target","predictions")))
+  
+  mpause()
+  
+  # graph: REG - simple Regression Plot for Random Forest
+  mae=mmetric(Y,PRF,metric="MAE")
+  nmae=mmetric(Y,PRF,metric="NMAE",val=srange)
+  r2=mmetric(Y,PRF,metric="R22")
+  print("Graph with PRF predictions (1-ahead):")
+  main=paste("Numero do Departamento", numeroDepartamento, "\n FORECAST (MAE=",round(mae,digits=1),", NMAE=",round(nmae,digits=0),"%, R^2=",round(r2,digits=2),")",sep="")
+  mgraph(Y,PRF,main=main,graph="REG",Grid=10,lty=1,col=c("black","blue"),leg=list(pos="topright",leg=c("target","predictions")))
+  
+  mpause()
   
   
 }
