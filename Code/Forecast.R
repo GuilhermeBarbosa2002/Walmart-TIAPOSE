@@ -2,6 +2,7 @@
   #TREINAR COM 139 E TESTAR AS ULTIMAS 4 SEMANAS - FORECAST
   
 library(forecast) # access forecast functions -> HoltWinters, forecast
+library(rminer) # para termos a função mpause(), apenas!
 
 # read data:
 cat("read passenger time series:")
@@ -39,7 +40,7 @@ Forecast <- function(departamento, numeroDepartamento){
   
 
   HW = HoltWinters(ts(departamento[TR], frequency = K))
-  plot(HW)
+ # plot(HW)
   
 
   #Vamos prever as 4 semanas seguintes (que vai corresponder ao TS)
@@ -80,7 +81,8 @@ Forecast <- function(departamento, numeroDepartamento){
          legend = c("Previsões", "Valores Reais"),
          col = c("blue", "black"), 
          lty = 1)
-  mpause()
+  
+  mpause() # wait for enter
 
   cat("RMSE para o Departamento ", numeroDepartamento, ":", rmse, "\n")
   
