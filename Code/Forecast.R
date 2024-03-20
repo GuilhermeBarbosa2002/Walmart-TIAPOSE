@@ -63,6 +63,19 @@ Forecast <- function(departamento, numeroDepartamento){
   # Calcular o RMSE
   rmse = sqrt(mean(erros_quadraticos))
   
+  # Calcular o MAE
+  mae = mean(abs(valores_reais - previsoes))
+  
+  # Calcular o NMAE
+  nmae = mae / mean(valores_reais)
+  
+  # Calcular o RRSE
+  rrse = sqrt(sum(erros_quadraticos) / sum((valores_reais - mean(valores_reais))^2))
+  
+  # Calcular o R2
+  r2 = 1 - sum(erros_quadraticos) / sum((valores_reais - mean(valores_reais))^2)
+  
+  
   # Plotagem do gráfico
   plot(departamento[TS], 
        type = "l", 
@@ -84,9 +97,12 @@ Forecast <- function(departamento, numeroDepartamento){
   
   mpause() # wait for enter
 
+  # Mostrar métricas
   cat("RMSE para o Departamento ", numeroDepartamento, ":", rmse, "\n")
-  
-  
+  cat("MAE para o Departamento ", numeroDepartamento, ":", mae, "\n")
+  cat("NMAE para o Departamento ", numeroDepartamento, ":", nmae, "\n")
+  cat("RRSE para o Departamento ", numeroDepartamento, ":", rrse, "\n")
+  cat("R2 para o Departamento ", numeroDepartamento, ":", r2, "\n")
 }
 
 # Testar para todos
