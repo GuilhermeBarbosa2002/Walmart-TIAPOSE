@@ -83,7 +83,7 @@ Forecast <- function(departamento, numeroDepartamento){
        ylim = range(c(departamento[TS], previsoes, valores_reais)),
        xlab = "Semanas", 
        ylab = "Valores",
-       main = paste("Comparação entre Previsões e Valores Reais - Departamento", numeroDepartamento, "\n RMSE = ", round(rmse,2)))
+       main = paste("Comparação entre Previsões e Valores Reais - Departamento", numeroDepartamento, "\n RMSE = ", round(rmse,2), " NMAE = ", round(nmae, 2), " RRSE = ", round(rmse,2), " R2 = ",  round(r2, 2)))
   
   # Adicionando linhas para previsões e valores reais
   lines(previsoes, col = "blue")
