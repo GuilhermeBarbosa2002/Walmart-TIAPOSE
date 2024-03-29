@@ -8,7 +8,7 @@ d3=d[,6] # d1 departamento 3
 d4=d[,7] # d1 departamento 4
 
 
-K=1
+K=4
 
 
 print("incremental (growing) window training demonstration:")
@@ -16,7 +16,7 @@ print("incremental (growing) window training demonstration:")
 Test=K # H, the number of multi-ahead steps, adjust if needed
 H=4
 S=H # step jump: set in this case to 4 months, a quarter
-Runs=8 # number of growing window iterations, adjust if needed
+Runs=10 # number of growing window iterations, adjust if needed
 timelags = c(1:4)
 
 
@@ -83,21 +83,22 @@ Growing_window <- function(departamento, nomedepartamento){
     
     ################################# GRAFICO ##################################
     
-    cat("iter:",b,"TR from:",trinit,"to:",(trinit+length(H$tr)-1),"size:",length(H2$tr),
-        "TS from:",H$ts[1],"to:",H$ts[length(H2$ts)],"size:",length(H$ts))
+    cat("iter:",b,"TR from:",trinit,"to:",(trinit+length(H$tr)-1),"size:",length(H$tr),
+        "TS from:",H$ts[1],"to:",H$ts[length(H$ts)],"size:",length(H$ts))
     
     
     mgraph(ts[H$ts],HOLTWINTERS_Pred,graph="REG",Grid=10,col=c("black","blue","red"),leg=list(pos="topleft",leg=c("target","Holtwintwers","Arima")))
     lines(ARIMA_Pred,pch=19,cex=0.5,type="b",col="red")
     title(paste("Departamento ", nomedepartamento, "\n iter:",b,"TR from:",trinit,"to:",(trinit+length(H$tr)-1),"size:",length(H$tr),
                 "TS from:",H$ts[1],"to:",H$ts[length(H$ts)],"size:",length(H$ts), "\n NMAE - Holtwinter - ", H_NMAE[b], "\n NMAE - Arima - ", A_NMAE[b]))
+    
   }
   
-  cat("**  DEPARTAMENTO ",nomedepartamento, " **")
-  cat("------- HOLTWINTERS --------")
-  cat("\n MAE: ", round(median(H_MAE),2), "\n NMAE: ", round(median(H_NMAE),2)," \n RMSE: ", round(median(H_RMSE),2),"\n RRSE: ", round(median(H_RRSE),2),"\n R2: ", median(H_R2))
-  cat("------- ARIMA --------")
-  cat("\n MAE: ", round(median(A_MAE),2), "\n NMAE: ", round(median(A_NMAE),2)," \n RMSE: ", round(median(A_RMSE),2),"\n RRSE: ", round(median(A_RRSE),2),"\n R2: ", median(A_R2))
+  cat("\n **  DEPARTAMENTO ",nomedepartamento, " **")
+  cat("\n ------- HOLTWINTERS --------")
+  cat("\n MAE: ", round(median(H_MAE),2), "\n NMAE: ", round(median(H_NMAE),2)," \n RMSE: ", round(median(H_RMSE),2),"\n RRSE: ", round(median(H_RRSE),2),"\n R2: ", round(median(H_R2),2))
+  cat("\n------- ARIMA --------")
+  cat("\n MAE: ", round(median(A_MAE),2), "\n NMAE: ", round(median(A_NMAE),2)," \n RMSE: ", round(median(A_RMSE),2),"\n RRSE: ", round(median(A_RRSE),2),"\n R2: ", round(median(A_R2),2))
   cat("\n ---------------------------------------------- \n")
 }
 
