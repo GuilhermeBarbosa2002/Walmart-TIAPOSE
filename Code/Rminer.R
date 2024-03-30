@@ -1,6 +1,6 @@
 #TREINAR COM 139 E TESTAR AS ULTIMAS 4 SEMANAS - Rminer
 
-library(rminer) # by Simão Dias
+library(rminer) # by Paulo Cortez
 
 
 # read data:
