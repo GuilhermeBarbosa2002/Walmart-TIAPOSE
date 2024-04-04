@@ -16,7 +16,7 @@ timelags <- c(1:4)
 
 
 
-Naive_Bayes <- function(departamento, nomedepartamento){
+Models <- function(departamento, nomedepartamento){
   
   ts <- ts(departamento, frequency = K)
   L  <- length(ts)
@@ -106,7 +106,7 @@ Naive_Bayes <- function(departamento, nomedepartamento){
   
 }
 
-Naive_Bayes(d1,"1")
-Naive_Bayes(d2,"2")
-Naive_Bayes(d3,"3")
-Naive_Bayes(d4,"4")
+Models(d1,"1")
+Models(d2,"2")
+Models(d3,"3")
+Models(d4,"4")
