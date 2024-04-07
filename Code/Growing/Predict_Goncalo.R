@@ -8,7 +8,7 @@ d3=d[,6] # d1 departamento 3
 d4=d[,7] # d1 departamento 4
 
 
-K=4
+K=52
 
 
 print("incremental (growing) window training demonstration:")

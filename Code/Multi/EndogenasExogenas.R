@@ -77,7 +77,7 @@ Real4 = d4[TS]
 compare_and_plot <- function(Real, Pred, d) {
   # Calcular métricas
   MAE <- mmetric(Real, Pred, metric = "MAE")
-  NMAE <- mmetric(Real, Pred, metric = "NMAE", val = 173619)
+  NMAE <- mmetric(Real, Pred, metric = "NMAE")
   RMSE <- mmetric(Real, Pred, metric = "RMSE")
   RRSE <- mmetric(Real, Pred, metric = "RRSE")
   R2 <- mmetric(Real, Pred, metric = "R22")
