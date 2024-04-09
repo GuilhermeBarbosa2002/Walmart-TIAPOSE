@@ -16,7 +16,7 @@ print("incremental (growing) window training demonstration:")
 Test=K # H, the number of multi-ahead steps, adjust if needed
 H=4
 S=H # step jump: set in this case to 4 months, a quarter
-Runs=10 # number of growing window iterations, adjust if needed
+Runs=12 # number of growing window iterations, adjust if needed
 timelags = c(1:4)
 
 
