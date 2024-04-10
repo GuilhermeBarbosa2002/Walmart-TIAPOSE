@@ -38,20 +38,20 @@ d4=data[,"WSdep4"] # employment
 
 
 # Create a matrix of exogenous variables
-exogen_matrix <- data[, c("IsHoliday","Week","Month")]
+exogen_matrix <- data[, c("Week","IsHoliday")]
 
 
 
 hd=holdout(d1,ratio=LTS,mode="order") # simple ordered holdout train and test split, rminer function
 
 
-cdata=cbind(d1,d2,d3,d4)
-cdata2=cbind(IsHoliday,Month)
+cdata=cbind(d2,d3)
+cdata2=cbind(Week, IsHoliday)
 
 mtr=ts(cdata[hd$tr,],frequency=K) # TS training object, uses forecast library mode!
 exogen2=ts(cdata2[hd$tr,],frequency=K)
 exog_future=ts(cdata2[hd$ts,],frequency=K)
-IsHoliday <- data.frame(exog_future)
+exog_future_df <- data.frame(exog_future)
 
 
 #Para quando so temos uma variavel exogena
@@ -61,7 +61,7 @@ IsHoliday <- data.frame(exog_future)
 mvar=VAR(mtr,lag.max=16, exogen = exogen2) # 4*K. Also default lags.pt=16 of serial.test
 # get multi-step ahead forecasts
 
-FV=predict(mvar, n.ahead = 4, dumvar = IsHoliday)
+FV=predict(mvar, n.ahead = 4, dumvar = exog_future_df )
 
 
 Pred=FV
@@ -78,14 +78,16 @@ Real2 = d2[TS]
 Real3 = d3[TS]
 Real4 = d4[TS]
 
-for (i in 1:ncol(mtr)) {
+model <- auto.arima(y = mtr, xreg=exogen2)
+
+
+
+for (i in 1:2) {
   # Fit ARIMAX model for each endogenous variable
-  model <- auto.arima(y = mtr[,i], xreg=exogen2)
   
-  Prediction = predict(model, n.ahead = 4, newxreg = IsHoliday)
+  Prediction = predict(model, n.ahead = 4, newxreg = exog_future_df )
   
   assign(paste0("pre", i), Prediction$pred)
-  
   
   # Print summary for each model
   plot(Prediction$pred)
@@ -102,11 +104,12 @@ arimax <- function(Real, Pred, d) {
   
   
     # Calcular métricas
-    MAE <- mmetric(Real, Pred, metric = "MAE")
-    NMAE <- mmetric(Real, Pred, metric = "NMAE")
-    RMSE <- mmetric(Real, Pred, metric = "RMSE")
-    RRSE <- mmetric(Real, Pred, metric = "RRSE")
-    R2 <- mmetric(Real, Pred, metric = "R22")
+    MAE <- round(mmetric(Real, Pred, metric = "MAE"),digits=2)
+    NMAE <- round(mmetric(Real, Pred, metric = "NMAE"), digits = 2)
+    RMSE <- round(mmetric(Real, Pred, metric = "RMSE"), digits =2)
+    RRSE <- round(mmetric(Real, Pred, metric = "RRSE"), digits = 2)
+    R2 <- round(mmetric(Real, Pred, metric = "R22"), digits =2)
+    cor=round(mmetric(Real,Pred,metric="COR"),digits=2)
 
     # Criar data frame para o gráfico
     data <- data.frame(
@@ -132,6 +135,7 @@ arimax <- function(Real, Pred, d) {
     cat("RMSE:", RMSE, "\n")
     cat("RRSE:", RRSE, "\n")
     cat("R2:", R2, "\n")
+    cat("COR", cor, "\n")
 
     # Retornar o gráfico
     plot(p)
@@ -143,11 +147,12 @@ arimax <- function(Real, Pred, d) {
 # Função para calcular métricas e traçar gráfico de comparação
 VAR <- function(Real, Pred, d) {
   # Calcular métricas
-  MAE <- mmetric(Real, Pred, metric = "MAE")
-  NMAE <- mmetric(Real, Pred, metric = "NMAE", val = 173619)
-  RMSE <- mmetric(Real, Pred, metric = "RMSE")
-  RRSE <- mmetric(Real, Pred, metric = "RRSE")
-  R2 <- mmetric(Real, Pred, metric = "R22")
+  MAE <- round(mmetric(Real, Pred, metric = "MAE"), digits = 2)
+  NMAE <- round(mmetric(Real, Pred, metric = "NMAE"), digits = 2)
+  RMSE <- round(mmetric(Real, Pred, metric = "RMSE"), digits = 2)
+  RRSE <- round(mmetric(Real, Pred, metric = "RRSE"), digits = 2)
+  R2 <- round(mmetric(Real, Pred, metric = "R22"), digits = 2)
+  cor=round(mmetric(Real,Pred,metric="COR"),digits=2)
 
   # Criar data frame para o gráfico
   data <- data.frame(
@@ -173,6 +178,7 @@ VAR <- function(Real, Pred, d) {
   cat("RMSE:", RMSE, "\n")
   cat("RRSE:", RRSE, "\n")
   cat("R2:", R2, "\n")
+  cat("COR:", cor, "\n")
 
   # Retornar o gráfico
   plot(p)
@@ -180,9 +186,9 @@ VAR <- function(Real, Pred, d) {
 }
 
 # Arimax
-arimax(Real = Real1, Pred = pre1, d = 1)
+arimax(Real = Real2, Pred = pre1, d = 1)
 mpause()
-arimax(Real = Real2, Pred = pre2, d = 2)
+arimax(Real = Real3, Pred = pre2, d = 2)
 mpause()
 arimax(Real = Real3, Pred = pre3, d = 3)
 mpause()
