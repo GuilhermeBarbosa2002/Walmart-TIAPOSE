@@ -6,29 +6,10 @@ actual_sales <- data.frame(
   WSdep4 = c(127009,124560,123346,117375)
 )
 
-# Adicionando os índices
-rownames(actual_sales) <- c(139, 140, 141, 142)
 
-
-# definir os Funcionarios contratados
-hired_workers <- data.frame(
-  WSdep1 = c(5,6,7),
-  WSdep2 = c(4,5,6),
-  WSdep3 = c(3,4,5),
-  WSdep4 = c(2,3,4)
-)
-
-hired_workers = as.matrix(hired_workers)
-
-
-# definir as encomendas de produtos
-product_orders <- data.frame(
-  WSdep1 = c(61662,0,12985,39924),
-  WSdep2 = c(78292,0,55403,75160),
-  WSdep3 = c(56434,0,69133,62131),
-  WSdep4 = c(24182,0,37167,99708)
-)
-product_orders = as.matrix(product_orders)
+s = c(5,6,7,4,5,6,3,4,5,2,3,4,61662,0,12985,39924,78292,0,55403,75160,56434,0,69133,62131,24182,0,37167,99708)
+hired_workers =matrix(s[1:12],nrow=3,ncol=4)
+product_orders =matrix(s[13:28],nrow=4,ncol=4)
 
 
 # vendas por semana por departamento
@@ -194,3 +175,52 @@ F2 <- function(hired_workers,product_orders){
 
 
 
+
+
+# Função EVAL
+
+eval=function(x) - F1(s) 
+  hired_workers =matrix(s[1:12],nrow=3,ncol=4)
+  product_orders =matrix(s[13:28],nrow=4,ncol=4)
+
+
+
+
+#ultima funcao crl
+calculate_sales <- function(hired_workers, product_orders){
+  max_support_per_dep = max_product_per_dep(hired_workers)
+  sales = matrix(c(16),nrow=4,ncol=4)
+  stock = matrix(c(16),nrow=4,ncol=4)
+  for(i in 1:ncol(sales)){
+    for(j in 1:nrow(sales)){
+      valor_previsto_venda = actual_sales[i,j]  #buscar o valor da posição do actual sales
+      valor_encomenda = product_orders[i,j]     #buscar o valor da posição da product orders
+      valor_maximo_dep = max_support_per_dep[i] #buscar o valor maximo que pode ser produzido para o departamento (i)
+      if(i > 1){ # com stock
+        
+    
+    
+      }else{   #sem stock
+        if(valor_previsto_venda <= valor_encomenda){
+          sales[i,j] = valor_previsto_venda
+          print(valor_maximo_dep) 
+          print(valor_encomenda)
+          if(valor_maximo_dep <= valor_encomenda){
+              stock[i,j] = valor_encomenda - valor_maximo_dep
+          }
+         
+        }else{
+          sales[i,j] = valor_encomenda
+        }
+            
+      }
+        
+      #verificação final - não podemos encomendar mais do que aquilo que produzimos
+      if(sales[i,j] > valor_maximo_dep){
+          sales[i,j] = valor_maximo_dep # o valor da encomenda fica o máximo que podemos encomendar
+      }
+    }
+  }
+  
+  return(stock)
+}

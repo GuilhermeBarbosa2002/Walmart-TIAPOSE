@@ -87,12 +87,12 @@ month=data[,"Month"] # Month
 
 hd=holdout(d1,ratio=LTS,mode="order") # simple ordered holdout train and test split, rminer function
 
-cdata=cbind(month,is_holiday, d1,d2,d3,d4)
+cdata=cbind(is_holiday,week,d1,d2,d3,d4)
 mtr=ts(cdata[hd$tr,],frequency=K) # TS training object, uses forecast library mode!
 Y=cdata[hd$ts,] # target values
 
 # create VAR model:
-mvar=autoVAR(mtr,LAGMAX=16) # 4*K. Also default lags.pt=16 of serial.test
+#mvar=autoVAR(mtr,LAGMAX=16) # 4*K. Also default lags.pt=16 of serial.test
 
 # # get multi-step ahead forecasts
 # FV=forecastVAR(mvar,h=LTS) # similar to the forecast library function, multi-step ahead forecasts
@@ -105,22 +105,22 @@ mvar=autoVAR(mtr,LAGMAX=16) # 4*K. Also default lags.pt=16 of serial.test
 # mpause()
 
 
-# generate 2 ARIMAX models, one for prod (1) and other for rw (2)
-# mtr - matrix with the training data, one column per to be predicted variable
-# arimax=autoARIMAX(mtr,frequency=4)
-# FA=forecastARIMAX(arimax,h=LTS)
-# Pred21=FA[[3]]
-# Pred22=FA[[4]]
-# Pred23=FA[[5]]
-# Pred24=FA[[6]]
-# fshow(Y,Pred21,Pred22,Pred23,Pred24, "ARIMAX","d1","d2","d3","d4")
-# mpause()
+#generate 2 ARIMAX models, one for prod (1) and other for rw (2)
+#mtr - matrix with the training data, one column per to be predicted variable
+arimax=autoARIMAX(mtr,frequency=4)
+FA=forecastARIMAX(arimax,h=LTS)
+Pred21=FA[[3]]
+Pred22=FA[[4]]
+Pred23=FA[[5]]
+Pred24=FA[[6]]
+fshow(Y,Pred21,Pred22,Pred23,Pred24, "ARIMAX","d1","d2","d3","d4")
+mpause()
 
 # 
 # 
-# # in this recipe, 2 mlpe models are combined, each with 4 time lags:
-# # in this recipe, 2 mlpe models are combined, each with 4 time lags:
-# 
+# # # in this recipe, 2 mlpe models are combined, each with 4 time lags:
+# # # in this recipe, 2 mlpe models are combined, each with 4 time lags:
+# # 
 # # first step: creation of the data.frame with all required inputs and target outputs:
 # x1lags=1:4
 # x2lags=1:4
