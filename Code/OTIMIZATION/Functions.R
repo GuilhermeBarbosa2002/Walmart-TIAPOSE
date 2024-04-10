@@ -5,6 +5,7 @@ actual_sales <- data.frame(
   WSdep3 = c(63584,62888,62768,60279),
   WSdep4 = c(127009,124560,123346,117375)
 )
+
 # Adicionando os índices
 rownames(actual_sales) <- c(139, 140, 141, 142)
 
@@ -28,6 +29,17 @@ product_orders <- data.frame(
   WSdep4 = c(24182,0,37167,99708)
 )
 product_orders = as.matrix(product_orders)
+
+
+# vendas por semana por departamento
+sales <- data.frame(
+  WSdep1 = c(54480,7182,12985,35283),
+  WSdep2 = c(78292,0,55403,75160),
+  WSdep3 = c(56434,0,62768,60279),
+  WSdep4 = c(24182,0,37167,67000)
+)
+
+sales = as.matrix(sales)
 
 
 
@@ -94,5 +106,91 @@ total_number_of_orders <- function(product_orders){
   total_nonzero <- sum(product_orders != 0)
   return(total_nonzero)
 }
+
+
+
+
+#calcular vendas em dolares
+sales_in_usd <- function(sales){
+  
+  preço <- c(8, 10, 12, 16)
+  preço = as.matrix(preço)
+  sales_usd = 0
+  
+  for(i in 1:ncol(sales)){
+    
+    
+    sales_usd <- sales_usd + sum(sales[,i] * preço[i])
+    
+  }
+  
+  return(sales_usd)
+}
+
+
+#stock
+calculate_stock <- function(product_orders, sales){
+  stock<- matrix(0, nrow = 4, ncol = 4)
+  for(i in 1:ncol(product_orders)){
+    for(j in 1:nrow(product_orders)){
+      if( j  > 1){
+        stock[j,i] = product_orders[j,i]- sales[j,i] + (stock[j-1,i])
+      }
+      else{
+        stock[j,i] = product_orders[j,i]- sales[j,i]
+      }
+    }
+  }
+  return(stock)
+}
+
+#calcular stock em dolares
+
+calculate_stock_in_usd <- function(product_orders,sales){
+  
+  stockM = calculate_stock(product_orders, sales)
+  
+  
+  price <- c(3, 5, 6, 8)
+  price = as.matrix(price)
+  
+  stock_usd = 0
+  
+  for(i in 1:ncol(stockM)){
+    
+    stock_usd <- stock_usd + sum(stockM[,i] * price[i])
+    
+  }
+  
+  return(stock_usd)
+  
+  
+}
+
+# calcular custos totais
+
+total_costs <- function(hired_workers,product_orders, sales){
+  
+  cost_orders = total_cost_orders(product_orders)
+  cost_workers = total_cost_workers(hired_workers)
+  cost_stock_in_usd = calculate_stock_in_usd(product_orders,sales)
+  total = cost_orders + cost_workers + cost_stock_in_usd
+  
+  return(total)
+}
+
+F1 <- function(hired_workers,product_orders, sales){
+  monthly_profit = sales_in_usd(sales)-total_costs(hired_workers,product_orders, sales)
+  
+  return(monthly_profit)
+}
+
+F2 <- function(hired_workers,product_orders){
+  monthly_effort  = total_number_of_workers(hired_workers) + total_number_of_orders(product_orders)
+  
+  return(monthly_effort)
+}
+
+
 
 
