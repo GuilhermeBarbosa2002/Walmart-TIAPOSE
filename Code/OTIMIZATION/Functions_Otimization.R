@@ -1,51 +1,4 @@
-# definir as vendas da semana
-actual_sales <- data.frame(
-  WSdep1 = c(54480,42221,36267,35283),
-  WSdep2 = c(159460,156945,146388,132156),
-  WSdep3 = c(63584,62888,62768,60279),
-  WSdep4 = c(127009,124560,123346,117375)
-)
-
-# Adicionando os índices
-rownames(actual_sales) <- c(139, 140, 141, 142)
-
-
-# definir os Funcionarios contratados
-hired_workers <- data.frame(
-  WSdep1 = c(5,6,7),
-  WSdep2 = c(4,5,6),
-  WSdep3 = c(3,4,5),
-  WSdep4 = c(2,3,4)
-)
-
-hired_workers = as.matrix(hired_workers)
-
-
-# definir as encomendas de produtos
-product_orders <- data.frame(
-  WSdep1 = c(61662,0,12985,39924),
-  WSdep2 = c(78292,0,55403,75160),
-  WSdep3 = c(56434,0,69133,62131),
-  WSdep4 = c(24182,0,37167,99708)
-)
-product_orders = as.matrix(product_orders)
-
-
-# vendas por semana por departamento
-sales <- data.frame(
-  WSdep1 = c(54480,7182,12985,35283),
-  WSdep2 = c(78292,0,55403,75160),
-  WSdep3 = c(56434,0,62768,60279),
-  WSdep4 = c(24182,0,37167,67000)
-)
-
-sales = as.matrix(sales)
-
-
-
-
-
-  # calcular o custo total dos colaboradores
+# calcular o custo total dos colaboradores
 total_cost_workers <- function(hired_workers) {
   junior <- 6000
   normal <- 8000
@@ -57,7 +10,7 @@ total_cost_workers <- function(hired_workers) {
   return(total_cost)
 }
 
-  # calcular o numero total de trabalhadores 
+# calcular o numero total de trabalhadores 
 total_number_of_workers <- function(hired_workers) {
   total_numbers <- rowSums(hired_workers)
   total_workers <- sum(total_numbers)
@@ -181,47 +134,69 @@ total_costs <- function(hired_workers,product_orders, sales){
   return(total)
 }
 
-F1 <- function(hired_workers,product_orders, sales){
-  monthly_profit = sales_in_usd(sales)-total_costs(hired_workers,product_orders, sales)
+
+
+
+#ultima funcao crl
+calculate_sales <- function(actual_sales, hired_workers, product_orders){
+  max_support_per_dep = max_product_per_dep(hired_workers)
+  sales = matrix(c(16),nrow=4,ncol=4)
+  stock = matrix(c(16),nrow=4,ncol=4)
+  for(j in 1:ncol(sales)){
+    for(i in 1:nrow(sales)){
+      valor_previsto_venda = actual_sales[i,j]  #buscar o valor da posição do actual sales
+      valor_encomenda = product_orders[i,j]     #buscar o valor da posição da product orders
+      valor_maximo_dep = max_support_per_dep[j] #buscar o valor maximo que pode ser produzido para o departamento (i)
+      
+      
+      if(i > 1){ # com stock
+        if(valor_previsto_venda <= valor_encomenda){
+          if((valor_previsto_venda) > valor_maximo_dep){
+            sales[i,j] = valor_maximo_dep
+            stock[i,j] = valor_encomenda - sales[i,j] + stock[i-1,j]
+          }else{
+            sales[i,j] = valor_previsto_venda 
+            stock[i,j] = valor_encomenda - sales[i,j] + stock[i-1,j]
+          }
+        }else{
+          if((valor_encomenda + stock[i-1,j]) >= valor_maximo_dep) {
+            
+            sales[i,j] = valor_maximo_dep
+            stock[i,j] = valor_encomenda - sales[i,j] + stock[i-1,j]
+          }else if(valor_encomenda + stock[i-1,j] <= valor_maximo_dep){
+            sales[i,j] = valor_encomenda + stock[i-1,j]
+            stock[i,j] = valor_encomenda - sales[i,j] + stock[i-1,j]
+          }else{
+            sales[i,j] = valor_encomenda
+            stock[i,j] = valor_encomenda - sales[i,j] + stock[i-1,j]
+          }
+        }
+        
+      }else{   #sem stock
+        if(valor_previsto_venda <= valor_encomenda){
+          if(valor_previsto_venda > valor_maximo_dep){
+            sales[i,j] = valor_maximo_dep
+            stock[i,j] = valor_encomenda - sales[i,j]
+          }else{
+            sales[i,j] = valor_previsto_venda
+            stock[i,j] = valor_encomenda - sales[i,j]
+          }
+        }else{
+          if(valor_encomenda > valor_maximo_dep){
+            sales[i,j] = valor_maximo_dep
+            stock[i,j] = valor_encomenda - sales[i,j]
+          }else{
+            sales[i,j] = valor_encomenda
+            stock[i,j] = valor_encomenda - sales[i,j]
+          }
+         
+        }
+        
+      }
+      
+      
+    }
+  }
   
-  return(monthly_profit)
+  return(sales)
 }
-
-F2 <- function(hired_workers,product_orders){
-  monthly_effort  = total_number_of_workers(hired_workers) + total_number_of_orders(product_orders)
-  
-  return(monthly_effort)
-}
-
-# Defina as capacidades dos funcionários
-junior_capacidade <- 4000
-normal_capacidade <- 7000
-senior_capacidade <- 9500
-
-# Custo mensal dos funcionários
-junior_custo <- 6000
-normal_custo <- 8000
-senior_custo <- 9750
-
-# Calcular o número de funcionários necessários para cada departamento nas próximas quatro semanas
-funcionarios_necessarios <- function(vendas, capacidade) {
-  return(ceiling(vendas / capacidade))
-}
-
-# Calcular o número total de funcionários necessários para cada departamento
-junior_necessarios <- sapply(actual_sales, function(vendas) funcionarios_necessarios(vendas, junior_capacidade))
-normal_necessarios <- sapply(actual_sales, function(vendas) funcionarios_necessarios(vendas, normal_capacidade))
-senior_necessarios <- sapply(actual_sales, function(vendas) funcionarios_necessarios(vendas, senior_capacidade))
-
-# Apresentar os resultados
-resultado <- data.frame(
-  Junior = junior_necessarios,
-  Normal = normal_necessarios,
-  Senior = senior_necessarios
-)
-
-resultado
-
-
-
-
