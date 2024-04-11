@@ -31,39 +31,33 @@ Growing_window <- function(departamento, nomedepartamento){
   YR=diff(range(ts)) # global Y range, use the same range for the NMAE calculation in all iterations
   
   D=CasesSeries(ts, timelags)
+  N=nrow(D) # ultimo indice dos dados 
+  NTR=N-H   # ultimo indice dos dados de Treino
   W2=W-max(timelags) # initial training window size for the D space (CasesSeries, rminer methods)
   
-  # Metricas para o LM
-  LM_MAE=vector(length=Runs) 
-  LM_NMAE=vector(length=Runs) 
-  LM_RMSE=vector(length=Runs) 
-  LM_RRSE=vector(length=Runs) 
-  LM_R2=vector(length=Runs) 
-  
-  
-  # growing window:
-  for(b in 1:Runs)  # cycle of the incremental window training (growing window)
-  {
-    
+
     ################################# RMINER ##################################
-    #dados
-    H=holdout(D$y,ratio=Test,mode="incremental",iter=b,window=W2,increment=S) 
-    trinit=H$tr[1]
+   TR=1:NTR # Indice dos Dados de treino
+   TS=(NTR+1):N # Indice dos dados de teste
     
     #fit LM
-    LM=fit(y~.,D[H$tr,],model="lm") # create forecasting model
-    
+    LM=fit(y~.,D[TR,],model="lm") # create forecasting model
+  
+    LTS=length(TS) # length of the test set
+    START=nrow(D)-LTS+1 # START is the row from D of the first test example
     #previsão
-    LM_Pred=lforecast(LM,D,start=(length(H$tr)+1),Test) # multi-step ahead forecasts
+    LM_Pred=lforecast(LM,D,start=START,horizon=LTS) # multi-step ahead forecasts
     
+    # Guardar os valores reais em Y do TS
+    Y=D[TS,]$y # valores reais
     
     ################################# METRICAS ################################
     
-    LM_MAE[b]=mmetric(y=ts[H$ts],x=LM_Pred,metric="MAE",val=YR)
-    LM_NMAE[b]=mmetric(y=ts[H$ts],x=LM_Pred,metric="NMAE",val=YR)
-    LM_RMSE[b]=mmetric(y=ts[H$ts],x=LM_Pred,metric="RMSE",val=YR)
-    LM_RRSE[b]=mmetric(y=ts[H$ts],x=LM_Pred,metric="RRSE",val=YR)
-    LM_R2[b]=mmetric(y=ts[H$ts],x=LM_Pred,metric="R22",val=YR)
+    LM_MAE=mmetric(y=Y,x=LM_Pred,metric="MAE",val=YR)
+    LM_NMAE=mmetric(y=Y,x=LM_Pred,metric="NMAE",val=YR)
+    LM_RMSE=mmetric(y=Y,x=LM_Pred,metric="RMSE",val=YR)
+    LM_RRSE=mmetric(y=Y,x=LM_Pred,metric="RRSE",val=YR)
+    LM_R2=mmetric(y=Y,x=LM_Pred,metric="R22",val=YR)
     
     
     pred = paste0("pred", nomedepartamento)
@@ -82,8 +76,6 @@ Growing_window <- function(departamento, nomedepartamento){
     #
     #mpause() # wait for enter
     
-    
-  }
   
   cat("\n **  DEPARTAMENTO ",nomedepartamento, " **")
   cat("\n------- LM --------")
@@ -99,9 +91,6 @@ Growing_window(d1,"1")
 Growing_window(d2,"2")
 Growing_window(d3,"3")
 Growing_window(d4,"4")
-
-
-
 
 
 seasonalnaive <- function(departamento, numeroDepartamento){

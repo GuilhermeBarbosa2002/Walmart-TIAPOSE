@@ -37,7 +37,7 @@ F2 <- function(x){
 # dimension
 D=28
 
-N <- 10000 # número de pesquisas
+N <- 1000000 # número de pesquisas
 # Pesquisa de Monte Carlo com D=2 e x em [-10.4,10.4]
 lower <- rep(0, D) # limites inferiores
 upper <- rep(100000, D) # limites superiores
