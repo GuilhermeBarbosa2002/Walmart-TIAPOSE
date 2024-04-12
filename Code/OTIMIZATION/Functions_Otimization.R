@@ -200,3 +200,111 @@ calculate_sales <- function(actual_sales, hired_workers, product_orders){
   
   return(sales)
 }
+
+
+
+# Funcao otimizada
+calculate_uppers <- function(actual_sales) {
+  # Definir os níveis de vendas para cada tipo de funcionário
+  sales_levels <- c(4000, 7000, 9500) * 4
+
+  # Identificar os departamentos
+  departments <- rep(1:4, each = 4)
+
+  # Inicializar o vetor uppers
+  uppers <- rep(0, 28)
+
+  # Calcular os valores uppers para os primeiros 12 elementos
+  actual_sales_by_dep <- colSums(actual_sales)
+  for (i in 1:3) {
+    for (j in 1:4) {
+      index <- (i - 1) * 4 + j
+      uppers[index] <- calculate_number_max_func(sales_levels[i], actual_sales_by_dep[j])
+    }
+  }
+
+  # Preencher os últimos 16 elementos com os totais de vendas reais de cada departamento
+  for (i in 1:4) {
+    index <- 12 + (i - 1) * 4
+    uppers[(index + 1):(index + 4)] <- actual_sales_by_dep[i]
+  }
+
+  # Retornar o vetor uppers
+  return(uppers)
+}
+
+
+  # funcao manual
+# calculate_uppers <- function(actual_sales){
+#   junior <- 4000 * 4
+#   normal <- 7000 * 4
+#   senior <- 9500 * 4
+# 
+#   uppers = rep(0,12)
+#   actual_sales_by_dep = colSums(actual_sales)
+# 
+# 
+#  ##c(5,6,7,4,5,6,3,4,5,2,3,4,61662,0,12985,39924,78292,0,55403,75160,56434,0,69133,62131,24182,0,37167,99708)
+#   uppers[1] = calculate_number_max_func(junior, actual_sales_by_dep[1])
+#   uppers[2] = calculate_number_max_func(junior, actual_sales_by_dep[2])
+#   uppers[3] = calculate_number_max_func(junior, actual_sales_by_dep[3])
+#   uppers[4] = calculate_number_max_func(junior, actual_sales_by_dep[4])
+# 
+#   uppers[5] = calculate_number_max_func(normal, actual_sales_by_dep[1])
+#   uppers[6] = calculate_number_max_func(normal, actual_sales_by_dep[2])
+#   uppers[7] = calculate_number_max_func(normal, actual_sales_by_dep[3])
+#   uppers[8] = calculate_number_max_func(normal, actual_sales_by_dep[4])
+# 
+#   uppers[9] = calculate_number_max_func(senior, actual_sales_by_dep[1])
+#   uppers[10] = calculate_number_max_func(senior, actual_sales_by_dep[2])
+#   uppers[11] = calculate_number_max_func(senior, actual_sales_by_dep[3])
+#   uppers[12] = calculate_number_max_func(senior, actual_sales_by_dep[4])
+# 
+# 
+#   uppers[13] = actual_sales_by_dep[1]
+#   uppers[14] = actual_sales_by_dep[1]
+#   uppers[15] = actual_sales_by_dep[1]
+#   uppers[16] = actual_sales_by_dep[1]
+# 
+#   uppers[17] = actual_sales_by_dep[2]
+#   uppers[18] = actual_sales_by_dep[2]
+#   uppers[19] = actual_sales_by_dep[2]
+#   uppers[20] = actual_sales_by_dep[2]
+# 
+#   uppers[21] = actual_sales_by_dep[3]
+#   uppers[22] = actual_sales_by_dep[3]
+#   uppers[23] = actual_sales_by_dep[3]
+#   uppers[24] = actual_sales_by_dep[3]
+# 
+#   uppers[25] = actual_sales_by_dep[4]
+#   uppers[26] = actual_sales_by_dep[4]
+#   uppers[27] = actual_sales_by_dep[4]
+#   uppers[28] = actual_sales_by_dep[4]
+# 
+#   return(uppers)
+# }
+
+## funcao otimizidada
+# sales_levels <- list(junior = junior, normal = normal, senior = senior)
+#
+# for (i in 1:3) {
+#   for (j in 1:4) {
+#     dep_index <- (i - 1) * 4 + j
+#     uppers[dep_index] <- calculate_number_max_func(sales_levels[[i]], actual_sales_by_dep[j])
+#   }
+# }
+
+
+
+calculate_number_max_func <- function(prod_by_func, sales_by_dep){
+  number_max_func = sales_by_dep / prod_by_func
+  number_max_func <- ceiling(number_max_func) # arredonda sempre para cima (42,01 -> 43)
+  return(number_max_func)
+  
+}
+
+
+calculate_number_max_orders <- function(orders, sales_by_dep){
+  
+  
+}

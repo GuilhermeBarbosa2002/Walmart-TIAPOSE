@@ -20,7 +20,7 @@ eval <- function(s){
   hired_workers = matrix(s[1:12],nrow=3,ncol=4)
   product_orders = matrix(s[13:28],nrow=4,ncol=4)
   sales = calculate_sales(actual_sales,hired_workers, product_orders)
-  monthly_profit = sales_in_usd(sales)- total_costs(hired_workers,product_orders, sales)
+  monthly_profit = sales_in_usd(sales )- total_costs(hired_workers,product_orders, sales)
   return(monthly_profit)
 }
 
@@ -37,10 +37,10 @@ F2 <- function(x){
 # dimension
 D=28
 
-N <- 1000000 # número de pesquisas
+N <- 10 # número de pesquisas
 # Pesquisa de Monte Carlo com D=2 e x em [-10.4,10.4]
 lower <- rep(0, D) # limites inferiores
 upper <- rep(100000, D) # limites superiores
-MC_min <- mcsearch(fn = eval, lower = lower, upper = upper, N = N, type = "min")
+MC <- mcsearch(fn = eval, lower = lower, upper = upper, N = N, type = "max")
 
 cat("Melhor solução:", round(MC$sol), "Função de avaliação:", MC$eval, " (encontrado na iteração:", MC$index, ")\n")
