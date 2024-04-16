@@ -35,8 +35,9 @@ eval <- function(s){
 ##################### PARAMETERS #################
 # dimension
 D=28
-REPORT=N/20 # report results
 N <- 100 # número de pesquisas
+REPORT=N/20 # report results
+
 lower <- rep(0, D) # limites inferiores
 upper <- calculate_uppers(actual_sales)# limites superiores
 # define the initial solution for hill_climbing
@@ -48,7 +49,7 @@ x2 = c(8, 38, 15, 24, 7, 22, 3, 5, 4, 3, 3, 13, 134101, 134441, 30785, 11860, 15
 
 ##################### MONTECARLO_SEARCH #################
 montecarlo <- function(eval, lower, upper, N, type){
-  MC <- mcsearch(fn = eval, lower = lower, upper = upper, N = N, type = "max")
+  MC <- mcsearch(fn = eval, lower = lower, upper = upper, N = N, type = type)
   cat("\n ******** MONTECARLO ******\n")
   cat("Melhor solução:", round(MC$sol), "Função de avaliação:", MC$eval, " (encontrado na iteração:", MC$index, ")\n")
 }
@@ -87,15 +88,14 @@ hill_climbing <- function(eval, lower, upper, N, type, s0, REPORT){
     
     cat("best solution:",GS$sol,"evaluation function",GS$eval," (found at iteration:",GS$index,")\n")
   
-  
   }
 
 # Montecarlo
-#montecarlo(eval,lower,upper,N,"max")
+montecarlo(eval,lower,upper,N,"max")
 
 # Hill_Climbing
 #hill_climbing(eval,lower, upper, N, "max", x2, REPORT)
 
 # Grid 
-grid(eval,lower,upper,N,"max")
+# grid(eval,lower,upper,N,"max")
 
