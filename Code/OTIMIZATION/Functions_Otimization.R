@@ -303,8 +303,3 @@ calculate_number_max_func <- function(prod_by_func, sales_by_dep){
   
 }
 
-
-calculate_number_max_orders <- function(orders, sales_by_dep){
-  
-  
-}
