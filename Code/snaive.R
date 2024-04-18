@@ -31,51 +31,45 @@ Growing_window <- function(departamento, nomedepartamento){
   YR=diff(range(ts)) # global Y range, use the same range for the NMAE calculation in all iterations
   
   D=CasesSeries(ts, timelags)
-  N=nrow(D) # ultimo indice dos dados 
-  NTR=N-H   # ultimo indice dos dados de Treino
   W2=W-max(timelags) # initial training window size for the D space (CasesSeries, rminer methods)
   
-
+  # Metricas para o LM
+  LM_MAE=vector(length=Runs) 
+  LM_NMAE=vector(length=Runs) 
+  LM_RMSE=vector(length=Runs) 
+  LM_RRSE=vector(length=Runs) 
+  LM_R2=vector(length=Runs) 
+  
+  
+  # growing window:
+  for(b in 1:Runs)  # cycle of the incremental window training (growing window)
+  {
+    
     ################################# RMINER ##################################
-   TR=1:NTR # Indice dos Dados de treino
-   TS=(NTR+1):N # Indice dos dados de teste
+    #dados
+    H=holdout(D$y,ratio=Test,mode="incremental",iter=b,window=W2,increment=S) 
+    trinit=H$tr[1]
     
     #fit LM
-    LM=fit(y~.,D[TR,],model="lm") # create forecasting model
-  
-    LTS=length(TS) # length of the test set
-    START=nrow(D)-LTS+1 # START is the row from D of the first test example
-    #previsão
-    LM_Pred=lforecast(LM,D,start=START,horizon=LTS) # multi-step ahead forecasts
+    LM=fit(y~.,D[H$tr,],model="lm") # create forecasting model
     
-    # Guardar os valores reais em Y do TS
-    Y=D[TS,]$y # valores reais
+    #previsão
+    LM_Pred=lforecast(LM,D,start=(length(H$tr)+1),Test) # multi-step ahead forecasts
+    
     
     ################################# METRICAS ################################
     
-    LM_MAE=mmetric(y=Y,x=LM_Pred,metric="MAE",val=YR)
-    LM_NMAE=mmetric(y=Y,x=LM_Pred,metric="NMAE",val=YR)
-    LM_RMSE=mmetric(y=Y,x=LM_Pred,metric="RMSE",val=YR)
-    LM_RRSE=mmetric(y=Y,x=LM_Pred,metric="RRSE",val=YR)
-    LM_R2=mmetric(y=Y,x=LM_Pred,metric="R22",val=YR)
+    LM_MAE[b]=mmetric(y=ts[H$ts],x=LM_Pred,metric="MAE",val=YR)
+    LM_NMAE[b]=mmetric(y=ts[H$ts],x=LM_Pred,metric="NMAE",val=YR)
+    LM_RMSE[b]=mmetric(y=ts[H$ts],x=LM_Pred,metric="RMSE",val=YR)
+    LM_RRSE[b]=mmetric(y=ts[H$ts],x=LM_Pred,metric="RRSE",val=YR)
+    LM_R2[b]=mmetric(y=ts[H$ts],x=LM_Pred,metric="R22",val=YR)
     
     
     pred = paste0("pred", nomedepartamento)
     assign(pred, c(round(median(LM_MAE),2), round(median(LM_NMAE),2),round(median(LM_RMSE),2), round(median(LM_RRSE),2), round(median(LM_R2),2)),envir = .GlobalEnv)
     
-    
-    ################################# GRAFICO ##################################
-    
-    #cat("iter:",b,"TR from:",trinit,"to:",(trinit+length(H$tr)-1),"size:",length(H$tr),
-    #    "TS from:",H$ts[1],"to:",H$ts[length(H$ts)],"size:",length(H$ts))
-    #
-    #mgraph(ts[H$ts],XG_Pred,graph="REG",Grid=10,col=c("black","blue","red"),leg=list(pos="topleft",leg=c("target","xgboost","lm")))
-    #lines(LM_Pred,pch=19,cex=0.5,type="b",col="red")
-    #title(paste("Departamento ", nomedepartamento, "\n iter:",b,"TR from:",trinit,"to:",(trinit+length(H$tr)-1),"size:",length(H$tr),
-    #            "TS from:",H$ts[1],"to:",H$ts[length(H$ts)],"size:",length(H$ts), "\n NMAE - xgboost - ", XG_NMAE[b], "\n NMAE - LM - ", LM_NMAE[b]))
-    #
-    #mpause() # wait for enter
-    
+  }
   
   cat("\n **  DEPARTAMENTO ",nomedepartamento, " **")
   cat("\n------- LM --------")
@@ -84,56 +78,64 @@ Growing_window <- function(departamento, nomedepartamento){
   
   
 }
-
-
-
 Growing_window(d1,"1")
 Growing_window(d2,"2")
 Growing_window(d3,"3")
 Growing_window(d4,"4")
 
 
-seasonalnaive <- function(departamento, numeroDepartamento){
- 
-  L = 143
+seasonalnaiveGrowing_window <- function(departamento, numeroDepartamento){
   
-  NTR = L - H  # numero de dados de treino        
-  TR = 1: NTR  # ficar com os dados de treino
-  TS = (NTR + 1):L #teste
-  YR=diff(range(departamento))
-   
-  ts = ts(departamento[TR],frequency = K)
-
-  #Vamos prever as 4 semanas seguintes (que vai corresponder ao TS)
-  SN = snaive(ts,h=4)
+  ts = ts(departamento,frequency = K)
+  L = length(ts)
   
-  # Extrair os valores reais dos dados de teste
-  valores_reais = departamento[TS]
+  # forecast:
+  W=(L-Test)-(Runs-1)*S # initial training window size for the ts space (forecast methods)
   
-  # Extrair as previsões dos dados de teste
-  previsoes = as.numeric(SN$mean)
-
-  LM_MAE=mmetric(valores_reais,previsoes,metric="MAE")
-  LM_NMAE=mmetric(valores_reais,previsoes,metric="NMAE",val=YR)
-  LM_RMSE=mmetric(valores_reais,previsoes,metric="RMSE")
-  LM_RRSE=mmetric(valores_reais,previsoes,metric="RRSE")
-  LM_R2=mmetric(valores_reais,previsoes,metric="R2")
+  YR=diff(range(ts)) # global Y range, use the same range for the NMAE calculation in all iterations
   
-  pre = paste0("pre", numeroDepartamento)
-  assign(pre, c(LM_MAE, LM_NMAE, LM_RMSE, LM_RRSE,LM_R2),envir = .GlobalEnv)
+  # Metricas para o SN
+  SN_MAE=vector(length=Runs) 
+  SN_NMAE=vector(length=Runs) 
+  SN_RMSE=vector(length=Runs) 
+  SN_RRSE=vector(length=Runs) 
+  SN_R2=vector(length=Runs) 
   
-
+  # growing window:
+  for(b in 1:Runs)  # cycle of the incremental window training (growing window)
+  {
+    
+    ################################# FORECAST ##################################
+    H=holdout(ts,ratio=Test,mode="incremental",iter=b,window=W,increment=S)  
+    trinit=H$tr[1]
+    dtr=ts(ts[H$tr],frequency=K) # create ts object, note that there is no start argument (for simplicity of the code)
+    
+    #previsao - SN
+    SN_Pred=snaive(ts,h=length(H$ts))$mean[1:Test]
+    #print(SN_Pred)
+    
+    ################################# METRICAS ################################
+    SN_MAE[b]=mmetric(y=ts[H$ts],x=SN_Pred,metric="MAE",val=YR)
+    SN_NMAE[b]=mmetric(y=ts[H$ts],x=SN_Pred,metric="NMAE",val=YR)
+    SN_RMSE[b]=mmetric(y=ts[H$ts],x=SN_Pred,metric="RMSE",val=YR)
+    SN_RRSE[b]=mmetric(y=ts[H$ts],x=SN_Pred,metric="RRSE",val=YR)
+    SN_R2[b]=mmetric(y=ts[H$ts],x=SN_Pred,metric="R22",val=YR)
+    
+    pre = paste0("pre", numeroDepartamento)
+    assign(pre, c(round(median(SN_MAE),2), round(median(SN_NMAE),2),round(median(SN_RMSE),2), round(median(SN_RRSE),2), round(median(SN_R2),2)),envir = .GlobalEnv)
+    
+  }
+  
   cat("\n **  DEPARTAMENTO ",numeroDepartamento, " **")
   cat("\n------- Snaive --------")
-  cat("\n MAE: ", round(median(LM_MAE),2), "\n NMAE: ", round(median(LM_NMAE),2)," \n RMSE: ", round(median(LM_RMSE),2),"\n RRSE: ", round(median(LM_RRSE),2),"\n R2: ", round(median(LM_R2),2))
+  cat("\n MAE: ", round(median(SN_MAE),2), "\n NMAE: ", round(median(SN_NMAE),2)," \n RMSE: ", round(median(SN_RMSE),2),"\n RRSE: ", round(median(SN_RRSE),2),"\n R2: ", round(median(SN_R2),2))
   cat("\n ---------------------------------------------- \n")
-  
 }
 
-seasonalnaive(d1,"1")
-seasonalnaive(d2,"2")
-seasonalnaive(d3,"3")
-seasonalnaive(d4,"4")
+seasonalnaiveGrowing_window(d1,"1")
+seasonalnaiveGrowing_window(d2,"2")
+seasonalnaiveGrowing_window(d3,"3")
+seasonalnaiveGrowing_window(d4,"4")
 
 
 MAE_Comparacao <- ((pre1[1] - pred1[1]) / pre1[1]) * 100
@@ -168,8 +170,7 @@ d2 <- c(DMAE_Comparacao, DNMAE_Comparacao, DRMSE_Comparacao, DRRSE_Comparacao, D
 d3 <- c(TMAE_Comparacao, TNMAE_Comparacao, TRMSE_Comparacao, TRRSE_Comparacao, TR2_Comparacao)
 d4 <- c(QMAE_Comparacao, QNMAE_Comparacao, QRMSE_Comparacao, QRRSE_Comparacao, QR2_Comparacao)
 
-# Organizar os valores em uma matriz
-tabela <- matrix(c(d1, d2, d3, d4), nrow = 5, byrow = TRUE)
+tabela <- data.frame(d1, d2, d3, d4)
 
 # Definir os nomes das linhas e colunas
 linhas <- c("MAE", "NMAE", "RMSE", "RRSE", "R2")
@@ -178,4 +179,6 @@ rownames(tabela) <- linhas
 colnames(tabela) <- colunas
 
 print(tabela)
+
+
 
