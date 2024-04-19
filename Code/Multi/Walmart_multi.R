@@ -87,7 +87,7 @@ month=data[,"Month"] # Month
 
 hd=holdout(d1,ratio=LTS,mode="order") # simple ordered holdout train and test split, rminer function
 
-cdata=cbind(is_holiday,week,d1,d2,d3,d4)
+cdata=cbind(d1,d2,d3,d4,fuel_price,month)
 mtr=ts(cdata[hd$tr,],frequency=K) # TS training object, uses forecast library mode!
 Y=cdata[hd$ts,] # target values
 
@@ -104,18 +104,19 @@ Y=cdata[hd$ts,] # target values
 # fshow(Y,Pred1,Pred2, Pred3, Pred4,"VAR", "d1", "d2", "d3", "d4")
 # mpause()
 
-
+# 
 #generate 2 ARIMAX models, one for prod (1) and other for rw (2)
 #mtr - matrix with the training data, one column per to be predicted variable
 arimax=autoARIMAX(mtr,frequency=4)
 FA=forecastARIMAX(arimax,h=LTS)
 Pred21=FA[[3]]
-Pred22=FA[[4]]
-Pred23=FA[[5]]
-Pred24=FA[[6]]
-fshow(Y,Pred21,Pred22,Pred23,Pred24, "ARIMAX","d1","d2","d3","d4")
-mpause()
+# Pred22=FA[[4]]
+# Pred23=FA[[5]]
+# Pred24=FA[[6]]
+# fshow(Y,Pred21,Pred22,Pred23,Pred24, "ARIMAX","d1","d2","d3","d4")
+# mpause()
 
+print(Pred21)
 # 
 # 
 # # # in this recipe, 2 mlpe models are combined, each with 4 time lags:
@@ -139,10 +140,10 @@ mpause()
 # 
 # MNN=mfit(mtr,"mlpe",VINP)
 # Pred3=lforecastm(MNN,h=LTS)
-# Pred31=Pred3[[3]]
-# Pred32=Pred3[[4]]
-# Pred33=Pred3[[5]]
-# Pred34=Pred3[[6]]
-# 
-# fshow(Y,Pred31,Pred32,Pred33, Pred34, "3mlpe","d1","d2","d3","d4")
+# Pred31=Pred3[[1]]
+#Pred32=Pred3[[4]]
+#Pred33=Pred3[[5]]
+#Pred34=Pred3[[6]]
+
+#fshow(Y,Pred31,Pred32,Pred33, Pred34, "3mlpe","d1","d2","d3","d4")
 
