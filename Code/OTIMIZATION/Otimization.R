@@ -77,25 +77,11 @@ hill_climbing <- function(eval, lower, upper, N, type, s0, REPORT){
 }
 
 
-  grid <- function(eval,lower, upper, N, type){
-    range=upper[1]-lower[1]
-    jump=range/(N-1) # 10 searches per dimension
-    step=rep(jump,D) # 10 searches per dimension
-    iter=N^D
-    cat("grid search sphere D=",D,"step=",step,"(iters=",iter,")\n")
-    
-    GS=gsearch(fn=eval,lower=lower,upper=upper,step=step,type=type)
-    
-    cat("best solution:",GS$sol,"evaluation function",GS$eval," (found at iteration:",GS$index,")\n")
-  
-  }
-
 # Montecarlo
 montecarlo(eval,lower,upper,N,"max")
 
 # Hill_Climbing
 #hill_climbing(eval,lower, upper, N, "max", x2, REPORT)
 
-# Grid 
-# grid(eval,lower,upper,N,"max")
+
 
