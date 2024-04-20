@@ -35,7 +35,7 @@ F2 <- function(s){
 ##################### PARAMETERS #################
 # dimension
 D=28
-N <- 1000# número de pesquisas
+N <- 100# número de pesquisas
 REPORT=N/20 # report results
 
 lower <- rep(0, D) # limites inferiores
