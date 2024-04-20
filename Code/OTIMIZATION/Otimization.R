@@ -24,18 +24,18 @@ eval <- function(s){
 }
 
 
-# F2 <- function(x){
-#     hired_workers = matrix(s[1:12],nrow=3,ncol=4)
-#     product_orders = matrix(s[13:28],nrow=4,ncol=4)
-#     monthly_effort  = total_number_of_workers(hired_workers) + total_number_of_orders(product_orders)
-# 
-#     return(monthly_effort)
-# }
+F2 <- function(s){
+    hired_workers = matrix(s[1:12],nrow=3,ncol=4)
+    product_orders = matrix(s[13:28],nrow=4,ncol=4)
+    monthly_effort  = total_number_of_workers(hired_workers) + total_number_of_orders(product_orders)
+
+    return(monthly_effort)
+}
 
 ##################### PARAMETERS #################
 # dimension
 D=28
-N <- 100 # número de pesquisas
+N <- 1000# número de pesquisas
 REPORT=N/20 # report results
 
 lower <- rep(0, D) # limites inferiores
@@ -81,7 +81,7 @@ hill_climbing <- function(eval, lower, upper, N, type, s0, REPORT){
 montecarlo(eval,lower,upper,N,"max")
 
 # Hill_Climbing
-#hill_climbing(eval,lower, upper, N, "max", x2, REPORT)
+hill_climbing(eval,lower, upper, N, "max", x, REPORT)
 
 
 
