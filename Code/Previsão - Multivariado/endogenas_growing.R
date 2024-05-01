@@ -165,6 +165,6 @@ Growing_window <- function(nome_departamento_a_prever,departamento_a_prever, dep
 }
 
 # Growing_window("1",d1,d2,d3,d4, week,month)
-# Growing_window("2",d2,d1,d3,d4, week,month)
+ Growing_window("2",d2,d1,d3,d4, is_holiday,month)
 # Growing_window("3",d3,d2,d1,d4, week,month)
-Growing_window("4",d4,d2,d3,d1, is_holiday,month)
+#("4",d4,d2,d3,d1, is_holiday,month)
