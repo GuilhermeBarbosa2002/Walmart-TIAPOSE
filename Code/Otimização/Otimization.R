@@ -79,16 +79,22 @@ hill_climbing <- function(eval, lower, upper, N, type, s0, REPORT){
 ##################### Simulated Annealing #################  
 SimulatedAnnealing <- function(eval, lower, upper, N, type){
   
-  # slight change of a real par under a normal u(0,0.5) function:
-  rchange2=function(par) # change for hclimbing
-  { hchange(par,lower=lower,upper=upper,rnorm,mean=0,sd=0.5,round=FALSE) }
+  # Função de mudança para o Simulated Annealing
+  rchange2 <- function(par) {
+    hchange(par, lower = lower, upper = upper, rnorm, mean = 1, sd = 0.5, round = FALSE)
+  }
   
   cat("\n ******** Simulated Annealing ******\n")
-  #cat("Simulated Annealing search D=",D,"(iters=",N,")\n")
-  CSANN=list(maxit=N,temp=5,trace=TRUE)
-  SA=optim(par=rep(-10.4,D),fn=eval,method="SANN",gr=rchange2,control=CSANN)
-  cat("best solution:",SA$par,"evaluation function",SA$value,"\n")  
+  
+  # Definição dos parâmetros do Simulated Annealing
+  CSANN <- list(maxit = N, temp = 100, trace = TRUE)
+  
+  # Execução do Simulated Annealing
+  SA <- optim(par = rep(0, length(lower)), fn = eval, method = "SANN", gr = rchange2, control = CSANN)
+  
+  cat("Melhor solução encontrada:", SA$par, "Valor da função de avaliação:", SA$value, "\n")  
 }
+
 
 #Simulated Annealing
 SimulatedAnnealing(eval,lower,upper,N,"max")
