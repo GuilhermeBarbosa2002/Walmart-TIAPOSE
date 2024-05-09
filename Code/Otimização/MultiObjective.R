@@ -19,6 +19,7 @@ eval <- function(s){
   product_orders = matrix(s[13:28], nrow=4, ncol=4)
   sales = calculate_sales(actual_sales, hired_workers, product_orders)
   monthly_profit = sales_in_usd(sales) - total_costs(hired_workers, product_orders, sales)
+
   return(-monthly_profit)
 }
 
@@ -59,7 +60,7 @@ for (i in I) {
 }
 
 # create PDF com a evolução da fronteira de Pareto
-pdf(file = "nsga-eval-F2.pdf", paper = "special", height = 5, width = 5)
+#pdf(file = "nsga-eval-F2.pdf", paper = "special", height = 5, width = 5)
 par(mar = c(4.0, 4.0, 0.1, 0.1))
 I <- 1:100
 for (i in I) {
