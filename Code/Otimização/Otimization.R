@@ -122,7 +122,7 @@ SimulatedAnnealing <- function(eval, lower, upper, s0, type){
   CSANN <- list(maxit = N, temp = 100, trace = FALSE)
   
   # Execução do Simulated Annealing
-  SA <- optim(par = s0, fn = eval, method = "SANN", gr = rchange2, control = CSANN)
+  SA <- optim(par = s0, fn = eval_min, method = "SANN", gr = rchange2, control = CSANN)
   
   cat("Melhor solução encontrada:", SA$par, "Valor da função de avaliação:", -SA$value, "\n")  
   
@@ -135,7 +135,7 @@ SimulatedAnnealing <- function(eval, lower, upper, s0, type){
 ##################### PARAMETERS #################
 # dimension
 D=28
-N <- 100000 #número de pesquisas
+N <- 100 #número de pesquisas
 REPORT=N/20 # report results
 
 lower <- rep(0, D) # limites inferiores
@@ -155,7 +155,7 @@ curve=rep(NA,N) # vector with the convergence values
 #s <- SimulatedAnnealing(eval_min,lower,upper,x,"max")
 
 #Montecarlo
-#s <- montecarlo(eval_max,lower,upper,N,"max")
+s <- montecarlo(eval_max,lower,upper,N,"max")
 
 # #Hill_Climbing
 s <- hill_climbing(eval_max,lower, upper, N, "max", x, REPORT)

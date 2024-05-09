@@ -28,23 +28,19 @@ print("incremental (growing) window training demonstration:")
 Test=K # H, the number of multi-ahead steps, adjust if needed
 H=4
 S=H # step jump: set in this case to 4 months, a quarter
-Runs=12 # number of growing window iterations, adjust if needed
+Runs=8# number of growing window iterations, adjust if needed
 timelags = c(1:4)
 
 
 
-Growing_window <- function(nome_departamento_a_prever,departamento_a_prever, departamento2,departamento3,departamento4,var1,var2){
+Growing_window <- function(nome_departamento_a_prever,cdata){
   
-  ts = ts(departamento_a_prever,frequency = K)
+  ts = ts(cdata[,1],frequency = K)
   L = length(ts)
   # forecast:
   W=(L-Test)-(Runs-1)*S # initial training window size for the ts space (forecast methods)
   
   YR=diff(range(ts)) # global Y range, use the same range for the NMAE calculation in all iterations
-  
-  
-  cdata=cbind(departamento_a_prever, departamento2, departamento3,departamento4,var1, var2)
-  
   
   
   # Metricas para o VAR
@@ -68,6 +64,12 @@ Growing_window <- function(nome_departamento_a_prever,departamento_a_prever, dep
   ML_RRSE=vector(length=Runs) 
   ML_R2=vector(length=Runs) 
   
+  # Inicialização das variáveis para armazenar previsões e valores reais
+  previsoes_VAR <- NULL
+  previsoes_ARIMAX <- NULL
+  previsoes_MLPE <- NULL
+  valores_reais <- NULL
+
   
   # growing window:
   for(b in 1:Runs)  # cycle of the incremental window training (growing window)
@@ -75,21 +77,19 @@ Growing_window <- function(nome_departamento_a_prever,departamento_a_prever, dep
     
     ################################# FORECAST ##################################
     #create timelags for mlpe:
-    # # first step: creation of the data.frame with all required inputs and target outputs:
-    x1lags=1:4
-    x2lags=1:4
-    x3lags=1:4
-    x4lags=1:4
-    x5lags=1:4
-    x6lags=1:4
-    # set vector list with the lagged inputs used by each model
-    VINP=vector("list",length=6)
-    VINP[[1]]=list(x1lags,1,1,1,1,1) # 1 to 4 lags for x1, 1 lag for x2, 1 lag for x3
-    VINP[[2]]=list(1,x2lags,1,1,1,1) # 1 lag for x1, 1 to 4 lags for x2, 1 lag for x3
-    VINP[[3]]=list(1,1,x3lags,1,1,1) # 1 lag for x1, 1 lag for x3, 1 to 4 lags for x3
-    VINP[[4]]=list(1,1,1,x4lags,1,1) # 1 to 4 lags for x1, 1 lag for x2, 1 lag for x3
-    VINP[[5]]=list(1,1,1,1,x5lags,1) # 1 lag for x1, 1 to 4 lags for x2, 1 lag for x3
-    VINP[[6]]=list(1,1,1,1,1,x6lags) # 1 lag for x1, 1 lag for x3, 1 to 4 lags for x3
+    VINP <- vector("list", length = length(colnames(cdata)))
+    for (i in 1:length(VINP)) {
+      lags <- vector("list", length(VINP))
+      for (j in 1:length(VINP)) {
+        if (j == i) {
+          lags[[j]] <- 1:4
+        } else {
+          lags[[j]] <- 1
+        }
+      }
+      VINP[[i]] <- lags
+    }
+
     
     H=holdout(ts,ratio=Test,mode="incremental",iter=b,window=W,increment=S)  
     trinit=H$tr[1]
@@ -139,20 +139,21 @@ Growing_window <- function(nome_departamento_a_prever,departamento_a_prever, dep
     ML_R2[b]=mmetric(y=ts[H$ts],x=PredMLPE,metric="R22",val=YR)
     
     
+    # Armazenamento das previsões e valores reais
+    previsoes_VAR <- c(previsoes_VAR, PredVAR)
+    previsoes_ARIMAX <- c(previsoes_ARIMAX, PredARIMAX)
+    previsoes_MLPE <- c(previsoes_MLPE, PredMLPE)
+    valores_reais <- c(valores_reais, ts[H$ts])
     
-    ################################# GRAFICO ##################################
-    
-    # cat("iter:",b,"TR from:",trinit,"to:",(trinit+length(H$tr)-1),"size:",length(H$tr),
-    #     "TS from:",H$ts[1],"to:",H$ts[length(H$ts)],"size:",length(H$ts))
-    
-    
-    mgraph(ts[H$ts], PredVAR, graph = "REG", Grid = 10, col = c("black", "blue", "red"), leg = list(pos = "topleft", leg = c("target", "AutoVar", "ArimaX")))
-    lines(PredARIMAX, pch = 19, cex = 0.5, type = "b", col = "red")
-    lines(PredMLPE, pch = 19, cex = 0.5, type = "b", col = "green")
-    title(paste("Departamento ", nome_departamento_a_prever, "\n iter:", b, "TR from:", trinit, "to:", (trinit + length(H$tr) - 1), "size:", length(H$tr), "TS from:", H$ts[1], "to:", H$ts[length(H$ts)], "size:", length(H$ts), "\n NMAE - AUTOVAR - ", VAR_NMAE[b], "\n NMAE - ARIMAX - ", ARIMAX_NMAE[b], "\n NMAE - MLPE - ", ML_NMAE[b]))
     
   }
-  
+      ################################# GRAFICO ##################################
+    mgraph(valores_reais, previsoes_VAR, graph = "REG", Grid = 10, col = c("black", "blue", "red"), leg = list(pos = "topleft", leg = c("target", "AutoVar", "ArimaX", "mlpe")))
+    lines(previsoes_VAR, pch = 19, cex = 0.5, type = "b", col = "red")
+    lines(previsoes_ARIMAX, pch = 19, cex = 0.5, type = "b", col = "green")
+    lines(previsoes_MLPE, pch = 19, cex = 0.5, type = "b", col = "orange")
+    title(paste("Departamento ", nome_departamento_a_prever, "\n NMAE - AUTOVAR - ", round(median(VAR_NMAE),2), "\n NMAE - ARIMAX - ", round(median(ARIMAX_NMAE),2), "\n NMAE - MLPE - ", round(median(ML_NMAE),2)))
+
   cat("\n **  DEPARTAMENTO ",nome_departamento_a_prever, " **")
   cat("\n ------- AUTO VAR --------")
   cat("\n MAE: ", round(median(VAR_MAE),2), "\n NMAE: ", round(median(VAR_NMAE),2)," \n RMSE: ", round(median(VAR_RMSE),2),"\n RRSE: ", round(median(VAR_RRSE),2),"\n R2: ", round(median(VAR_R2),2))
@@ -165,6 +166,10 @@ Growing_window <- function(nome_departamento_a_prever,departamento_a_prever, dep
 }
 
 # Growing_window("1",d1,d2,d3,d4, week,month)
- Growing_window("2",d2,d1,d3,d4, is_holiday,month)
+# Growing_window("1", cbind(d1,d2,d3,d4))
+# Growing_window("2", cbind(d2,d1,d3,d4))
+# Growing_window("3", cbind(d3,d1,d2,d4))
+# Growing_window("4", cbind(d4,d1,d2,d3))
+
 # Growing_window("3",d3,d2,d1,d4, week,month)
 #("4",d4,d2,d3,d1, is_holiday,month)
