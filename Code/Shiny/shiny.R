@@ -1,37 +1,250 @@
 library(shiny)
 library(shinythemes)
+library(lubridate)
+library(DT)
+library(plotly)
+library(shinyWidgets)
 
-# Define a UI for the application
+# Carrega o arquivo CSV
+walmart_data <- read.csv("walmart.csv")
+
+# Convertendo a coluna Date para o formato correto
+walmart_data$Date <- as.Date(walmart_data$Date)
+
+start_date <- as.Date("2012-03-02")
+end_date <- as.Date("2012-11-09")
+date_sequence <- seq(from = start_date, to = end_date, by = "4 weeks")
+
+inverse_index <- 9:0
+
+# Define a UI para a aplicação
 ui <- fluidPage(
-  theme = shinytheme("flatly"), # Escolha o tema "flatly"
-  titlePanel("Selecione uma Semana"),
-  sidebarLayout(
-    sidebarPanel(
-      dateInput("selected_week", "Selecione o Início da Semana:", 
-                format = "yyyy-mm-dd", 
-                startview = "month",
-                weekstart = 1,
-                language = "pt",
-                autoclose = TRUE)
+  theme = shinytheme("flatly"),
+  titlePanel("Análise de Vendas do Walmart"),
+  tabsetPanel(
+    tabPanel("Univariado",
+             sidebarLayout(
+               sidebarPanel(
+                 sliderTextInput("selected_dates", "Selecione um intervalo de datas:",
+                                 choices = date_sequence,
+                                 grid = FALSE),
+                 selectInput("package", "Pacote:",
+                             choices = c("rminer" = "rminer", "forecast" = "forecast")),
+                 uiOutput("model_selector"),
+                 selectInput("objetivo", "Escolha o objetivo:",
+                             choices = c("Objetivo1", "Objetivo2", "Multiobjetivo")),
+                 selectInput("otimizacao", "Modelo de Otimização:",
+                             choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo")),
+                 actionButton("predict_button", "Predict")
+               ),
+               mainPanel(
+                 tabsetPanel(
+                   tabPanel("Previsões",
+                            fluidRow(
+                              column(12,
+                                     DTOutput("predictions_table")
+                              )
+                            ),
+                            fluidRow(
+                              column(12,
+                                     plotOutput("selected_plot")
+                              )
+                            )
+                   ),
+                   tabPanel("Otimização",
+                            fluidRow(
+                              column(4, tableOutput("hired_workers_table")),
+                              
+                            ),
+                            fluidRow(
+                              
+                              column(4, tableOutput("product_orders_table")),
+                              
+                            ),
+                            fluidRow(
+                              
+                              column(4, tableOutput("sales_table"))
+                            ),
+                            fluidRow(
+                              column(12, textOutput("monthly_profit_output"))
+                            )
+                   )
+                 )
+               )
+             )
     ),
-    mainPanel(
-      h3("Semana Selecionada:", style = "color: #333333;"),
-      verbatimTextOutput("selected_week_output")
+    tabPanel("Dataset",
+             fluidRow(
+               column(12,
+                      DTOutput("data_table")
+               )
+             )
+    ),
+    tabPanel("Vendas totais por departamento",
+             fluidRow(
+               column(6, plotlyOutput("gauge_WSdep1")),
+               column(6, plotlyOutput("gauge_WSdep2")),
+               column(6, plotlyOutput("gauge_WSdep3")),
+               column(6, plotlyOutput("gauge_WSdep4"))
+             )
     )
   )
 )
 
-# Define the server logic
-server <- function(input, output) {
-  
-  # Atualiza o output sempre que a data selecionada mudar
-  output$selected_week_output <- renderText({
-    # Extrai a semana a partir da data selecionada
-    selected_week <- input$selected_week
-    end_of_week <- selected_week + lubridate::weeks(1) - lubridate::days(1)
-    paste("De", format(selected_week, "%d/%m/%Y"), "até", format(end_of_week, "%d/%m/%Y"))
+# Define a lógica do servidor
+server <- function(input, output, session) {
+  output$model_selector <- renderUI({
+    if (input$package == "rminer") {
+      selectInput("model", "Modelo de Previsão:",
+                  choices = c("Random Forest", "mlpe", "xgboost", "lm", "mars", "ksvm"))
+    } else if (input$package == "forecast") {
+      selectInput("model", "Modelo de Previsão:",
+                  choices = c("Holtwinters", "Arima", "NN", "ETS"))
+    }
   })
+  
+  predictions <- reactiveVal(data.frame())  
+  
+  
+  
+  observeEvent(input$predict_button, {
+    source("Models4Shiny_2.R")
+    
+    selected_date <- as.Date(input$selected_dates)
+    selected_position <- which(date_sequence == selected_date)
+    selected_inverse_index <- inverse_index[selected_position]
+    model <- input$model
+    objective <- input$objetivo
+    otimization <- input$otimizacao
+    
+    d1 <- walmart_data[,"WSdep1"]  
+    d2 <- walmart_data[,"WSdep2"]  
+    d3 <- walmart_data[,"WSdep3"]  
+    d4 <- walmart_data[,"WSdep4"]  
+    
+    if (model %in% c("Arima", "Holtwinters", "NN", "ETS")) {
+      Pred1 <- Univariado_Forecast(departamento = d1, nomedepartamento = "Departamento 1", modelo = model, D = selected_inverse_index)
+      Pred2 <- Univariado_Forecast(departamento = d2, nomedepartamento = "Departamento 2", modelo = model, D = selected_inverse_index)
+      Pred3 <- Univariado_Forecast(departamento = d3, nomedepartamento = "Departamento 3", modelo = model, D = selected_inverse_index)
+      Pred4 <- Univariado_Forecast(departamento = d4, nomedepartamento = "Departamento 4", modelo = model, D = selected_inverse_index)
+    }
+    
+    if (model %in% c("Random Forest", "mlpe", "xgboost", "lm", "mars", "ksvm")) {
+      Pred1 <- Univariado_Rminer(departamento = d1, nomedepartamento = "Departamento 1", modelo = model, D = selected_inverse_index)
+      Pred2 <- Univariado_Rminer(departamento = d2, nomedepartamento = "Departamento 2", modelo = model, D = selected_inverse_index)
+      Pred3 <- Univariado_Rminer(departamento = d3, nomedepartamento = "Departamento 3", modelo = model, D = selected_inverse_index)
+      Pred4 <- Univariado_Rminer(departamento = d4, nomedepartamento = "Departamento 4", modelo = model, D = selected_inverse_index)
+    }
+    
+    # Update the predictions reactive value
+    predictions(data.frame(
+      Time = 1:length(Pred1),
+      Department1 = Pred1,
+      Department2 = Pred2,
+      Department3 = Pred3,
+      Department4 = Pred4
+    ))
+    
+    DataFrame=data.frame(Pred1,Pred2,Pred3,Pred4)
+    
+    
+    # Run optimization
+    optimization_results <- Uniobjetivo(df = DataFrame, algoritmo = otimization)
+    
+    # Update UI with optimization results
+    output$hired_workers_table <<- renderTable(optimization_results$hired_workers)
+    output$product_orders_table <<- renderTable(optimization_results$product_orders)
+    output$sales_table <<- renderTable(optimization_results$sales)
+    output$monthly_profit_output <<- renderText({
+      paste("Monthly Profit: ", round(optimization_results$monthly_profit, 2))
+    })
+    
+    
+    output$predictions_table <- renderDT({
+      predictions_rounded <- data.frame(lapply(predictions(), function(x) {
+        if (is.numeric(x)) return(round(x, 2))
+        return(x)
+      }))
+      
+      datatable(predictions_rounded, 
+                selection = 'single',
+                options = list(
+                  pageLength = 10,     
+                  searching = FALSE,   
+                  paging = FALSE,      
+                  info = FALSE,        
+                  ordering = FALSE    
+                ),
+                rownames = FALSE       
+      )
+    })
+  })
+  
+  output$selected_plot <- renderPlot({
+    req(input$predictions_table_rows_selected)
+    sel_row <- input$predictions_table_rows_selected
+    if (length(sel_row) == 0) return()
+    
+    selected_data <- predictions()[sel_row, ]
+    
+    barplot(as.numeric(selected_data[-1]), 
+            names.arg = colnames(selected_data)[-1], 
+            ylab = "Value",
+            col = "darkblue")
+  })
+  
+  output$data_table <- renderDT({
+    datatable(walmart_data, options = list(lengthMenu = c(5, 10, 15), pageLength = 5))
+  })
+  
+  mean_values <- reactive({
+    mean_WSdep1 <- mean(walmart_data$WSdep1, na.rm = TRUE)
+    mean_WSdep2 <- mean(walmart_data$WSdep2, na.rm = TRUE)
+    mean_WSdep3 <- mean(walmart_data$WSdep3, na.rm = TRUE)
+    mean_WSdep4 <- mean(walmart_data$WSdep4, na.rm = TRUE)
+    
+    data.frame(Department = c("WSdep1", "WSdep2", "WSdep3", "WSdep4"),
+               Mean = c(mean_WSdep1, mean_WSdep2, mean_WSdep3, mean_WSdep4))
+  })
+  
+  output$gauge_WSdep1 <- renderPlotly({
+    render_gauge_plot("WSdep1", mean_values())
+  })
+  
+  output$gauge_WSdep2 <- renderPlotly({
+    render_gauge_plot("WSdep2", mean_values())
+  })
+  
+  output$gauge_WSdep3 <- renderPlotly({
+    render_gauge_plot("WSdep3", mean_values())
+  })
+  
+  output$gauge_WSdep4 <- renderPlotly({
+    render_gauge_plot("WSdep4", mean_values())
+  })
+  
+  render_gauge_plot <- function(department, mean_values) {
+    mean_value <- mean_values[mean_values$Department == department, "Mean"]
+    
+    plot_ly(
+      type = "indicator",
+      mode = "gauge+number",
+      value = mean_value,
+      title = list(text = department),
+      gauge = list(
+        axis = list(range = list(NULL, max(mean_values$Mean))),
+        bar = list(color = "darkblue"),
+        bordercolor = "gray",
+        bgcolor = "white",
+        steps = list(
+          list(range = c(0, max(mean_values$Mean) / 3), color = "lightgray"),
+          list(range = c(max(mean_values$Mean) / 3, 2 * max(mean_values$Mean) / 3), color = "gray"),
+          list(range = c(2 * max(mean_values$Mean) / 3, max(mean_values$Mean)), color = "darkgray")
+        )
+      )
+    )
+  }
 }
 
-# Cria uma aplicação Shiny
+# Cria a aplicação Shiny
 shinyApp(ui = ui, server = server)
