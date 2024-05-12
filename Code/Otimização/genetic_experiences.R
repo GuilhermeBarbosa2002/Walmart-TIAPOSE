@@ -22,11 +22,11 @@ eval <- function(s){
 }
 
 
-iter=10000
+iter=100
 lowers = rep(0,28)
 uppers = calculate_uppers(actual_sales)
 
-rga=rbga(lowers,uppers,popSize=2000,mutationChance=0.33,elitism=10,evalFunc=eval,iter=iter) 
+rga=rbga(lowers,uppers,popSize=20,mutationChance=0.33,elitism=10,evalFunc=eval,iter=iter) 
 
 
 plot(rga)

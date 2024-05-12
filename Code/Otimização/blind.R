@@ -1,4 +1,3 @@
-### blind.R file ###
 
 # full bind search method
 #    search - matrix with solutions x D

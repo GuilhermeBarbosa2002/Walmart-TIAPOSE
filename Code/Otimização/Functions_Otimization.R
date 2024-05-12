@@ -237,6 +237,7 @@ calculate_sales <- function(actual_sales, hired_workers, product_orders){
 
 #funcao manual
 calculate_uppers <- function(actual_sales){
+
   junior <- 4000
   normal <- 7000
   senior <- 9500
@@ -304,7 +305,7 @@ calculate_uppers <- function(actual_sales){
   
   hired_workers = matrix(uppers[1:12],nrow=3,ncol=4)
   product_orders = matrix(uppers[13:28],nrow=4,ncol=4)
-  
+
   return(uppers)
 
 }

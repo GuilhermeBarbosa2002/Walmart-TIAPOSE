@@ -13,6 +13,7 @@ actual_sales <- data.frame(
 )
 
 
+
 ## Define the eval function
 eval_min <- function(s){
   s <- round(s)
@@ -155,7 +156,7 @@ curve=rep(NA,N) # vector with the convergence values
 #s <- SimulatedAnnealing(eval_min,lower,upper,x,"max")
 
 #Montecarlo
-s <- montecarlo(eval_max,lower,upper,N,"max")
+#s <- montecarlo(eval_max,lower,upper,N,"max")
 
 # #Hill_Climbing
 s <- hill_climbing(eval_max,lower, upper, N, "max", x, REPORT)

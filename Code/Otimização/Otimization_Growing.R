@@ -1,9 +1,9 @@
 source("functions_Otimization.R")
 source("blind.R") # fsearch is defined here
-source("montecarlo.R") # mcsearch is defined here
+source("montecarlo.R") # mcsearch is defined heres
 source("hill.R") #  hclimbing is defined here
 source("grid.R") #  gsearch is defined here
-
+library(tabuSearch)
 
 
 # definir as vendas da semana
@@ -13,6 +13,25 @@ actual_sales <- data.frame(
   WSdep3 = c(63584,62888,62768,60279),
   WSdep4 = c(127009,124560,123346,117375)
 )
+
+
+BEST <- 0
+
+# Initialize curve as a vector or list
+curve <- numeric(N)
+
+# Now you can assign values to curve
+curve[EV] <- BEST
+
+
+###################################### DEFINE PARAMETERS ##############################
+D = 28
+N = 1000
+Ni = 20 # iterations to get the s0 at montecarlo
+
+
+
+
 
 ###################################### EVAL #####################################
 eval <- function(s){
@@ -32,15 +51,15 @@ eval_min <- function(s){
   sales = calculate_sales(actual_sales,hired_workers, product_orders)
   monthly_profit = sales_in_usd(sales) - total_costs(hired_workers,product_orders, sales)
   
-  # EV <<- EV + 1
-  # if(monthly_profit > BEST){
-  #   BEST <<- monthly_profit
-  # }
-  # 
-  # if(EV <= N){
-  #   curve[EV] <<- BEST
-  # }
-  # 
+  EV <<- EV + 1
+  if(monthly_profit > BEST){
+    BEST <<- monthly_profit
+  }
+  
+  if(EV <= N){
+    curve[EV] <<- BEST
+  }
+  
   return(-monthly_profit)
 }
 
@@ -51,17 +70,18 @@ eval_max <- function(s){
   sales = calculate_sales(actual_sales,hired_workers, product_orders)
   monthly_profit = sales_in_usd(sales) - total_costs(hired_workers,product_orders, sales)
   
-  # EV <<- EV + 1
-  # if(monthly_profit > BEST){
-  #   BEST <<- monthly_profit
-  # }
-  # 
-  # if(EV <= N){
-  #   curve[EV] <<- BEST
-  # }
+  EV <<- EV + 1
+  if(monthly_profit > BEST){
+    BEST <<- monthly_profit
+  }
+  
+  if(EV <= N){
+    curve[EV] <<- BEST
+  }
   
   return(monthly_profit)
 }
+
 
 
 ###################################### LOAD DATA #####################################
@@ -74,21 +94,10 @@ dados_growing <- dados_growing[, c("WSdep1", "WSdep2", "WSdep3", "WSdep4")]
 # Dividir os dados em grupos de 4 linhas
 grupos <- split(dados_growing, rep(1:8, each = 4))
 
-# Dividir os dados em grupos de 4 linhas
-grupos <- split(dados_growing, rep(1:8, each = 4))
-
-###################################### DEFINE PARAMETERS ##############################
-D = 28
-N = 10000
 
 
 ###################################### MONTECARLO_SEARCH ##############################
-montecarlo <- function(eval_max, lower, upper, N, type){
-  MC <- mcsearch(fn = eval_max, lower = lower, upper = upper, N = N, type = type)
-  # cat("\n ******** MONTECARLO ******\n")
-  # cat("Melhor solução:", round(MC$sol), "Função de avaliação:", MC$eval, " (encontrado na iteração:", MC$index, ")\n")
-  return(MC$eval)
-}
+
 montecarlo_growing <- function(){
   montecarlo_values=vector(length=8) 
   # Loop para percorrer todas as matrizes
@@ -96,11 +105,13 @@ montecarlo_growing <- function(){
     lower <- rep(0,D) # limites inferiores
     upper <- calculate_uppers(grupos[[i]])# limites superiores
     actual_sales = grupos[[i]]
-    
-    montecarlo_values[i] = montecarlo(eval_max,lower,upper,N,"max")
-  
+    MC <- mcsearch(fn = eval_max, lower = lower, upper = upper, N = N, type = "max")
+    montecarlo_values[i] = MC$eval
+
+    plot(curve, type = "l", col = "blue", xlab = "Iterações", ylab = "Valor da Função de Avaliação", main = "Curva de Convergência - MonteCarlo")  
   }
   
+
   return(median(montecarlo_values))
 
 }
@@ -109,7 +120,7 @@ montecarlo_growing <- function(){
 ###################################### HILL_CLIMBING ##############################
 
 # slight change of a real par under a normal u(0,0.5) function:
-rchange1 <- function(par, lower, upper) { 
+rchange1 <- function(par, lower, upper) { acc
   new_par <- hchange(par, lower = lower, upper = upper, rnorm, mean = 0, sd = 0.25, round = FALSE)
   rounded_par <- ceiling(new_par)
   return(rounded_par)
@@ -117,17 +128,17 @@ rchange1 <- function(par, lower, upper) {
 
 hill_climbing_growing <- function(){
   hill_climbing_values=vector(length=8) 
-  for (i in 1:length(grupos)) {
+   for (i in 1:length(grupos)) {
     lower <- rep(0,D) # limites inferiores
     upper <- calculate_uppers(grupos[[i]])# limites superiores
     actual_sales = grupos[[i]]
     #get s0 from montecarlo with one iteration
-    MC <- mcsearch(fn = eval_max, lower = lower, upper = upper, N = 1, type = "max")
+    MC <- mcsearch(fn = eval_max, lower = lower, upper = upper, N = Ni, type = "max")
     s0 = MC$sol
     HC = hclimbing(par = s0, fn = eval_max, change = rchange1, lower = lower, upper = upper, type = "max",
                                              control = list(maxit = N, REPORT = 0, digits = 2, trace = TRUE))
     hill_climbing_values[i] = HC$eval
-   
+    
   }
   
   return(median(hill_climbing_values))
@@ -154,11 +165,11 @@ simulatedAnnealing_growing <- function(){
     upper <- calculate_uppers(grupos[[i]])# limites superiores
     actual_sales = grupos[[i]]
     #get s0 from montecarlo with one iteration
-    MC <- mcsearch(fn = eval_max, lower = lower, upper = upper, N = 1, type = "max")
+    MC <- mcsearch(fn = eval_max, lower = lower, upper = upper, N = Ni, type = "max")
     s0 = MC$sol
     # Execução do Simulated Annealing
     SA <- optim(par = s0, fn = eval_min, method = "SANN", gr = rchange2, control = CSANN)
-    simulatedAnnealing_values[i] = -SA$value
+    simulatedAnnealing_values[i] = SA$value
   }
   
   return(median(simulatedAnnealing_values))
@@ -166,31 +177,112 @@ simulatedAnnealing_growing <- function(){
 
 
 ######################################### RGBA - genetic #########################################
-# get 
 rgba_growing <- function(){
   rgba_values=vector(length=8) 
+  popSize = 200
+  iter = N/popSize
   # Loop para percorrer todas as matrizes
   for (i in 1:length(grupos)) {
     lower <- rep(0,D) # limites inferiores
     upper <- calculate_uppers(grupos[[i]])# limites superiores
     actual_sales = grupos[[i]]
-    
-    montecarlo_values[i] = montecarlo(eval_max,lower,upper,N,"max")
-  
+
+    rga=rbga(lower,upper,popSize=popSize,mutationChance=0.33,elitism=10,evalFunc=eval_max,iter=iter) 
+    bindex=which.min(rga$evaluations)
+    rgba_values[i] = rga$evaluations[bindex]
   }
   
-  return(median(montecarlo_values))
-  popSize = 200
-  iter = N/popSize
-  lowers = rep(0,28)
-  uppers = calculate_uppers(actual_sales)
-
-  rga=rbga(lowers,uppers,popSize=2000,mutationChance=0.33,elitism=10,evalFunc=eval,iter=iter) 
-
-
-  plot(rga)
-  bindex=which.min(rga$evaluations)
-  cat("best solution:",rga$population[bindex,],"evaluation function",rga$evaluations[bindex],"\n")
+  return(median(rgba_values))
 
 }
+
+####################################### Tabu - Search ############################################
+
+# Function to divide binary array by bits 
+matrix_transform <- function(solution, start, elements, dimension_start, bits){
+  matrix_final <- c()
+  for(i in 1:elements){
+    matrix_final[i]  <- bin2int(solution[start:(start + bits - 1)])
+    start <- start + bits
+  }
+  return(matrix_final)
+}
+
+# Evaluation Function
+eval_bin <- function(solution){
+  hired_workers  <- matrix(matrix_transform(solution        = solution, 
+                                            start           = 1, 
+                                            elements        = 12,
+                                            dimension_start = 1,
+                                            bits            = bits_workers), nrow = 3, ncol = 4)
+  
+  product_orders <- matrix(matrix_transform(solution        = solution, 
+                                            start           = 12 * bits_workers + 1, 
+                                            elements        = 16, 
+                                            dimension_start = 13, 
+                                            bits            = bits_orders), nrow = 4, ncol = 4)
+  
+  sales          <- calculate_sales(actual_sales, hired_workers, product_orders)
+  monthly_profit <- sales_in_usd(sales) - total_costs(hired_workers, product_orders, sales)
+  
+  return(monthly_profit)
+}
+
+# Function to build Initial Config
+initial_config_build <- function(config, n_bits, dimensions){
+  initial_length <- length(config)
+  while(length(config) - initial_length < dimensions * n_bits){
+    config <- c(config, rep(0, n_bits), rep(1, n_bits))
+  }
+  return(config)
+}
+
+bits_workers <- 0
+bits_orders  <- 0
+
+tabu_growing <- function(){
+  tabu_values=vector(length=8) 
+  
+  for (i in 1:length(grupos)) {
+    lower <- rep(0,D) # limites inferiores
+    upper <- calculate_uppers(grupos[[i]])# limites superiores
+    bits_workers <<- ceiling(max(log(upper[1:12] , 2))) # Bits for Hired Workers
+    bits_orders  <<- ceiling(max(log(upper[13:28], 2))) # Bits for Product Orders
+    size         <- 12 * bits_workers + 16 * bits_orders # solution size
+    
+    initial_config <- c() # Building Initial configuration
+    initial_config <- initial_config_build(config = initial_config, n_bits = bits_workers, dimensions = 12) # Building Initial configuration for Hired Workers
+    initial_config <- initial_config_build(config = initial_config, n_bits = bits_orders , dimensions = 16) # Building Initial configuration for Product Orders
+    solution <- tabuSearch(size, iters = N, objFunc = eval_bin, config = initial_config, verbose = TRUE)
+    
+    b  <- which.max(solution$eUtilityKeep) # best index
+    bs <- solution$configKeep[b,]
+    tabu_values[i] <- eval_bin(bs)
+  }
+  
+  return(median(tabu_values))
+  
+}
+
+
+###################################### run the models #######################33
+EV=0 #  initial evaluation point is zero.
+BEST=-Inf # initial best is -Inf
+curve=rep(NA,N) # vector with the convergence values
+montecarlo = montecarlo_growing()
+print(paste("Montecarlo - ", montecarlo))
+
+# hill_climbing = hill_climbing_growing()
+# print(paste("HillClimnbing - ", hill_climbing))
+# 
+# san = simulatedAnnealing_growing()
+# print(paste("Simulated Annealing - ", san))
+# 
+# rgba_genetic = rgba_growing()
+# print(paste("RGBA genetic - ", rgba_genetic))
+# 
+# tabu = tabu_growing()
+# print(paste("Tabu - ", tabu))
+
+
 
