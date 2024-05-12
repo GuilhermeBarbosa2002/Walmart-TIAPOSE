@@ -11,14 +11,11 @@ walmart_data <- read.csv("walmart.csv")
 # Convertendo a coluna Date para o formato correto
 walmart_data$Date <- as.Date(walmart_data$Date)
 
-
-
 start_date <- as.Date("2012-03-02")
 end_date <- as.Date("2012-11-09")
 date_sequence <- seq(from = start_date, to = end_date, by = "4 weeks")
 
 inverse_index <- 9:0
-
 
 # Define a UI para a aplicação
 ui <- fluidPage(
@@ -31,20 +28,47 @@ ui <- fluidPage(
                  sliderTextInput("selected_dates", "Selecione um intervalo de datas:",
                                  choices = date_sequence,
                                  grid = FALSE),
-                 selectInput("package", "Escolha o pacote a ser executado:",
+                 selectInput("package", "Pacote:",
                              choices = c("rminer" = "rminer", "forecast" = "forecast")),
                  uiOutput("model_selector"),
+                 selectInput("objetivo", "Escolha o objetivo:",
+                             choices = c("Objetivo1", "Objetivo2", "Multiobjetivo")),
+                 selectInput("otimizacao", "Modelo de Otimização:",
+                             choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo")),
                  actionButton("predict_button", "Predict")
                ),
                mainPanel(
-                 textOutput("selected_date_text"),
-                 fluidRow(
-                   column(6, plotOutput("pred_plot1")),
-                   column(6, plotOutput("pred_plot2"))
-                 ),
-                 fluidRow(
-                   column(6, plotOutput("pred_plot3")),
-                   column(6, plotOutput("pred_plot4"))
+                 tabsetPanel(
+                   tabPanel("Previsões",
+                            fluidRow(
+                              column(12,
+                                     DTOutput("predictions_table")
+                              )
+                            ),
+                            fluidRow(
+                              column(12,
+                                     plotOutput("selected_plot")
+                              )
+                            )
+                   ),
+                   tabPanel("Otimização",
+                            fluidRow(
+                              column(4, tableOutput("hired_workers_table")),
+                              
+                            ),
+                            fluidRow(
+                              
+                              column(4, tableOutput("product_orders_table")),
+                              
+                            ),
+                            fluidRow(
+                              
+                              column(4, tableOutput("sales_table"))
+                            ),
+                            fluidRow(
+                              column(12, textOutput("monthly_profit_output"))
+                            )
+                   )
                  )
                )
              )
@@ -67,176 +91,140 @@ ui <- fluidPage(
   )
 )
 
-
 # Define a lógica do servidor
 server <- function(input, output, session) {
-  
-  
   output$model_selector <- renderUI({
     if (input$package == "rminer") {
-      selectInput("model", "Escolha o modelo:",
-                  choices = c("rf","mlpe", "xgboost","lm","mars","ksvm"))
+      selectInput("model", "Modelo de Previsão:",
+                  choices = c("Random Forest", "mlpe", "xgboost", "lm", "mars", "ksvm"))
     } else if (input$package == "forecast") {
-      selectInput("model", "Escolha o modelo:",
-                  choices = c("HW","auto.arima","nnetar","ets"))
+      selectInput("model", "Modelo de Previsão:",
+                  choices = c("Holtwinters", "Arima", "NN", "ETS"))
     }
   })
   
+  predictions <- reactiveVal(data.frame())  
   
   
-  # Função para previsão usando Growing_Window do arquivo Growing_Gonçalo.R
+  
   observeEvent(input$predict_button, {
     source("Models4Shiny_2.R")
     
     selected_date <- as.Date(input$selected_dates)
     selected_position <- which(date_sequence == selected_date)
     selected_inverse_index <- inverse_index[selected_position]
-    model = input$model
+    model <- input$model
+    objective <- input$objetivo
+    otimization <- input$otimizacao
     
+    d1 <- walmart_data[,"WSdep1"]  
+    d2 <- walmart_data[,"WSdep2"]  
+    d3 <- walmart_data[,"WSdep3"]  
+    d4 <- walmart_data[,"WSdep4"]  
     
-    d1=data[,"WSdep1"]  
-    d2=data[,"WSdep2"]  
-    d3=data[,"WSdep3"]  
-    d4=data[,"WSdep4"]  
-    
-    
-    print(model)
-    if(model == "auto.arima"){
-      Pred1 <- Univariado_Forecast(departamento=d1, nomedepartamento="Departamento 1", modelo="Arima", D=selected_inverse_index)
-      Pred2 <- Univariado_Forecast(departamento=d2, nomedepartamento="Departamento 2", modelo="Arima", D=selected_inverse_index)
-      Pred3 <- Univariado_Forecast(departamento=d3, nomedepartamento="Departamento 3", modelo="Arima", D=selected_inverse_index)
-      Pred4 <- Univariado_Forecast(departamento=d4, nomedepartamento="Departamento 4", modelo="Arima", D=selected_inverse_index)
-    }
-    if(model == "HW"){
-      Pred1 <- Univariado_Forecast(departamento=d1, nomedepartamento="Departamento 1", modelo="Holtwinters", D=selected_inverse_index)
-      Pred2 <- Univariado_Forecast(departamento=d2, nomedepartamento="Departamento 2", modelo="Holtwinters", D=selected_inverse_index)
-      Pred3 <- Univariado_Forecast(departamento=d3, nomedepartamento="Departamento 3", modelo="Holtwinters", D=selected_inverse_index)
-      Pred4 <- Univariado_Forecast(departamento=d4, nomedepartamento="Departamento 4", modelo="Holtwinters", D=selected_inverse_index)
-    }
-    if(model == "nnetar"){
-      Pred1 <- Univariado_Forecast(departamento=d1, nomedepartamento="Departamento 1", modelo="NN", D=selected_inverse_index)
-      Pred2 <- Univariado_Forecast(departamento=d2, nomedepartamento="Departamento 2", modelo="NN", D=selected_inverse_index)
-      Pred3 <- Univariado_Forecast(departamento=d3, nomedepartamento="Departamento 3", modelo="NN", D=selected_inverse_index)
-      Pred4 <- Univariado_Forecast(departamento=d4, nomedepartamento="Departamento 4", modelo="NN", D=selected_inverse_index)
-    }
-    if(model == "ets"){
-      Pred1 <- Univariado_Forecast(departamento=d1, nomedepartamento="Departamento 1", modelo="ETS", D=selected_inverse_index)
-      Pred2 <- Univariado_Forecast(departamento=d2, nomedepartamento="Departamento 2", modelo="ETS", D=selected_inverse_index)
-      Pred3 <- Univariado_Forecast(departamento=d3, nomedepartamento="Departamento 3", modelo="ETS", D=selected_inverse_index)
-      Pred4 <- Univariado_Forecast(departamento=d4, nomedepartamento="Departamento 4", modelo="ETS", D=selected_inverse_index)
-    }
-    if(model == "rf"){
-      Pred1 <- Univariado_Rminer(departamento=d1, nomedepartamento="Departamento 1", modelo="Random Forest", D=selected_inverse_index)
-      Pred2 <- Univariado_Rminer(departamento=d2, nomedepartamento="Departamento 2", modelo="Random Forest", D=selected_inverse_index)
-      Pred3 <- Univariado_Rminer(departamento=d3, nomedepartamento="Departamento 3", modelo="Random Forest", D=selected_inverse_index)
-      Pred4 <- Univariado_Rminer(departamento=d4, nomedepartamento="Departamento 4", modelo="Random Forest", D=selected_inverse_index)
-    }
-    if(model == "mlpe"){
-      Pred1 <- Univariado_Rminer(departamento=d1, nomedepartamento="Departamento 1", modelo="mlpe", D=selected_inverse_index)
-      Pred2 <- Univariado_Rminer(departamento=d2, nomedepartamento="Departamento 2", modelo="mlpe", D=selected_inverse_index)
-      Pred3 <- Univariado_Rminer(departamento=d3, nomedepartamento="Departamento 3", modelo="mlpe", D=selected_inverse_index)
-      Pred4 <- Univariado_Rminer(departamento=d4, nomedepartamento="Departamento 4", modelo="mlpe", D=selected_inverse_index)
-    }
-    if(model == "xgboost"){
-      Pred1 <- Univariado_Rminer(departamento=d1, nomedepartamento="Departamento 1", modelo="xgboost", D=selected_inverse_index)
-      Pred2 <- Univariado_Rminer(departamento=d2, nomedepartamento="Departamento 2", modelo="xgboost", D=selected_inverse_index)
-      Pred3 <- Univariado_Rminer(departamento=d3, nomedepartamento="Departamento 3", modelo="xgboost", D=selected_inverse_index)
-      Pred4 <- Univariado_Rminer(departamento=d4, nomedepartamento="Departamento 4", modelo="xgboost", D=selected_inverse_index)
-    }
-    if(model == "lm"){
-      Pred1 <- Univariado_Rminer(departamento=d1, nomedepartamento="Departamento 1", modelo="lm", D=selected_inverse_index)
-      Pred2 <- Univariado_Rminer(departamento=d2, nomedepartamento="Departamento 2", modelo="lm", D=selected_inverse_index)
-      Pred3 <- Univariado_Rminer(departamento=d3, nomedepartamento="Departamento 3", modelo="lm", D=selected_inverse_index)
-      Pred4 <- Univariado_Rminer(departamento=d4, nomedepartamento="Departamento 4", modelo="lm", D=selected_inverse_index)
-    }
-    if(model == "mars"){
-      Pred1 <- Univariado_Rminer(departamento=d1, nomedepartamento="Departamento 1", modelo="mars", D=selected_inverse_index)
-      Pred2 <- Univariado_Rminer(departamento=d2, nomedepartamento="Departamento 2", modelo="mars", D=selected_inverse_index)
-      Pred3 <- Univariado_Rminer(departamento=d3, nomedepartamento="Departamento 3", modelo="mars", D=selected_inverse_index)
-      Pred4 <- Univariado_Rminer(departamento=d4, nomedepartamento="Departamento 4", modelo="mars", D=selected_inverse_index)
-    }
-    if(model == "ksvm"){
-      Pred1 <- Univariado_Rminer(departamento=d1, nomedepartamento="Departamento 1", modelo="ksvm", D=selected_inverse_index)
-      Pred2 <- Univariado_Rminer(departamento=d2, nomedepartamento="Departamento 2", modelo="ksvm", D=selected_inverse_index)
-      Pred3 <- Univariado_Rminer(departamento=d3, nomedepartamento="Departamento 3", modelo="ksvm", D=selected_inverse_index)
-      Pred4 <- Univariado_Rminer(departamento=d4, nomedepartamento="Departamento 4", modelo="ksvm", D=selected_inverse_index)
+    if (model %in% c("Arima", "Holtwinters", "NN", "ETS")) {
+      Pred1 <- Univariado_Forecast(departamento = d1, nomedepartamento = "Departamento 1", modelo = model, D = selected_inverse_index)
+      Pred2 <- Univariado_Forecast(departamento = d2, nomedepartamento = "Departamento 2", modelo = model, D = selected_inverse_index)
+      Pred3 <- Univariado_Forecast(departamento = d3, nomedepartamento = "Departamento 3", modelo = model, D = selected_inverse_index)
+      Pred4 <- Univariado_Forecast(departamento = d4, nomedepartamento = "Departamento 4", modelo = model, D = selected_inverse_index)
     }
     
-   
+    if (model %in% c("Random Forest", "mlpe", "xgboost", "lm", "mars", "ksvm")) {
+      Pred1 <- Univariado_Rminer(departamento = d1, nomedepartamento = "Departamento 1", modelo = model, D = selected_inverse_index)
+      Pred2 <- Univariado_Rminer(departamento = d2, nomedepartamento = "Departamento 2", modelo = model, D = selected_inverse_index)
+      Pred3 <- Univariado_Rminer(departamento = d3, nomedepartamento = "Departamento 3", modelo = model, D = selected_inverse_index)
+      Pred4 <- Univariado_Rminer(departamento = d4, nomedepartamento = "Departamento 4", modelo = model, D = selected_inverse_index)
+    }
     
-    # Plot for Pred1
-    output$pred_plot1 <- renderPlot({
-      if (exists("Pred1")) {
-        plot(Pred1, type="l", col="red", lwd=2, xlab="Time", ylab="Value", main="Forecast for Department 1")
-      }
+    # Update the predictions reactive value
+    predictions(data.frame(
+      Time = 1:length(Pred1),
+      Department1 = Pred1,
+      Department2 = Pred2,
+      Department3 = Pred3,
+      Department4 = Pred4
+    ))
+    
+    DataFrame=data.frame(Pred1,Pred2,Pred3,Pred4)
+    
+    
+    # Run optimization
+    optimization_results <- Uniobjetivo(df = DataFrame, algoritmo = otimization)
+    
+    # Update UI with optimization results
+    output$hired_workers_table <<- renderTable(optimization_results$hired_workers)
+    output$product_orders_table <<- renderTable(optimization_results$product_orders)
+    output$sales_table <<- renderTable(optimization_results$sales)
+    output$monthly_profit_output <<- renderText({
+      paste("Monthly Profit: ", round(optimization_results$monthly_profit, 2))
     })
     
-    # Plot for Pred2
-    output$pred_plot2 <- renderPlot({
-      if (exists("Pred2")) {
-        plot(Pred2, type="l", col="blue", lwd=2, xlab="Time", ylab="Value", main="Forecast for Department 2")
-      }
-    })
     
-    # Plot for Pred3
-    output$pred_plot3 <- renderPlot({
-      if (exists("Pred3")) {
-        plot(Pred3, type="l", col="green", lwd=2, xlab="Time", ylab="Value", main="Forecast for Department 3")
-      }
+    output$predictions_table <- renderDT({
+      predictions_rounded <- data.frame(lapply(predictions(), function(x) {
+        if (is.numeric(x)) return(round(x, 2))
+        return(x)
+      }))
+      
+      datatable(predictions_rounded, 
+                selection = 'single',
+                options = list(
+                  pageLength = 10,     
+                  searching = FALSE,   
+                  paging = FALSE,      
+                  info = FALSE,        
+                  ordering = FALSE    
+                ),
+                rownames = FALSE       
+      )
     })
-    
-    # Plot for Pred4
-    output$pred_plot4 <- renderPlot({
-      if (exists("Pred4")) {
-        plot(Pred4, type="l", col="purple", lwd=2, xlab="Time", ylab="Value", main="Forecast for Department 4")
-      }
-    })
-    
   })
   
-  # Renderiza a tabela com os dados CSV
+  output$selected_plot <- renderPlot({
+    req(input$predictions_table_rows_selected)
+    sel_row <- input$predictions_table_rows_selected
+    if (length(sel_row) == 0) return()
+    
+    selected_data <- predictions()[sel_row, ]
+    
+    barplot(as.numeric(selected_data[-1]), 
+            names.arg = colnames(selected_data)[-1], 
+            ylab = "Value",
+            col = "darkblue")
+  })
+  
   output$data_table <- renderDT({
-    datatable(walmart_data, 
-              options = list(
-                lengthMenu = c(5, 10, 15),
-                pageLength = 5
-              ))
+    datatable(walmart_data, options = list(lengthMenu = c(5, 10, 15), pageLength = 5))
   })
   
-  # Calcula o valor médio da soma das colunas WSdep1, WSdep2, WSdep3 e WSdep4
   mean_values <- reactive({
-    mean_WSdep1 <- mean(walmart_data$WSdep1)
-    mean_WSdep2 <- mean(walmart_data$WSdep2)
-    mean_WSdep3 <- mean(walmart_data$WSdep3)
-    mean_WSdep4 <- mean(walmart_data$WSdep4)
+    mean_WSdep1 <- mean(walmart_data$WSdep1, na.rm = TRUE)
+    mean_WSdep2 <- mean(walmart_data$WSdep2, na.rm = TRUE)
+    mean_WSdep3 <- mean(walmart_data$WSdep3, na.rm = TRUE)
+    mean_WSdep4 <- mean(walmart_data$WSdep4, na.rm = TRUE)
     
-    data.frame(Dep = c("WSdep1", "WSdep2", "WSdep3", "WSdep4"),
+    data.frame(Department = c("WSdep1", "WSdep2", "WSdep3", "WSdep4"),
                Mean = c(mean_WSdep1, mean_WSdep2, mean_WSdep3, mean_WSdep4))
   })
   
-  # Renderiza o gráfico de velocímetro para WSdep1
   output$gauge_WSdep1 <- renderPlotly({
     render_gauge_plot("WSdep1", mean_values())
   })
   
-  # Renderiza o gráfico de velocímetro para WSdep2
   output$gauge_WSdep2 <- renderPlotly({
     render_gauge_plot("WSdep2", mean_values())
   })
   
-  # Renderiza o gráfico de velocímetro para WSdep3
   output$gauge_WSdep3 <- renderPlotly({
     render_gauge_plot("WSdep3", mean_values())
   })
   
-  # Renderiza o gráfico de velocímetro para WSdep4
   output$gauge_WSdep4 <- renderPlotly({
     render_gauge_plot("WSdep4", mean_values())
   })
   
-  # Função para renderizar os gráficos de velocímetro
   render_gauge_plot <- function(department, mean_values) {
-    mean_value <- mean_values[mean_values$Dep == department, "Mean"]
+    mean_value <- mean_values[mean_values$Department == department, "Mean"]
     
     plot_ly(
       type = "indicator",
@@ -247,17 +235,15 @@ server <- function(input, output, session) {
         axis = list(range = list(NULL, max(mean_values$Mean))),
         bar = list(color = "darkblue"),
         bordercolor = "gray",
-        bgcolor = "white",  # Define o fundo como branco
+        bgcolor = "white",
         steps = list(
-          list(range = c(0, max(mean_values$Mean) / 3), color = "white"),
-          list(range = c(max(mean_values$Mean) / 3, 2 * max(mean_values$Mean) / 3), color = "white"),
-          list(range = c(2 * max(mean_values$Mean) / 3, max(mean_values$Mean)), color = "white")
+          list(range = c(0, max(mean_values$Mean) / 3), color = "lightgray"),
+          list(range = c(max(mean_values$Mean) / 3, 2 * max(mean_values$Mean) / 3), color = "gray"),
+          list(range = c(2 * max(mean_values$Mean) / 3, max(mean_values$Mean)), color = "darkgray")
         )
       )
     )
   }
-  
-  
 }
 
 # Cria a aplicação Shiny
