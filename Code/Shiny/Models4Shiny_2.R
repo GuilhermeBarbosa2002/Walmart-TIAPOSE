@@ -2,6 +2,9 @@ library(forecast)
 library(rminer)
 library(vars)
 library(lubridate)
+library(genalg)
+library(adana)
+library(tabuSearch)
 
 source("multi-utils.R")
 
@@ -17,6 +20,18 @@ d2=data[,"WSdep2"]
 d3=data[,"WSdep3"]  
 d4=data[,"WSdep4"]
 week=data[,"Week"] 
+
+bits_workers <- 0
+bits_orders  <- 0
+
+matrix_transform <- function(solution, start, elements, dimension_start, bits){
+  matrix_final <- c()
+  for(i in 1:elements){
+    matrix_final[i]  <- bin2int(solution[start:(start + bits - 1)])
+    start <- start + bits
+  }
+  return(matrix_final)
+}
 
 #-------------Univariado
 
@@ -280,6 +295,69 @@ Uniobjetivo=function(df,algoritmo){
     return(monthly_effort)
   }
   
+  ############# RGBA.BIN ################
+  
+  RBGABIN = function(){
+    
+    
+    
+    eval_rbga <- function(solution){
+      hired_workers  <- matrix(matrix_transform(solution        = solution, 
+                                                start           = 1, 
+                                                elements        = 12,
+                                                dimension_start = 1,
+                                                bits            = bits_workers), nrow = 3, ncol = 4)
+      
+      product_orders <- matrix(matrix_transform(solution        = solution, 
+                                                start           = 12 * bits_workers + 1, 
+                                                elements        = 16, 
+                                                dimension_start = 13, 
+                                                bits            = bits_orders), nrow = 4, ncol = 4)
+      
+      sales          <- calculate_sales(actual_sales, hired_workers, product_orders)
+      monthly_profit <- sales_in_usd(sales) - total_costs(hired_workers, product_orders, sales)
+      
+      return(-monthly_profit)
+    }
+    
+    
+    # global variables (can be used inside the functions):
+    D              <- 28 # dimension
+    Low            <- rep(0, D) # Lower
+    Up             <- calculate_uppers(actual_sales) # Upper
+    N              <- 100 # number of iterations
+    Low            <- rep(0, D) # Lower
+    Up             <- calculate_uppers(actual_sales) # Upper
+    bits_workers   <<- ceiling(max(log(Up[1:12] , 2))) # Bits for Hired Workers
+    bits_orders    <<- ceiling(max(log(Up[13:28], 2))) # Bits for Product Orders
+    size           <- 12 * bits_workers + 16 * bits_orders # solution size
+    mutationChance <- 1 / (size + 1)
+    popsize        <- 200
+    elitism        <- popsize * 0.2
+    #ITER           <- 1
+    
+    rga <- rbga.bin(size           = size,
+                    popSize        = popsize,
+                    iters          = N, 
+                    mutationChance = mutationChance,
+                    elitism        = elitism, 
+                    zeroToOneRatio = 10,
+                    #monitorFunc    = NULL, 
+                    evalFunc       = eval_rbga,
+                    verbose        = FALSE)
+    
+    print(rga)
+    
+    
+    bs <- rga$population[rga$evaluations == min(rga$evaluations), ]
+    print(bs)
+    
+    
+    
+    
+    return(bs)
+  }
+  
   
   ##################### MONTECARLO_SEARCH #################
   montecarlo <- function(eval_max, lower, upper, N, type){
@@ -350,6 +428,101 @@ Uniobjetivo=function(df,algoritmo){
     return(SA$par)
   }
   
+  
+  ###############RGBA-Genetic#####################
+  RBGA = function(eval, lower, upper, N){
+    
+    
+    rga=rbga(lower,upper,popSize=200,mutationChance=0.33,elitism=10,evalFunc=eval,iter=N)
+    
+    bindex=which.min(rga$evaluations)
+    
+   
+    return(ceiling(rga$population[bindex,]))
+    
+  }
+  
+  ##################Tabu########################
+  Tabu = function(){
+    
+    evaltabu <- function(solution){
+      hired_workers  <- matrix(matrix_transform(solution        = solution, 
+                                                start           = 1, 
+                                                elements        = 12,
+                                                dimension_start = 1,
+                                                bits            = bits_workers), nrow = 3, ncol = 4)
+      
+      product_orders <- matrix(matrix_transform(solution        = solution, 
+                                                start           = 12 * bits_workers + 1, 
+                                                elements        = 16, 
+                                                dimension_start = 13, 
+                                                bits            = bits_orders), nrow = 4, ncol = 4)
+      
+      sales          <- calculate_sales(actual_sales, hired_workers, product_orders)
+      monthly_profit <- sales_in_usd(sales) - total_costs(hired_workers, product_orders, sales)
+      
+      return(monthly_profit)
+    }
+    
+    # Evaluation Function 
+    F2 <- function(solution){
+      hired_workers  <- matrix(matrix_transform(solution        = solution, 
+                                                start           = 1, 
+                                                elements        = 12,
+                                                dimension_start = 1,
+                                                bits            = bits_workers), nrow = 3, ncol = 4)
+      
+      product_orders <- matrix(matrix_transform(solution        = solution, 
+                                                start           = 12 * bits_workers + 1, 
+                                                elements        = 16, 
+                                                dimension_start = 13, 
+                                                bits            = bits_orders), nrow = 4, ncol = 4)
+      
+      monthly_effort <- total_number_of_workers(hired_workers) + total_number_of_orders(product_orders)
+      return(-monthly_effort) # needs to be negative because tabuSearch only maximizes
+    }
+    
+    initial_config_build <- function(config, n_bits, dimensions){
+      initial_length <- length(config)
+      while(length(config) - initial_length < dimensions * n_bits){
+        config <- c(config, rep(0, n_bits), rep(1, n_bits))
+      }
+      return(config)
+    }
+    
+    D            <- 28 # dimension
+    Low          <- rep(0, 28) # Lower
+    Up           <- calculate_uppers(actual_sales) # Upper
+    bits_workers <<- ceiling(max(log(Up[1:12] , 2))) # Bits for Hired Workers
+    bits_orders  <<- ceiling(max(log(Up[13:28], 2))) # Bits for Product Orders
+    N            <- 100 # number of iterations
+    size         <- 12 * bits_workers + 16 * bits_orders # solution size
+    
+    # Building Initial configuration
+    initial_config <- c()
+    
+    # Building Initial configuration for Hired Workers
+    initial_config <- initial_config_build(config     = initial_config, 
+                              n_bits     = bits_workers, 
+                              dimensions = 12)
+    
+    # Building Initial configuration for Product Orders
+    initial_config <- initial_config_build(config     = initial_config, 
+                              n_bits     = bits_orders, 
+                              dimensions = 16)
+    
+    
+    solution <- tabuSearch(size, iters = N, objFunc = evaltabu, config = initial_config, verbose = F)
+    
+    b  <- which.max(solution$eUtilityKeep) # best index
+    bs <- solution$configKeep[b,]
+    
+    return(bs)
+    
+    
+    
+  }
+  
   ##################### PARAMETERS #################
   # dimension
   D=28
@@ -375,11 +548,32 @@ Uniobjetivo=function(df,algoritmo){
   }
   
   
+  # RGBA genetic
+  if(algoritmo=="RBGA"){
+    
+    s <- RBGA(eval_max,lower,upper,N=100)
+  }
+  
+  # TabuSearch
+  if(algoritmo=="Tabu"){
+    
+    s <- Tabu()
+  }
+  
+  
   #Montecarlo
   
   if(algoritmo=="Montecarlo"){
     s <- montecarlo(eval_max,lower,upper,N,"max")
   }
+  
+  
+  #RGBABIN
+  
+  if(algoritmo=="RBGA.BIN"){
+    s <- RBGABIN()
+  }
+  
   
   
   #Hill_Climbing
@@ -389,11 +583,36 @@ Uniobjetivo=function(df,algoritmo){
     s <- hill_climbing(eval_max,lower, upper, N, "max", x2, REPORT)
   }
   
+  if(algoritmo != "RBGA.BIN"){
+    hired_workers  <- matrix(s[1:12] , nrow = 3, ncol = 4)
+    product_orders <- matrix(s[13:28], nrow = 4, ncol = 4)
+    sales          <- calculate_sales(actual_sales, hired_workers, product_orders)
+    monthly_profit <- sales_in_usd(sales) - total_costs(hired_workers, product_orders, sales)
+  }
   
-  hired_workers  <- matrix(s[1:12] , nrow = 3, ncol = 4)
-  product_orders <- matrix(s[13:28], nrow = 4, ncol = 4)
-  sales          <- calculate_sales(actual_sales, hired_workers, product_orders)
-  monthly_profit <- sales_in_usd(sales) - total_costs(hired_workers, product_orders, sales)
+  
+  if(algoritmo %in% c("RBGA.BIN", "Tabu")){
+    
+    
+    
+    hired_workers  <- matrix(matrix_transform(solution        = s,
+                                              start           = 1, 
+                                              elements        = 12,
+                                              dimension_start = 1,
+                                              bits            = bits_workers), nrow = 3, ncol = 4)
+    
+    product_orders <- matrix(matrix_transform(solution        = s, 
+                                              start           = 12 * bits_workers + 1, 
+                                              elements        = 16, 
+                                              dimension_start = 13,
+                                              bits            = bits_orders), nrow = 4, ncol = 4)
+    
+    sales          <- calculate_sales(actual_sales, hired_workers, product_orders)
+    monthly_profit <- sales_in_usd(sales) - total_costs(hired_workers, product_orders, sales)
+    
+  }
+  
+ 
   
   cat("Best Solution: \nHired Workers \n")
   print(hired_workers) 
@@ -411,6 +630,8 @@ Uniobjetivo=function(df,algoritmo){
   ))
   
 }
+
+
 #-------------MultiObjetivo
 #-------------BestSolution
 

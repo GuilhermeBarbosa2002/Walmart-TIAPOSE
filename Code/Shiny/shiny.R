@@ -34,7 +34,7 @@ ui <- fluidPage(
                  selectInput("objetivo", "Escolha o objetivo:",
                              choices = c("Objetivo1", "Objetivo2", "Multiobjetivo")),
                  selectInput("otimizacao", "Modelo de Otimização:",
-                             choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo")),
+                             choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo","RBGA","RBGA.BIN","Tabu")),
                  actionButton("predict_button", "Predict")
                ),
                mainPanel(
