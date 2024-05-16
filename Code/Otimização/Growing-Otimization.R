@@ -17,8 +17,13 @@ actual_sales <- data.frame(
 
 ###################################### DEFINE PARAMETERS ##############################
 D = 28
+<<<<<<< HEAD
 N = 100
 Ni = 1000 # iterations to get the s0 at montecarlo
+=======
+N = 100000
+Ni = 30 # iterations to get the s0 at montecarlo
+>>>>>>> fa6dd4329e57482a925608b00f9a549a05e83aa0
 BEST = 0
 EV = 0
 curve=rep(NA,N) # vector with the convergence values
@@ -187,6 +192,7 @@ rgba_growing <- function(){
     upper <- calculate_uppers(grupos[[i]])# limites superiores
     actual_sales <- grupos[[i]]
     
+<<<<<<< HEAD
     rga <- rbga(stringMin      = lower, 
                 stringMax      = upper, 
                 popSize        = popSize, 
@@ -194,6 +200,18 @@ rgba_growing <- function(){
                 elitism        = popSize * 0.2, 
                 evalFunc       = eval_min, 
                 iter           = N)
+=======
+    rga=rbga(lower,upper,popSize=popSize,mutationChance=0.33,elitism=50,evalFunc=eval_max,iter=iter) 
+    bindex=which.min(rga$evaluations)
+    rgba_values[i] = rga$evaluations[bindex]
+    # Armazenar os valores de convergência
+    start_index <- (i - 1) * N + 1
+    end_index <- i * N
+    rgba_curve[start_index:end_index] <- curve
+    EV <<- 0
+    BEST <<- -Inf
+    curve <<- rep(NA,N) 
+>>>>>>> fa6dd4329e57482a925608b00f9a549a05e83aa0
     
     bs <- rga$population[rga$evaluations == min(rga$evaluations)]
     rgba_values[i] <- eval_max(bs)

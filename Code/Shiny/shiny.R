@@ -7,6 +7,7 @@ library(shinyWidgets)
 
 # Carrega o arquivo CSV
 walmart_data <- read.csv("walmart.csv")
+selected = ""
 
 # Convertendo a coluna Date para o formato correto
 walmart_data$Date <- as.Date(walmart_data$Date)
@@ -21,7 +22,7 @@ inverse_index <- 9:0
 ui <- fluidPage(
   theme = shinytheme("flatly"),
   titlePanel("Análise de Vendas do Walmart"),
-  tabsetPanel(
+  tabsetPanel(id = 'opcoes',
     tabPanel("Univariado",
              sidebarLayout(
                sidebarPanel(
@@ -31,10 +32,12 @@ ui <- fluidPage(
                  selectInput("package", "Pacote:",
                              choices = c("rminer" = "rminer", "forecast" = "forecast")),
                  uiOutput("model_selector"),
-                 selectInput("objetivo", "Escolha o objetivo:",
-                             choices = c("Objetivo1", "Objetivo2", "Multiobjetivo")),
-                 selectInput("otimizacao", "Modelo de Otimização:",
+                 selectInput("objetivo_uni", "Escolha o objetivo:",
+                             choices = c("Uniobjetivo", "Multiobjetivo")),
+                 uiOutput("objetivo_selector"),
+                 selectInput("otimizacao_uni", "Modelo de Otimização:",
                              choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo","RBGA","RBGA.BIN","Tabu")),
+                 uiOutput("otimizacao_selector"),
                  actionButton("predict_button", "Predict")
                ),
                mainPanel(
@@ -53,12 +56,12 @@ ui <- fluidPage(
                    ),
                    tabPanel("Otimização",
                             fluidRow(
-                              column(4, tableOutput("hired_workers_table")),
+                              column(4, tableOutput("hired_workers_table"))
                               
                             ),
                             fluidRow(
                               
-                              column(4, tableOutput("product_orders_table")),
+                              column(4, tableOutput("product_orders_table"))
                               
                             ),
                             fluidRow(
@@ -73,7 +76,60 @@ ui <- fluidPage(
                )
              )
     ),
-    tabPanel("Dataset",
+    tabPanel("Multivariado",
+             sidebarLayout(
+               sidebarPanel(
+                 sliderTextInput("selected_dates_multi", "Selecione um intervalo de datas:",
+                                 choices = date_sequence,
+                                 grid = FALSE),
+                 selectInput("variable_type", "Tipo de variaveis:",
+                             choices = c("Endogenas" = "Endogenas", "Exogenas" = "Exogenas")),
+                 uiOutput("type_selector"),
+                 selectInput("objetivo_multi", "Escolha o objetivo:",
+                             choices = c("Uniobjetivo", "Multiobjetivo")),
+                 uiOutput("objetivo_selector"),
+                 selectInput("otimizacao_multi", "Modelo de Otimização:",
+                             choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo","RBGA","RBGA.BIN","Tabu")),
+                 uiOutput("otimizacao_multi_selector"),
+                 actionButton("predict_button_", "Predict")
+               ),
+               mainPanel(
+                 tabsetPanel(
+                   tabPanel("Previsões",
+                            fluidRow(
+                              column(12,
+                                     DTOutput("predictions_table_")
+                              )
+                            ),
+                            fluidRow(
+                              column(12,
+                                     plotOutput("selected_plot_")
+                              )
+                            )
+                   ),
+                   tabPanel("Otimização",
+                            fluidRow(
+                              column(4, tableOutput("hired_workers_table_"))
+                              
+                            ),
+                            fluidRow(
+                              
+                              column(4, tableOutput("product_orders_table_"))
+                              
+                            ),
+                            fluidRow(
+                              
+                              column(4, tableOutput("sales_table_"))
+                            ),
+                            fluidRow(
+                              column(12, textOutput("monthly_profit_output_"))
+                            )
+                   )
+                 )
+               )
+             )
+    ),
+        tabPanel("Dataset",
              fluidRow(
                column(12,
                       DTOutput("data_table")
@@ -101,55 +157,137 @@ server <- function(input, output, session) {
       selectInput("model", "Modelo de Previsão:",
                   choices = c("Holtwinters", "Arima", "NN", "ETS"))
     }
+    
   })
+  output$type_selector <- renderUI({
+    if (input$variable_type == "Endogenas") {
+      tagList(
+        checkboxGroupInput("endogenous_vars", "Selecione as variáveis endógenas:",
+                           choices = c("WSdep1", "WSdep2", "WSdep3","WSdep4", "IsHoliday", "Week"),
+                           selected = c("WSdep1", "IsHoliday")),
+        selectInput("model_multi", "Modelo de Previsão:",
+                    choices = c("AUTOVAR", "ARIMAX", "MLPE"))
+      )
+    } else if (input$variable_type == "Exogenas") {
+      selectInput("model_multi", "Modelo de Previsão:",
+                  choices = c("ARIMAX"))
+    }
+  })
+  
+  
+  observeEvent(input$objetivo_uni, {
+    if (input$objetivo_uni == "Uniobjetivo") {
+      updateSelectInput(session, "otimizacao_uni",
+                        choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo", "RBGA", "RBGA.BIN", "Tabu"))
+    } else if (input$objetivo_uni == "Multiobjetivo") {
+      updateSelectInput(session, "otimizacao_uni",
+                        choices = c("NGSA-II", "a definir"))
+    }
+  })
+  
+  observeEvent(input$objetivo_multi, {
+    if (input$objetivo_multi == "Uniobjetivo") {
+      updateSelectInput(session, "otimizacao_multi",
+                        choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo", "RBGA", "RBGA.BIN", "Tabu"))
+    } else if (input$objetivo_multi == "Multiobjetivo") {
+      updateSelectInput(session, "otimizacao_multi",
+                        choices = c("NGSA-II", "a definir"))
+    }
+  })
+  
   
   predictions <- reactiveVal(data.frame())  
   
   
-  
+
   observeEvent(input$predict_button, {
     source("Models4Shiny_2.R")
+    
     
     selected_date <- as.Date(input$selected_dates)
     selected_position <- which(date_sequence == selected_date)
     selected_inverse_index <- inverse_index[selected_position]
     model <- input$model
     objective <- input$objetivo
-    otimization <- input$otimizacao
+    otimization_uni <- input$otimizacao_uni
+    otimization_uni <- input$otimizacao_multi
     
     d1 <- walmart_data[,"WSdep1"]  
     d2 <- walmart_data[,"WSdep2"]  
     d3 <- walmart_data[,"WSdep3"]  
     d4 <- walmart_data[,"WSdep4"]  
     
-    if (model %in% c("Arima", "Holtwinters", "NN", "ETS")) {
-      Pred1 <- Univariado_Forecast(departamento = d1, nomedepartamento = "Departamento 1", modelo = model, D = selected_inverse_index)
-      Pred2 <- Univariado_Forecast(departamento = d2, nomedepartamento = "Departamento 2", modelo = model, D = selected_inverse_index)
-      Pred3 <- Univariado_Forecast(departamento = d3, nomedepartamento = "Departamento 3", modelo = model, D = selected_inverse_index)
-      Pred4 <- Univariado_Forecast(departamento = d4, nomedepartamento = "Departamento 4", modelo = model, D = selected_inverse_index)
-    }
     
-    if (model %in% c("Random Forest", "mlpe", "xgboost", "lm", "mars", "ksvm")) {
-      Pred1 <- Univariado_Rminer(departamento = d1, nomedepartamento = "Departamento 1", modelo = model, D = selected_inverse_index)
-      Pred2 <- Univariado_Rminer(departamento = d2, nomedepartamento = "Departamento 2", modelo = model, D = selected_inverse_index)
-      Pred3 <- Univariado_Rminer(departamento = d3, nomedepartamento = "Departamento 3", modelo = model, D = selected_inverse_index)
-      Pred4 <- Univariado_Rminer(departamento = d4, nomedepartamento = "Departamento 4", modelo = model, D = selected_inverse_index)
-    }
+      if (model %in% c("Arima", "Holtwinters", "NN", "ETS")) {
+        print(paste("MODELO: ", model))
+        Pred1 <- Univariado_Forecast(departamento = d1, nomedepartamento = "Departamento 1", modelo = model, D = selected_inverse_index)
+        Pred2 <- Univariado_Forecast(departamento = d2, nomedepartamento = "Departamento 2", modelo = model, D = selected_inverse_index)
+        Pred3 <- Univariado_Forecast(departamento = d3, nomedepartamento = "Departamento 3", modelo = model, D = selected_inverse_index)
+        Pred4 <- Univariado_Forecast(departamento = d4, nomedepartamento = "Departamento 4", modelo = model, D = selected_inverse_index)
+        
+      }
+      
+      if (model %in% c("Random Forest", "mlpe", "xgboost", "lm", "mars", "ksvm")) {
+        Pred1 <- Univariado_Rminer(departamento = d1, nomedepartamento = "Departamento 1", modelo = model, D = selected_inverse_index)
+        Pred2 <- Univariado_Rminer(departamento = d2, nomedepartamento = "Departamento 2", modelo = model, D = selected_inverse_index)
+        Pred3 <- Univariado_Rminer(departamento = d3, nomedepartamento = "Departamento 3", modelo = model, D = selected_inverse_index)
+        Pred4 <- Univariado_Rminer(departamento = d4, nomedepartamento = "Departamento 4", modelo = model, D = selected_inverse_index)
+      }
+      
+      if (model %in% c("ARIMAX", "AUTOVAR", "MLPE")) {
+        selected_vars <- input$endogenous_vars
+        
+        reorder_vars <- function(vars, primary) {
+          if (!primary %in% vars) {
+            c(primary, vars)
+          } else {
+            c(primary, vars[vars != primary])
+          }
+        }
+        
+        selected_vars_d1 <- reorder_vars(selected_vars, "WSdep1")
+        selected_vars_d2 <- reorder_vars(selected_vars, "WSdep2")
+        selected_vars_d3 <- reorder_vars(selected_vars, "WSdep3")
+        selected_vars_d4 <- reorder_vars(selected_vars, "WSdep4")
+        
+        
+        Pred1 <- Multivariado(departamento = d1, nomedepartamento = "Departamento 1", modelo = model, D = selected_inverse_index, variaveis = selected_vars_d1)
+        Pred2 <- Multivariado(departamento = d2, nomedepartamento = "Departamento 2", modelo = model, D = selected_inverse_index, variaveis = selected_vars_d2)
+        Pred3 <- Multivariado(departamento = d3, nomedepartamento = "Departamento 3", modelo = model, D = selected_inverse_index, variaveis = selected_vars_d3)
+        Pred4 <- Multivariado(departamento = d4, nomedepartamento = "Departamento 4", modelo = model, D = selected_inverse_index, variaveis = selected_vars_d4)
+      }
+      
+      # if (model %in% c("ARIMAX")) {
+      #   Pred1 <- Multi_Exogen(departamento = d1, nomedepartamento = "Departamento 1", modelo = model, D = selected_inverse_index)
+      #   Pred2 <- Multi_Exogen(departamento = d2, nomedepartamento = "Departamento 2", modelo = model, D = selected_inverse_index)
+      #   Pred3 <- Multi_Exogen(departamento = d3, nomedepartamento = "Departamento 3", modelo = model, D = selected_inverse_index)
+      #   Pred4 <- Multi_Exogen(departamento = d4, nomedepartamento = "Departamento 4", modelo = model, D = selected_inverse_index)
+      # }
+      
+      # Update the predictions reactive value
+      predictions(data.frame(
+        Time = 1:length(Pred1),
+        Department1 = Pred1,
+        Department2 = Pred2,
+        Department3 = Pred3,
+        Department4 = Pred4
+      ))
+      
+      DataFrame=data.frame(Pred1,Pred2,Pred3,Pred4)
     
-    # Update the predictions reactive value
-    predictions(data.frame(
-      Time = 1:length(Pred1),
-      Department1 = Pred1,
-      Department2 = Pred2,
-      Department3 = Pred3,
-      Department4 = Pred4
-    ))
-    
-    DataFrame=data.frame(Pred1,Pred2,Pred3,Pred4)
-    
-    
-    # Run optimization
-    optimization_results <- Uniobjetivo(df = DataFrame, algoritmo = otimization)
+
+    # if(objetivo_uni == "Uniobjetivo"){
+    #   
+    #   
+    # }  
+    # else if(objetivo_uni == 'Multiobjetivo'){
+    #   
+    #   optimization_results <- mul(df = DataFrame, algoritmo = otimization_uni)
+    # }
+    # 
+      optimization_results <- Uniobjetivo(df = DataFrame, algoritmo = otimization_uni)
+  
+      
     
     # Update UI with optimization results
     output$hired_workers_table <<- renderTable(optimization_results$hired_workers)
@@ -158,7 +296,6 @@ server <- function(input, output, session) {
     output$monthly_profit_output <<- renderText({
       paste("Monthly Profit: ", round(optimization_results$monthly_profit, 2))
     })
-    
     
     output$predictions_table <- renderDT({
       predictions_rounded <- data.frame(lapply(predictions(), function(x) {
@@ -178,7 +315,6 @@ server <- function(input, output, session) {
                 rownames = FALSE       
       )
     })
-  })
   
   output$selected_plot <- renderPlot({
     req(input$predictions_table_rows_selected)
@@ -192,6 +328,127 @@ server <- function(input, output, session) {
             ylab = "Value",
             col = "darkblue")
   })
+  }) 
+  
+  ##################################################################################33
+  
+  observeEvent(input$predict_button_, {
+    source("Models4Shiny_2.R")
+    
+    
+    selected_date <- as.Date(input$selected_dates_multi)
+    selected_position <- which(date_sequence == selected_date)
+    selected_inverse_index <- inverse_index[selected_position]
+    model <- input$model_multi
+    objective <- input$objetivo_multi
+    otimization_uni <- input$otimizacao_uni
+    otimization_uni <- input$otimizacao_multi
+    
+    d1 <- walmart_data[,"WSdep1"]  
+    d2 <- walmart_data[,"WSdep2"]  
+    d3 <- walmart_data[,"WSdep3"]  
+    d4 <- walmart_data[,"WSdep4"]  
+    
+    
+    if (model %in% c("ARIMAX", "AUTOVAR", "MLPE")) {
+      selected_vars <- input$endogenous_vars
+      
+      reorder_vars <- function(vars, primary) {
+        if (!primary %in% vars) {
+          c(primary, vars)
+        } else {
+          c(primary, vars[vars != primary])
+        }
+      }
+      
+      selected_vars_d1 <- reorder_vars(selected_vars, "WSdep1")
+      selected_vars_d2 <- reorder_vars(selected_vars, "WSdep2")
+      selected_vars_d3 <- reorder_vars(selected_vars, "WSdep3")
+      selected_vars_d4 <- reorder_vars(selected_vars, "WSdep4")
+      
+      
+      Pred1 <- Multivariado(departamento = d1, nomedepartamento = "Departamento 1", modelo = model, D = selected_inverse_index, variaveis = selected_vars_d1)
+      Pred2 <- Multivariado(departamento = d2, nomedepartamento = "Departamento 2", modelo = model, D = selected_inverse_index, variaveis = selected_vars_d2)
+      Pred3 <- Multivariado(departamento = d3, nomedepartamento = "Departamento 3", modelo = model, D = selected_inverse_index, variaveis = selected_vars_d3)
+      Pred4 <- Multivariado(departamento = d4, nomedepartamento = "Departamento 4", modelo = model, D = selected_inverse_index, variaveis = selected_vars_d4)
+    }
+    
+    # if (model %in% c("ARIMAX")) {
+    #   Pred1 <- Multi_Exogen(departamento = d1, nomedepartamento = "Departamento 1", modelo = model, D = selected_inverse_index)
+    #   Pred2 <- Multi_Exogen(departamento = d2, nomedepartamento = "Departamento 2", modelo = model, D = selected_inverse_index)
+    #   Pred3 <- Multi_Exogen(departamento = d3, nomedepartamento = "Departamento 3", modelo = model, D = selected_inverse_index)
+    #   Pred4 <- Multi_Exogen(departamento = d4, nomedepartamento = "Departamento 4", modelo = model, D = selected_inverse_index)
+    # }
+    
+    # Update the predictions reactive value
+    predictions(data.frame(
+      Time = 1:length(Pred1),
+      Department1 = Pred1,
+      Department2 = Pred2,
+      Department3 = Pred3,
+      Department4 = Pred4
+    ))
+    
+    DataFrame=data.frame(Pred1,Pred2,Pred3,Pred4)
+    
+    
+    # if(objetivo_uni == "Uniobjetivo"){
+    #   
+    #   
+    # }  
+    # else if(objetivo_uni == 'Multiobjetivo'){
+    #   
+    #   optimization_results <- mul(df = DataFrame, algoritmo = otimization_uni)
+    # }
+    # 
+    optimization_results <- Uniobjetivo(df = DataFrame, algoritmo = otimization_uni)
+    
+    
+    
+    # Update UI with optimization results
+    output$hired_workers_table_ <<- renderTable(optimization_results$hired_workers)
+    output$product_orders_table_ <<- renderTable(optimization_results$product_orders)
+    output$sales_table_ <<- renderTable(optimization_results$sales)
+    output$monthly_profit_output_ <<- renderText({
+      paste("Monthly Profit: ", round(optimization_results$monthly_profit, 2))
+    })
+    
+    output$predictions_table_ <- renderDT({
+      predictions_rounded <- data.frame(lapply(predictions(), function(x) {
+        if (is.numeric(x)) return(round(x, 2))
+        return(x)
+      }))
+      
+      datatable(predictions_rounded, 
+                selection = 'single',
+                options = list(
+                  pageLength = 10,     
+                  searching = FALSE,   
+                  paging = FALSE,      
+                  info = FALSE,        
+                  ordering = FALSE    
+                ),
+                rownames = FALSE       
+      )
+    })
+    
+    output$selected_plot_ <- renderPlot({
+      req(input$predictions_table__rows_selected)
+      sel_row <- input$predictions_table__rows_selected
+      if (length(sel_row) == 0) return()
+      
+      selected_data <- predictions()[sel_row, ]
+      
+      barplot(as.numeric(selected_data[-1]), 
+              names.arg = colnames(selected_data)[-1], 
+              ylab = "Value",
+              col = "darkblue")
+    })
+    
+  })    
+  
+  
+  
   
   output$data_table <- renderDT({
     datatable(walmart_data, options = list(lengthMenu = c(5, 10, 15), pageLength = 5))
@@ -222,7 +479,8 @@ server <- function(input, output, session) {
   output$gauge_WSdep4 <- renderPlotly({
     render_gauge_plot("WSdep4", mean_values())
   })
-  
+
+
   render_gauge_plot <- function(department, mean_values) {
     mean_value <- mean_values[mean_values$Department == department, "Mean"]
     

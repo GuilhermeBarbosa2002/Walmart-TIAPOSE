@@ -18,7 +18,7 @@ eval <- function(s){
   product_orders = matrix(s[13:28],nrow=4,ncol=4)
   sales = calculate_sales(actual_sales,hired_workers, product_orders)
   monthly_profit = sales_in_usd(sales) - total_costs(hired_workers,product_orders, sales)
-  return(monthly_profit)
+  return(-monthly_profit)
 }
 
 
