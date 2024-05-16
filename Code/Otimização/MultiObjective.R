@@ -22,6 +22,15 @@ eval <- function(s){
 
   return(-monthly_profit)
 }
+eval_max <- function(s){
+  s <- round(s)
+  hired_workers = matrix(s[1:12], nrow=3, ncol=4)
+  product_orders = matrix(s[13:28], nrow=4, ncol=4)
+  sales = calculate_sales(actual_sales, hired_workers, product_orders)
+  monthly_profit = sales_in_usd(sales) - total_costs(hired_workers, product_orders, sales)
+  
+  return(monthly_profit)
+}
 
 F2 <- function(s){
   s <- round(s)
@@ -48,14 +57,14 @@ objective_function <- function(x) {
 # execute a otimização multiobjetivo
 G <- nsga2(fn = objective_function, idim = D, odim = 2,
            lower.bounds = lower, upper.bounds = upper,
-           popsize = 200, generations = 1:1000)
-
+           popsize = 200, generations = 1:10)
+print(G)
 # mostrar os melhores indivíduos
-I <- which(G[[100]]$pareto.optimal)
+I <- which(G[[1]]$pareto.optimal)
 for (i in I) {
-  x <- round(G[[100]]$par[i,], digits = 0)
+  x <- round(G[[1]]$par[i,], digits = 0)
   cat("Hired workers and product orders:", x, "\n")
-  cat("Monthly profit:", eval(x), "\n")
+  cat("Monthly profit:", eval_max(x), "\n")
   cat("Monthly effort:", F2(x), "\n\n")
 }
 

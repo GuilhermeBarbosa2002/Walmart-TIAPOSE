@@ -5,6 +5,7 @@ library(lubridate)
 library(genalg)
 library(adana)
 library(tabuSearch)
+library(vars)
 
 source("multi-utils.R")
 
@@ -177,32 +178,31 @@ Multivariado = function(departamento, nomedepartamento, modelo, D,variaveis){
   d4=data[,"WSdep4"]
   week=data[,"Week"] 
   Test=K
-  H=4
+  
   
   ts = ts(departamento,frequency = K)
   L = length(ts)
   NTR = L - D   
   
   TR = 1: NTR 
-  
-  cdata <- variaveis
-
-  
+ 
+  variaveis_selecionadas <- data[, variaveis, drop = FALSE]
+ 
+  cdata = cbind(variaveis_selecionadas) 
   mtr=ts(cdata[TR,],frequency=K)
-
     
   
-  if(modelo == "autoVAR"){
+  if(modelo == "AUTOVAR"){
     mvar=autoVAR(mtr,LAGMAX=4)
     Pred = forecastVAR(mvar,h=LTS)
     Pred = Pred[[1]]
   }
-  if(modelo == "arimax"){
+  if(modelo == "ARIMAX"){
     arimax=autoARIMAX(mtr, frequency=4)
     Pred=forecastARIMAX(arimax,h=LTS)
     Pred = Pred[[1]]
   }
-  if(modelo == "mlpe"){
+  if(modelo == "MLPE"){
     
     VINP <- vector("list", length = length(colnames(cdata)))
     for (i in 1:length(VINP)) {
@@ -216,17 +216,18 @@ Multivariado = function(departamento, nomedepartamento, modelo, D,variaveis){
       }
       VINP[[i]] <- lags
     }
-
     
     MNN=mfit(mtr,"mlpe",VINP)
     Pred=lforecastm(MNN,h=LTS)
     Pred=Pred[[1]]
+  
   }
-  
-  plot(Pred, type="l", col="black", lwd=2, xlab="Time", ylab="Value", main=paste("Forecast for Department ", nomedepartamento, "\n ", modelo))
-  legend("topright", legend="Pred", col="black", lwd=2)
-  
- 
+  # 
+  # plot(Pred, type="l", col="black", lwd=2, xlab="Time", ylab="Value", main=paste("Forecast for Department ", nomedepartamento, "\n ", modelo))
+  # legend("topright", legend="Pred", col="black", lwd=2)
+  # 
+  print(Pred)
+  return(Pred)
 }
 
 
@@ -294,6 +295,22 @@ Uniobjetivo=function(df,algoritmo){
     
     return(monthly_effort)
   }
+  
+  F1 <- function(s){
+    s <- round(s)
+    hired_workers = matrix(s[1:12], nrow=3, ncol=4)
+    product_orders = matrix(s[13:28], nrow=4, ncol=4)
+    sales = calculate_sales(actual_sales, hired_workers, product_orders)
+    monthly_profit = sales_in_usd(sales) - total_costs(hired_workers, product_orders, sales)
+    
+    return(-monthly_profit)
+  }
+  
+  objective_function <- function(x) {
+    x <- round(x)
+    c(F1(x), F2(x))
+  }
+  
   
   ############# RGBA.BIN ################
   
@@ -522,6 +539,8 @@ Uniobjetivo=function(df,algoritmo){
     
     
   }
+  
+  ####################### NSGA-II ###########################
   
   ##################### PARAMETERS #################
   # dimension

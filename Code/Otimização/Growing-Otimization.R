@@ -16,8 +16,8 @@ actual_sales <- data.frame(
 
 ###################################### DEFINE PARAMETERS ##############################
 D = 28
-N = 1000
-Ni = 10 # iterations to get the s0 at montecarlo
+N = 100000
+Ni = 30 # iterations to get the s0 at montecarlo
 BEST = 0
 EV = 0
 curve=rep(NA,N) # vector with the convergence values
@@ -196,7 +196,6 @@ rgba_growing <- function(){
     rga=rbga(lower,upper,popSize=popSize,mutationChance=0.33,elitism=50,evalFunc=eval_max,iter=iter) 
     bindex=which.min(rga$evaluations)
     rgba_values[i] = rga$evaluations[bindex]
-    print(rga)
     # Armazenar os valores de convergência
     start_index <- (i - 1) * N + 1
     end_index <- i * N
