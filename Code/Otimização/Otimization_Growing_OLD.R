@@ -4,6 +4,7 @@ source("montecarlo.R") # mcsearch is defined heres
 source("hill.R") #  hclimbing is defined here
 source("grid.R") #  gsearch is defined here
 library(tabuSearch)
+library(adana)
 
 
 # definir as vendas da semana
@@ -95,7 +96,6 @@ dados_growing <- dados_growing[, c("WSdep1", "WSdep2", "WSdep3", "WSdep4")]
 grupos <- split(dados_growing, rep(1:8, each = 4))
 
 
-
 ###################################### MONTECARLO_SEARCH ##############################
 
 montecarlo_growing <- function(){
@@ -110,7 +110,6 @@ montecarlo_growing <- function(){
 
     plot(curve, type = "l", col = "blue", xlab = "Iterações", ylab = "Valor da Função de Avaliação", main = "Curva de Convergência - MonteCarlo")  
   }
-  
 
   return(median(montecarlo_values))
 
@@ -253,7 +252,7 @@ tabu_growing <- function(){
     initial_config <- c() # Building Initial configuration
     initial_config <- initial_config_build(config = initial_config, n_bits = bits_workers, dimensions = 12) # Building Initial configuration for Hired Workers
     initial_config <- initial_config_build(config = initial_config, n_bits = bits_orders , dimensions = 16) # Building Initial configuration for Product Orders
-    solution <- tabuSearch(size, iters = N, objFunc = eval_bin, config = initial_config, verbose = TRUE)
+    solution <- tabuSearch(size, iters = N, objFunc = eval_bin, config = initial_config, verbose = F)
     
     b  <- which.max(solution$eUtilityKeep) # best index
     bs <- solution$configKeep[b,]
