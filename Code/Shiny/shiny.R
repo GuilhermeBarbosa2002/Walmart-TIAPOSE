@@ -26,19 +26,19 @@ ui <- fluidPage(
     tabPanel("Univariado",
              sidebarLayout(
                sidebarPanel(
-                 sliderTextInput("selected_dates", "Selecione um intervalo de datas:",
+                 sliderTextInput("selected_dates_uni", "Selecione um intervalo de datas:",
                                  choices = date_sequence,
                                  grid = FALSE),
                  selectInput("package", "Pacote:",
                              choices = c("rminer" = "rminer", "forecast" = "forecast")),
-                 uiOutput("model_selector"),
+                 uiOutput("model_selector_uni"),
                  selectInput("objetivo_uni", "Escolha o objetivo:",
                              choices = c("Uniobjetivo", "Multiobjetivo")),
                  uiOutput("objetivo_selector"),
                  selectInput("otimizacao_uni", "Modelo de Otimização:",
                              choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo","RBGA","RBGA.BIN","Tabu")),
                  uiOutput("otimizacao_selector"),
-                 actionButton("predict_button", "Predict")
+                 actionButton("predict_button_uni", "Predict")
                ),
                mainPanel(
                  tabsetPanel(
@@ -98,28 +98,28 @@ ui <- fluidPage(
                    tabPanel("Previsões",
                             fluidRow(
                               column(12,
-                                     DTOutput("predictions_table_")
+                                     DTOutput("predictions_table_multi")
                               )
                             ),
                             fluidRow(
                               column(12,
-                                     plotOutput("selected_plot_")
+                                     plotOutput("selected_plot_multi")
                               )
                             )
                    ),
                    tabPanel("Otimização",
                             fluidRow(
-                              column(4, tableOutput("hired_workers_table_"))
+                              column(4, tableOutput("hired_workers_table_multi"))
                               
                             ),
                             fluidRow(
                               
-                              column(4, tableOutput("product_orders_table_"))
+                              column(4, tableOutput("product_orders_table_multi"))
                               
                             ),
                             fluidRow(
                               
-                              column(4, tableOutput("sales_table_"))
+                              column(4, tableOutput("sales_table_multi"))
                             ),
                             fluidRow(
                               column(12, textOutput("monthly_profit_output_"))
@@ -143,18 +143,26 @@ ui <- fluidPage(
                column(6, plotlyOutput("gauge_WSdep3")),
                column(6, plotlyOutput("gauge_WSdep4"))
              )
+    ),
+    tabPanel("Correlação de Spearman",
+             fluidRow(
+               column(12,
+                      plotlyOutput("spearman_correlation_plot")
+               )
+             )
     )
   )
+  
 )
 
 # Define a lógica do servidor
 server <- function(input, output, session) {
-  output$model_selector <- renderUI({
+  output$model_selector_uni <- renderUI({
     if (input$package == "rminer") {
-      selectInput("model", "Modelo de Previsão:",
+      selectInput("model_uni", "Modelo de Previsão:",
                   choices = c("Random Forest", "mlpe", "xgboost", "lm", "mars", "ksvm"))
     } else if (input$package == "forecast") {
-      selectInput("model", "Modelo de Previsão:",
+      selectInput("model_uni", "Modelo de Previsão:",
                   choices = c("Holtwinters", "Arima", "NN", "ETS"))
     }
     
@@ -199,18 +207,18 @@ server <- function(input, output, session) {
   predictions <- reactiveVal(data.frame())  
   
   
-
-  observeEvent(input$predict_button, {
+  ############################### UNIVARIADO ###################################################
+  
+  observeEvent(input$predict_button_uni, {
     source("Models4Shiny_2.R")
     
     
-    selected_date <- as.Date(input$selected_dates)
+    selected_date <- as.Date(input$selected_dates_uni)
     selected_position <- which(date_sequence == selected_date)
     selected_inverse_index <- inverse_index[selected_position]
-    model <- input$model
-    objective <- input$objetivo
+    model <- input$model_uni
+    objective <- input$objetivo_uni
     otimization_uni <- input$otimizacao_uni
-    otimization_uni <- input$otimizacao_multi
     
     d1 <- walmart_data[,"WSdep1"]  
     d2 <- walmart_data[,"WSdep2"]  
@@ -330,7 +338,7 @@ server <- function(input, output, session) {
   })
   }) 
   
-  ##################################################################################33
+  ############################### MULTIVARIADO ###################################################
   
   observeEvent(input$predict_button_, {
     source("Models4Shiny_2.R")
@@ -341,7 +349,6 @@ server <- function(input, output, session) {
     selected_inverse_index <- inverse_index[selected_position]
     model <- input$model_multi
     objective <- input$objetivo_multi
-    otimization_uni <- input$otimizacao_uni
     otimization_uni <- input$otimizacao_multi
     
     d1 <- walmart_data[,"WSdep1"]  
@@ -406,14 +413,14 @@ server <- function(input, output, session) {
     
     
     # Update UI with optimization results
-    output$hired_workers_table_ <<- renderTable(optimization_results$hired_workers)
-    output$product_orders_table_ <<- renderTable(optimization_results$product_orders)
-    output$sales_table_ <<- renderTable(optimization_results$sales)
-    output$monthly_profit_output_ <<- renderText({
+    output$hired_workers_table_multi <<- renderTable(optimization_results$hired_workers)
+    output$product_orders_table_multi <<- renderTable(optimization_results$product_orders)
+    output$sales_table_multi <<- renderTable(optimization_results$sales)
+    output$monthly_profit_output_multi <<- renderText({
       paste("Monthly Profit: ", round(optimization_results$monthly_profit, 2))
     })
     
-    output$predictions_table_ <- renderDT({
+    output$predictions_table_multi <- renderDT({
       predictions_rounded <- data.frame(lapply(predictions(), function(x) {
         if (is.numeric(x)) return(round(x, 2))
         return(x)
@@ -432,7 +439,7 @@ server <- function(input, output, session) {
       )
     })
     
-    output$selected_plot_ <- renderPlot({
+    output$selected_plot_multi <- renderPlot({
       req(input$predictions_table__rows_selected)
       sel_row <- input$predictions_table__rows_selected
       if (length(sel_row) == 0) return()
@@ -447,6 +454,12 @@ server <- function(input, output, session) {
     
   })    
   
+  # Função para calcular a correlação de Spearman e renderizar o gráfico
+  output$spearman_correlation_plot <- renderPlotly({
+    spearman_correlation <- cor(walmart_data[, c("WSdep1", "WSdep2", "WSdep3", "WSdep4")], method = "spearman")
+    plot_ly(x = colnames(spearman_correlation), y = colnames(spearman_correlation), z = as.matrix(spearman_correlation), type = "heatmap") %>%
+      layout(title = "Correlação de Spearman entre departamentos")
+  })
   
   
   
