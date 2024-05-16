@@ -45,31 +45,31 @@ ui <- fluidPage(
                    tabPanel("Previsões",
                             fluidRow(
                               column(12,
-                                     DTOutput("predictions_table")
+                                     DTOutput("predictions_table_uni")
                               )
                             ),
                             fluidRow(
                               column(12,
-                                     plotOutput("selected_plot")
+                                     plotOutput("selected_plot_uni")
                               )
                             )
                    ),
                    tabPanel("Otimização",
                             fluidRow(
-                              column(4, tableOutput("hired_workers_table"))
+                              column(4, tableOutput("hired_workers_table_uni"))
                               
                             ),
                             fluidRow(
                               
-                              column(4, tableOutput("product_orders_table"))
+                              column(4, tableOutput("product_orders_table_uni"))
                               
                             ),
                             fluidRow(
                               
-                              column(4, tableOutput("sales_table"))
+                              column(4, tableOutput("sales_table_uni"))
                             ),
                             fluidRow(
-                              column(12, textOutput("monthly_profit_output"))
+                              column(12, textOutput("monthly_profit_output_uni"))
                             )
                    )
                  )
@@ -91,7 +91,7 @@ ui <- fluidPage(
                  selectInput("otimizacao_multi", "Modelo de Otimização:",
                              choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo","RBGA","RBGA.BIN","Tabu")),
                  uiOutput("otimizacao_multi_selector"),
-                 actionButton("predict_button_", "Predict")
+                 actionButton("predict_button_multi", "Predict")
                ),
                mainPanel(
                  tabsetPanel(
@@ -122,7 +122,7 @@ ui <- fluidPage(
                               column(4, tableOutput("sales_table_multi"))
                             ),
                             fluidRow(
-                              column(12, textOutput("monthly_profit_output_"))
+                              column(12, textOutput("monthly_profit_output_multi"))
                             )
                    )
                  )
@@ -204,13 +204,15 @@ server <- function(input, output, session) {
   })
   
   
-  predictions <- reactiveVal(data.frame())  
+  predictions_uni <- reactiveVal(data.frame()) 
+  predictions_multi <- reactiveVal(data.frame())  
   
   
   ############################### UNIVARIADO ###################################################
   
   observeEvent(input$predict_button_uni, {
     source("Models4Shiny_2.R")
+    print("MULTIVARIADO")
     
     
     selected_date <- as.Date(input$selected_dates_uni)
@@ -242,38 +244,9 @@ server <- function(input, output, session) {
         Pred4 <- Univariado_Rminer(departamento = d4, nomedepartamento = "Departamento 4", modelo = model, D = selected_inverse_index)
       }
       
-      if (model %in% c("ARIMAX", "AUTOVAR", "MLPE")) {
-        selected_vars <- input$endogenous_vars
-        
-        reorder_vars <- function(vars, primary) {
-          if (!primary %in% vars) {
-            c(primary, vars)
-          } else {
-            c(primary, vars[vars != primary])
-          }
-        }
-        
-        selected_vars_d1 <- reorder_vars(selected_vars, "WSdep1")
-        selected_vars_d2 <- reorder_vars(selected_vars, "WSdep2")
-        selected_vars_d3 <- reorder_vars(selected_vars, "WSdep3")
-        selected_vars_d4 <- reorder_vars(selected_vars, "WSdep4")
-        
-        
-        Pred1 <- Multivariado(departamento = d1, nomedepartamento = "Departamento 1", modelo = model, D = selected_inverse_index, variaveis = selected_vars_d1)
-        Pred2 <- Multivariado(departamento = d2, nomedepartamento = "Departamento 2", modelo = model, D = selected_inverse_index, variaveis = selected_vars_d2)
-        Pred3 <- Multivariado(departamento = d3, nomedepartamento = "Departamento 3", modelo = model, D = selected_inverse_index, variaveis = selected_vars_d3)
-        Pred4 <- Multivariado(departamento = d4, nomedepartamento = "Departamento 4", modelo = model, D = selected_inverse_index, variaveis = selected_vars_d4)
-      }
-      
-      # if (model %in% c("ARIMAX")) {
-      #   Pred1 <- Multi_Exogen(departamento = d1, nomedepartamento = "Departamento 1", modelo = model, D = selected_inverse_index)
-      #   Pred2 <- Multi_Exogen(departamento = d2, nomedepartamento = "Departamento 2", modelo = model, D = selected_inverse_index)
-      #   Pred3 <- Multi_Exogen(departamento = d3, nomedepartamento = "Departamento 3", modelo = model, D = selected_inverse_index)
-      #   Pred4 <- Multi_Exogen(departamento = d4, nomedepartamento = "Departamento 4", modelo = model, D = selected_inverse_index)
-      # }
-      
+    
       # Update the predictions reactive value
-      predictions(data.frame(
+      predictions_uni(data.frame(
         Time = 1:length(Pred1),
         Department1 = Pred1,
         Department2 = Pred2,
@@ -298,15 +271,15 @@ server <- function(input, output, session) {
       
     
     # Update UI with optimization results
-    output$hired_workers_table <<- renderTable(optimization_results$hired_workers)
-    output$product_orders_table <<- renderTable(optimization_results$product_orders)
-    output$sales_table <<- renderTable(optimization_results$sales)
-    output$monthly_profit_output <<- renderText({
+    output$hired_workers_table_uni <<- renderTable(optimization_results$hired_workers)
+    output$product_orders_table_uni <<- renderTable(optimization_results$product_orders)
+    output$sales_table_uni <<- renderTable(optimization_results$sales)
+    output$monthly_profit_output_uni <<- renderText({
       paste("Monthly Profit: ", round(optimization_results$monthly_profit, 2))
     })
     
-    output$predictions_table <- renderDT({
-      predictions_rounded <- data.frame(lapply(predictions(), function(x) {
+    output$predictions_table_uni <- renderDT({
+      predictions_rounded <- data.frame(lapply(predictions_uni(), function(x) {
         if (is.numeric(x)) return(round(x, 2))
         return(x)
       }))
@@ -324,12 +297,12 @@ server <- function(input, output, session) {
       )
     })
   
-  output$selected_plot <- renderPlot({
-    req(input$predictions_table_rows_selected)
-    sel_row <- input$predictions_table_rows_selected
+  output$selected_plot_uni <- renderPlot({
+    req(input$predictions_table_uni_rows_selected)
+    sel_row <- input$predictions_table_uni_rows_selected
     if (length(sel_row) == 0) return()
     
-    selected_data <- predictions()[sel_row, ]
+    selected_data <- predictions_uni()[sel_row, ]
     
     barplot(as.numeric(selected_data[-1]), 
             names.arg = colnames(selected_data)[-1], 
@@ -340,8 +313,9 @@ server <- function(input, output, session) {
   
   ############################### MULTIVARIADO ###################################################
   
-  observeEvent(input$predict_button_, {
+  observeEvent(input$predict_button_multi, {
     source("Models4Shiny_2.R")
+    print("MULTIVARIADO")
     
     
     selected_date <- as.Date(input$selected_dates_multi)
@@ -388,7 +362,7 @@ server <- function(input, output, session) {
     # }
     
     # Update the predictions reactive value
-    predictions(data.frame(
+    predictions_multi(data.frame(
       Time = 1:length(Pred1),
       Department1 = Pred1,
       Department2 = Pred2,
@@ -396,7 +370,7 @@ server <- function(input, output, session) {
       Department4 = Pred4
     ))
     
-    DataFrame=data.frame(Pred1,Pred2,Pred3,Pred4)
+    DataFrame_multi=data.frame(Pred1,Pred2,Pred3,Pred4)
     
     
     # if(objetivo_uni == "Uniobjetivo"){
@@ -408,25 +382,24 @@ server <- function(input, output, session) {
     #   optimization_results <- mul(df = DataFrame, algoritmo = otimization_uni)
     # }
     # 
-    optimization_results <- Uniobjetivo(df = DataFrame, algoritmo = otimization_uni)
-    
+    optimization_results_multi <- Uniobjetivo(df = DataFrame_multi, algoritmo = otimization_uni)
     
     
     # Update UI with optimization results
-    output$hired_workers_table_multi <<- renderTable(optimization_results$hired_workers)
-    output$product_orders_table_multi <<- renderTable(optimization_results$product_orders)
-    output$sales_table_multi <<- renderTable(optimization_results$sales)
+    output$hired_workers_table_multi <<- renderTable(optimization_results_multi$hired_workers)
+    output$product_orders_table_multi <<- renderTable(optimization_results_multi$product_orders)
+    output$sales_table_multi <<- renderTable(optimization_results_multi$sales)
     output$monthly_profit_output_multi <<- renderText({
-      paste("Monthly Profit: ", round(optimization_results$monthly_profit, 2))
+      paste("Monthly Profit: ", round(optimization_results_multi$monthly_profit, 2))
     })
     
     output$predictions_table_multi <- renderDT({
-      predictions_rounded <- data.frame(lapply(predictions(), function(x) {
+      predictions_rounded_multi <- data.frame(lapply(predictions_multi(), function(x) {
         if (is.numeric(x)) return(round(x, 2))
         return(x)
       }))
       
-      datatable(predictions_rounded, 
+      datatable(predictions_rounded_multi, 
                 selection = 'single',
                 options = list(
                   pageLength = 10,     
@@ -440,11 +413,11 @@ server <- function(input, output, session) {
     })
     
     output$selected_plot_multi <- renderPlot({
-      req(input$predictions_table__rows_selected)
-      sel_row <- input$predictions_table__rows_selected
+      req(input$predictions_table_multi_rows_selected)
+      sel_row <- input$predictions_table_multi_rows_selected
       if (length(sel_row) == 0) return()
       
-      selected_data <- predictions()[sel_row, ]
+      selected_data <- predictions_multi()[sel_row, ]
       
       barplot(as.numeric(selected_data[-1]), 
               names.arg = colnames(selected_data)[-1], 
