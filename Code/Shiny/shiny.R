@@ -102,6 +102,12 @@ ui <- fluidPage(
                                         column(6, textOutput("total_cost_stock_output_uni"))
                                       )
                                       
+                             ),
+                             tabPanel("Curva de Convergência",
+                                      fluidRow(
+                                        column(12,
+                                               plotOutput("convergence_curve"))
+                                      )
                              )
                            )
                          )
@@ -154,6 +160,11 @@ ui <- fluidPage(
                                       ),
                                       fluidRow(
                                         column(12, textOutput("monthly_profit_output_multi"))
+                                      )
+                             ),
+                             tabPanel("Curva de Convergência",
+                                      fluidRow(
+                                        column(12, plotOutput("convergence_curve_multi"))
                                       )
                              )
                            )
@@ -638,6 +649,8 @@ server <- function(input, output, session) {
         return(x)
       }))
       
+      
+      
       datatable(predictions_rounded, 
                 selection = 'single',
                 options = list(
@@ -649,6 +662,12 @@ server <- function(input, output, session) {
                 ),
                 rownames = FALSE       
       )
+    })
+    output$convergence_curve <- renderPlot({
+      plot(optimization_results$convergence_curve, 
+           type = "l", 
+           ylab = "Values",
+           xlab = "Iteractions")
     })
     
     output$selected_plot_uni <- renderPlot({
@@ -805,6 +824,13 @@ server <- function(input, output, session) {
                 ),
                 rownames = FALSE       
       )
+    })
+    
+    output$convergence_curve_multi <- renderPlot({
+      plot(optimization_results_multi$convergence_curve, 
+           type = "l", 
+           ylab = "Values",
+           xlab = "Iteractions")
     })
     
     output$selected_plot_multi <- renderPlot({

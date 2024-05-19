@@ -303,6 +303,15 @@ Uniobjetivo=function(df,algoritmo,func){
     sales = calculate_sales(actual_sales, hired_workers, product_orders)
     monthly_profit = sales_in_usd(sales) - total_costs(hired_workers, product_orders, sales)
     
+    EV <<- EV + 1
+    if(monthly_profit > BEST){
+      BEST <<- monthly_profit
+    }
+    
+    if(EV <= N){
+      curve[EV] <<- BEST
+    }
+    
     return(-monthly_profit)
   }
   
@@ -398,6 +407,15 @@ Uniobjetivo=function(df,algoritmo,func){
       sales          <- calculate_sales(actual_sales, hired_workers, product_orders)
       monthly_profit <- sales_in_usd(sales) - total_costs(hired_workers, product_orders, sales)
       
+      EV <<- EV + 1
+      if(monthly_profit > BEST){
+        BEST <<- monthly_profit
+      }
+      
+      if(EV <= N){
+        curve[EV] <<- BEST
+      }
+      
       return(-monthly_profit)
     }
     
@@ -450,6 +468,10 @@ Uniobjetivo=function(df,algoritmo,func){
     elitism        <- popsize * 0.2
     #ITER           <- 1
     
+    EV    <<- 0 #  initial evaluation point is zero.
+    BEST  <<- -Inf # initial best is -Inf
+    curve <<- rep(NA,N) # vector with the convergence values
+    
     rga <- rbga.bin(size           = size,
                     popSize        = popsize,
                     iters          = N, 
@@ -476,6 +498,10 @@ Uniobjetivo=function(df,algoritmo,func){
   ##################### MONTECARLO_SEARCH #################
   montecarlo <- function(eval_max, lower, upper, N, type){
     
+    EV    <<- 0 #  initial evaluation point is zero.
+    BEST  <<- -Inf # initial best is -Inf
+    curve <<- rep(NA,N) # vector with the convergence values
+    
     MC <- mcsearch(fn = eval_max, lower = lower, upper = upper, N = N, type = type)
     
     best_solution <- round(MC$sol)
@@ -500,6 +526,10 @@ Uniobjetivo=function(df,algoritmo,func){
     # ##with report
     # HC=hclimbing(par=s0,fn=eval,change=rchange1,lower=lower,upper=upper,type=type,
     #              control=list(maxit=N,REPORT=REPORT,digits=2))
+    
+    EV    <<- 0 #  initial evaluation point is zero.
+    BEST  <<- -Inf # initial best is -Inf
+    curve <<- rep(NA,N) # vector with the convergence values
     
     ##without report
     HC = hclimbing(par = s0, fn = eval, change = rchange1, lower = lower, upper = upper, type = type,
@@ -532,6 +562,10 @@ Uniobjetivo=function(df,algoritmo,func){
     # Definição dos parâmetros do Simulated Annealing
     CSANN <- list(maxit = N, temp = 100, trace = FALSE)
     
+    EV    <<- 0 #  initial evaluation point is zero.
+    BEST  <<- -Inf # initial best is -Inf
+    curve <<- rep(NA,N) # vector with the convergence values
+    
     # Execução do Simulated Annealing
     SA <- optim(par = s0, fn = eval_min, method = "SANN", gr = rchange2, control = CSANN)
     
@@ -546,6 +580,9 @@ Uniobjetivo=function(df,algoritmo,func){
   ###############RGBA-Genetic#####################
   RBGA = function(eval, lower, upper, N){
     
+    EV    <<- 0 #  initial evaluation point is zero.
+    BEST  <<- -Inf # initial best is -Inf
+    curve <<- rep(NA,N) # vector with the convergence values
     
     rga=rbga(lower,upper,popSize=200,mutationChance=0.33,elitism=10,evalFunc=eval,iter=N)
     
@@ -574,6 +611,15 @@ Uniobjetivo=function(df,algoritmo,func){
       
       sales          <- calculate_sales(actual_sales, hired_workers, product_orders)
       monthly_profit <- sales_in_usd(sales) - total_costs(hired_workers, product_orders, sales)
+      
+      EV <<- EV + 1
+      if(monthly_profit > BEST){
+        BEST <<- monthly_profit
+      }
+      
+      if(EV <= N){
+        curve[EV] <<- BEST
+      }
       
       return(monthly_profit)
     }
@@ -620,6 +666,10 @@ Uniobjetivo=function(df,algoritmo,func){
     bits_orders  <<- ceiling(max(log(Up[13:28], 2))) # Bits for Product Orders
     N            <- 100 # number of iterations
     size         <- 12 * bits_workers + 16 * bits_orders # solution size
+    
+    EV    <<- 0 #  initial evaluation point is zero.
+    BEST  <<- -Inf # initial best is -Inf
+    curve <<- rep(NA,N) # vector with the convergence values
     
     # Building Initial configuration
     initial_config <- c()
@@ -754,7 +804,9 @@ Uniobjetivo=function(df,algoritmo,func){
     hired_workers = hired_workers,
     product_orders = product_orders,
     sales = sales,
-    monthly_profit = monthly_profit
+    monthly_profit = monthly_profit,
+    convergence_curve = curve
+    #pareto_curve = pareto_curve
   ))
   
 }
