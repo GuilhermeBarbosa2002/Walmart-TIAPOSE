@@ -153,7 +153,7 @@ ui <- fluidPage(
     ),
     
     
-        tabPanel("Melhor Modelo Previsão",
+        tabPanel("Melhor Modelo",
              sidebarLayout(
                sidebarPanel(
                  sliderTextInput("selected_dates_best_model", "Selecione um intervalo de datas:",
@@ -163,13 +163,34 @@ ui <- fluidPage(
                ),
                mainPanel(
                  tabsetPanel(
-                   tabPanel("uni",
+                   tabPanel("previsão",
                             fluidRow(
                               column(12,
                                      DTOutput("predictions_table_best_model")
                               )
                             ),
+                            fluidRow(
+                              column(12,
+                                     plotOutput("selected_plot_best_model")
+                              )
+                            )
                   
+                 ),
+                 tabPanel("otimização",
+                          fluidRow(
+                            column(4, tableOutput("hired_workers_table_best_model"))
+                          ),
+                          fluidRow(
+                            column(4, tableOutput("product_orders_table_best_model"))
+                          ),
+                          fluidRow(
+                            
+                            column(4, tableOutput("sales_table_best_model"))
+                          ),
+                          fluidRow(
+                            column(12, textOutput("monthly_profit_output_best_model"))
+                          )
+                          
                  )
                )
              )
@@ -240,7 +261,7 @@ server <- function(input, output, session) {
   
   
   
-  ############################### BEST MODEL ###################################################
+  ############################### BEST MODEL PREVISÃO ###################################################
   
   observeEvent(input$predict_button_best_model, {
     source("Models4Shiny_2.R")
@@ -287,15 +308,15 @@ server <- function(input, output, session) {
     #   optimization_results <- mul(df = DataFrame, algoritmo = otimization_uni)
     # }
     # 
-    optimization_results <- Uniobjetivo(df = DataFrame, algoritmo = otimization_uni)
+    optimization_results <- Uniobjetivo(df = DataFrame, algoritmo = "RBGA")
     
     
     
     # Update UI with optimization results
-    output$hired_workers_table_uni <<- renderTable(optimization_results$hired_workers)
-    output$product_orders_table_uni <<- renderTable(optimization_results$product_orders)
-    output$sales_table_uni <<- renderTable(optimization_results$sales)
-    output$monthly_profit_output_uni <<- renderText({
+    output$hired_workers_table_best_model <<- renderTable(optimization_results$hired_workers)
+    output$product_orders_table_best_model <<- renderTable(optimization_results$product_orders)
+    output$sales_table_best_model <<- renderTable(optimization_results$sales)
+    output$monthly_profit_output_best_model <<- renderText({
       paste("Monthly Profit: ", round(optimization_results$monthly_profit, 2))
     })
     
@@ -318,7 +339,7 @@ server <- function(input, output, session) {
       )
     })
     
-    output$selected_plot_uni <- renderPlot({
+    output$selected_plot_best_model <- renderPlot({
       req(input$predictions_table_best_model_rows_selected)
       sel_row <- input$predictions_table_best_model_rows_selected
       if (length(sel_row) == 0) return()
@@ -330,6 +351,10 @@ server <- function(input, output, session) {
               ylab = "Value",
               col = "darkblue")
     })
+    
+    
+    
+    
   }) 
   
   
@@ -338,6 +363,8 @@ server <- function(input, output, session) {
   
   
   
+ 
+ 
   
   
   

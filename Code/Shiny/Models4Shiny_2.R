@@ -447,10 +447,10 @@ Uniobjetivo=function(df,algoritmo){
   
   
   ###############RGBA-Genetic#####################
-  RBGA = function(eval, lower, upper, N){
+  RBGA = function(fu, lower, upper, N){
     
     
-    rga=rbga(lower,upper,popSize=200,mutationChance=0.33,elitism=10,evalFunc=eval,iter=N)
+    rga=rbga(lower,upper,popSize=200,mutationChance=0.33,elitism=10,evalFunc=fu,iter=N)
     
     bindex=which.min(rga$evaluations)
     
@@ -570,7 +570,7 @@ Uniobjetivo=function(df,algoritmo){
   # RGBA genetic
   if(algoritmo=="RBGA"){
     
-    s <- RBGA(eval_max,lower,upper,N=100)
+    s <- RBGA(eval_min,lower,upper,N=100)
   }
   
   # TabuSearch
