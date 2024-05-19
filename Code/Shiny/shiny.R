@@ -4,6 +4,7 @@ library(lubridate)
 library(DT)
 library(plotly)
 library(shinyWidgets)
+source("Functions_Otimization.R")
 
 # Carrega o arquivo CSV
 walmart_data <- read.csv("walmart.csv")
@@ -23,183 +24,210 @@ ui <- fluidPage(
   theme = shinytheme("flatly"),
   titlePanel("Análise de Vendas do Walmart"),
   tabsetPanel(id = 'opcoes',
-    tabPanel("Univariado",
-             sidebarLayout(
-               sidebarPanel(
-                 sliderTextInput("selected_dates_uni", "Selecione um intervalo de datas:",
-                                 choices = date_sequence,
-                                 grid = FALSE),
-                 selectInput("package", "Pacote:",
-                             choices = c("rminer" = "rminer", "forecast" = "forecast")),
-                 uiOutput("model_selector_uni"),
-                 selectInput("objetivo_uni", "Escolha o objetivo:",
-                             choices = c("Uniobjetivo", "Multiobjetivo")),
-                 uiOutput("objetivo_selector"),
-                 selectInput("otimizacao_uni", "Modelo de Otimização:",
-                             choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo","RBGA","RBGA.BIN","Tabu","NSGA II")),
-                 uiOutput("otimizacao_selector"),
-                 actionButton("predict_button_uni", "Predict")
-               ),
-               mainPanel(
-                 tabsetPanel(
-                   tabPanel("Previsões",
-                            fluidRow(
-                              column(12,
-                                     DTOutput("predictions_table_uni")
-                              )
-                            ),
-                            fluidRow(
-                              column(12,
-                                     plotOutput("selected_plot_uni")
-                              )
-                            )
-                   ),
-                   tabPanel("Otimização",
-                            fluidRow(
-                              column(4, tableOutput("hired_workers_table_uni"))
-                              
-                            ),
-                            fluidRow(
-                              
-                              column(4, tableOutput("product_orders_table_uni"))
-                              
-                            ),
-                            fluidRow(
-                              
-                              column(4, tableOutput("sales_table_uni"))
-                            ),
-                            fluidRow(
-                              column(12, textOutput("monthly_profit_output_uni"))
-                            )
-                   )
-                 )
-               )
-             )
-    ),
-    tabPanel("Multivariado",
-             sidebarLayout(
-               sidebarPanel(
-                 sliderTextInput("selected_dates_multi", "Selecione um intervalo de datas:",
-                                 choices = date_sequence,
-                                 grid = FALSE),
-                 selectInput("variable_type", "Tipo de variaveis:",
-                             choices = c("Endogenas" = "Endogenas", "Exogenas" = "Exogenas")),
-                 uiOutput("type_selector"),
-                 selectInput("objetivo_multi", "Escolha o objetivo:",
-                             choices = c("Uniobjetivo", "Multiobjetivo")),
-                 uiOutput("objetivo_selector"),
-                 selectInput("otimizacao_multi", "Modelo de Otimização:",
-                             choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo","RBGA","RBGA.BIN","Tabu","NSGA II")),
-                 uiOutput("otimizacao_multi_selector"),
-                 actionButton("predict_button_multi", "Predict")
-               ),
-               mainPanel(
-                 tabsetPanel(
-                   tabPanel("Previsões",
-                            fluidRow(
-                              column(12,
-                                     DTOutput("predictions_table_multi")
-                              )
-                            ),
-                            fluidRow(
-                              column(12,
-                                     plotOutput("selected_plot_multi")
-                              )
-                            )
-                   ),
-                   tabPanel("Otimização",
-                            fluidRow(
-                              column(4, tableOutput("hired_workers_table_multi"))
-                              
-                            ),
-                            fluidRow(
-                              
-                              column(4, tableOutput("product_orders_table_multi"))
-                              
-                            ),
-                            fluidRow(
-                              
-                              column(4, tableOutput("sales_table_multi"))
-                            ),
-                            fluidRow(
-                              column(12, textOutput("monthly_profit_output_multi"))
-                            )
-                   )
-                 )
-               )
-             )
-    ),
-        tabPanel("Dataset",
-             fluidRow(
-               column(12,
-                      DTOutput("data_table")
-               )
-             )
-    ),
-    tabPanel("Vendas totais por departamento",
-             fluidRow(
-               column(6, plotlyOutput("gauge_WSdep1")),
-               column(6, plotlyOutput("gauge_WSdep2")),
-               column(6, plotlyOutput("gauge_WSdep3")),
-               column(6, plotlyOutput("gauge_WSdep4"))
-             )
-    ),
-    tabPanel("Correlação de Spearman",
-             fluidRow(
-               column(12,
-                      plotlyOutput("spearman_correlation_plot")
-               )
-             )
-    ),
-    
-    
-        tabPanel("Melhor Modelo",
-             sidebarLayout(
-               sidebarPanel(
-                 sliderTextInput("selected_dates_best_model", "Selecione um intervalo de datas:",
-                                 choices = date_sequence,
-                                 grid = FALSE),
-                 actionButton("predict_button_best_model", "Predict")
-               ),
-               mainPanel(
-                 tabsetPanel(
-                   tabPanel("Previsões",
-                            fluidRow(
-                              column(12,
-                                     DTOutput("predictions_table_best_model")
-                              )
-                            ),
-                            fluidRow(
-                              column(12,
-                                     plotOutput("selected_plot_best_model")
-                              )
-                            )
-                  
-                 ),
-                 tabPanel("Otimização",
-                          fluidRow(
-                            column(4, tableOutput("hired_workers_table_best_model"))
-                          ),
-                          fluidRow(
-                            column(4, tableOutput("product_orders_table_best_model"))
-                          ),
-                          fluidRow(
-                            
-                            column(4, tableOutput("sales_table_best_model"))
-                          ),
-                          fluidRow(
-                            column(12, textOutput("monthly_profit_output_best_model"))
-                          )
-                          
-                 )
-               )
-             )
-             ))
+              tabPanel("Univariado",
+                       sidebarLayout(
+                         sidebarPanel(
+                           sliderTextInput("selected_dates_uni", "Selecione um intervalo de datas:",
+                                           choices = date_sequence,
+                                           grid = FALSE),
+                           selectInput("package", "Pacote:",
+                                       choices = c("rminer" = "rminer", "forecast" = "forecast")),
+                           uiOutput("model_selector_uni"),
+                           selectInput("objetivo_uni", "Escolha o objetivo:",
+                                       choices = c("Uniobjetivo", "Multiobjetivo")),
+                           uiOutput("objetivo_selector"),
+                           selectInput("otimizacao_uni", "Modelo de Otimização:",
+                                       choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo","RBGA","RBGA.BIN","Tabu","NSGA II")),
+                           uiOutput("otimizacao_selector"),
+                           actionButton("predict_button_uni", "Predict")
+                         ),
+                         mainPanel(
+                           tabsetPanel(
+                             tabPanel("Previsões",
+                                      fluidRow(
+                                        column(12,
+                                               DTOutput("predictions_table_uni")
+                                        )
+                                      ),
+                                      fluidRow(
+                                        column(12,
+                                               plotOutput("selected_plot_uni")
+                                        )
+                                      )
+                             ),
+                             tabPanel("Otimização",
+                                      fluidRow(
+                                        column(6, 
+                                               div(style = "text-align: center;",
+                                                   h4("Trabalhadores a Contratar"),
+                                                   tableOutput("hired_workers_table_uni")
+                                               )
+                                        ),
+                                        column(6,
+                                               div(style = "text-align: center;",
+                                                   h4("Produtos a Encomendar"),
+                                                   tableOutput("product_orders_table_uni")
+                                               )
+                                        )
+                                        
+                                      ),
+                                      fluidRow(
+                                        column(6, 
+                                               div(style = "text-align: center;",
+                                                   h4("Vendas"),
+                                                   tableOutput("sales_uni")
+                                               )
+                                        ),
+                                        column(6,
+                                               div(style = "text-align: center;",
+                                                   h4("Stock"),
+                                                   tableOutput("stock_uni")
+                                               )
+                                        )
+                                      ),
+                                      fluidRow(
+                                        column(6, textOutput("monthly_profit_output_uni")),
+                                        column(6, textOutput("total_number_workers_output_uni"))
+                                      ),
+                                      fluidRow(
+                                        column(6, textOutput("total_sales_output_uni")),
+                                        column(6, textOutput("total_number_orders_output_uni"))
+                                      ),
+                                      fluidRow(
+                                        column(6, textOutput("total_cost_output_uni")),
+                                        column(6, textOutput("total_cost_workers_output_uni"))
+                                      ),
+                                      fluidRow(
+                                        column(6, textOutput("total_cost_orders_output_uni")),
+                                        column(6, textOutput("total_cost_stock_output_uni"))
+                                      )
+                                      
+                             )
+                           )
+                         )
+                       )
+              ),
+              tabPanel("Multivariado",
+                       sidebarLayout(
+                         sidebarPanel(
+                           sliderTextInput("selected_dates_multi", "Selecione um intervalo de datas:",
+                                           choices = date_sequence,
+                                           grid = FALSE),
+                           selectInput("variable_type", "Tipo de variaveis:",
+                                       choices = c("Endogenas" = "Endogenas", "Exogenas" = "Exogenas")),
+                           uiOutput("type_selector"),
+                           selectInput("objetivo_multi", "Escolha o objetivo:",
+                                       choices = c("Uniobjetivo", "Multiobjetivo")),
+                           uiOutput("objetivo_selector"),
+                           selectInput("otimizacao_multi", "Modelo de Otimização:",
+                                       choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo","RBGA","RBGA.BIN","Tabu","NSGA II")),
+                           uiOutput("otimizacao_multi_selector"),
+                           actionButton("predict_button_multi", "Predict")
+                         ),
+                         mainPanel(
+                           tabsetPanel(
+                             tabPanel("Previsões",
+                                      fluidRow(
+                                        column(12,
+                                               DTOutput("predictions_table_multi")
+                                        )
+                                      ),
+                                      fluidRow(
+                                        column(12,
+                                               plotOutput("selected_plot_multi")
+                                        )
+                                      )
+                             ),
+                             tabPanel("Otimização",
+                                      fluidRow(
+                                        column(4, tableOutput("hired_workers_table_multi"))
+                                        
+                                      ),
+                                      fluidRow(
+                                        
+                                        column(4, tableOutput("product_orders_table_multi"))
+                                        
+                                      ),
+                                      fluidRow(
+                                        
+                                        column(4, tableOutput("sales_table_multi"))
+                                      ),
+                                      fluidRow(
+                                        column(12, textOutput("monthly_profit_output_multi"))
+                                      )
+                             )
+                           )
+                         )
+                       )
+              ),
+              tabPanel("Dataset",
+                       fluidRow(
+                         column(12,
+                                DTOutput("data_table")
+                         )
+                       )
+              ),
+              tabPanel("Vendas totais por departamento",
+                       fluidRow(
+                         column(6, plotlyOutput("gauge_WSdep1")),
+                         column(6, plotlyOutput("gauge_WSdep2")),
+                         column(6, plotlyOutput("gauge_WSdep3")),
+                         column(6, plotlyOutput("gauge_WSdep4"))
+                       )
+              ),
+              tabPanel("Correlação de Spearman",
+                       fluidRow(
+                         column(12,
+                                plotlyOutput("spearman_correlation_plot")
+                         )
+                       )
+              ),
+              
+              
+              tabPanel("Melhor Modelo",
+                       sidebarLayout(
+                         sidebarPanel(
+                           sliderTextInput("selected_dates_best_model", "Selecione um intervalo de datas:",
+                                           choices = date_sequence,
+                                           grid = FALSE),
+                           actionButton("predict_button_best_model", "Predict")
+                         ),
+                         mainPanel(
+                           tabsetPanel(
+                             tabPanel("Previsões",
+                                      fluidRow(
+                                        column(12,
+                                               DTOutput("predictions_table_best_model")
+                                        )
+                                      ),
+                                      fluidRow(
+                                        column(12,
+                                               plotOutput("selected_plot_best_model")
+                                        )
+                                      )
+                                      
+                             ),
+                             tabPanel("Otimização",
+                                      fluidRow(
+                                        column(4, tableOutput("hired_workers_table_best_model"))
+                                      ),
+                                      fluidRow(
+                                        column(4, tableOutput("product_orders_table_best_model"))
+                                      ),
+                                      fluidRow(
+                                        
+                                        column(4, tableOutput("sales_table_best_model"))
+                                      ),
+                                      fluidRow(
+                                        column(12, textOutput("monthly_profit_output_best_model"))
+                                      )
+                                      
+                             )
+                           )
+                         )
+                       ))
   ))
 
-    
-  
-  
 
 
 # Define a lógica do servidor
@@ -302,13 +330,13 @@ server <- function(input, output, session) {
     
     get_real_data(selected_inverse_index)
     
-
+    
     Pred1 <- Univariado_Rminer(departamento = d1, nomedepartamento = "Departamento 1", modelo = "ksvm", D = selected_inverse_index)
     Pred2 <- Univariado_Rminer(departamento = d2, nomedepartamento = "Departamento 2", modelo = "lm", D = selected_inverse_index)
     Pred3 <- Univariado_Rminer(departamento = d3, nomedepartamento = "Departamento 3", modelo = "mars", D = selected_inverse_index)
     Pred4 <- Univariado_Rminer(departamento = d4, nomedepartamento = "Departamento 4", modelo = "ksvm", D = selected_inverse_index)
     
-      
+    
     # Update the predictions reactive value
     predictions_best(data.frame(
       Time = 1:length(Pred1),
@@ -324,7 +352,7 @@ server <- function(input, output, session) {
     
     
     
-   
+    
     
     optimization_results <- Uniobjetivo(df = DataFrame, algoritmo = "RBGA", func="eval_min")
     
@@ -399,8 +427,8 @@ server <- function(input, output, session) {
   
   
   
- 
- 
+  
+  
   
   
   
@@ -450,60 +478,159 @@ server <- function(input, output, session) {
     get_real_data(selected_inverse_index)
     
     
-      if (model %in% c("Arima", "Holtwinters", "NN", "ETS")) {
-        print(paste("MODELO: ", model))
-        Pred1 <- Univariado_Forecast(departamento = d1, nomedepartamento = "Departamento 1", modelo = model, D = selected_inverse_index)
-        Pred2 <- Univariado_Forecast(departamento = d2, nomedepartamento = "Departamento 2", modelo = model, D = selected_inverse_index)
-        Pred3 <- Univariado_Forecast(departamento = d3, nomedepartamento = "Departamento 3", modelo = model, D = selected_inverse_index)
-        Pred4 <- Univariado_Forecast(departamento = d4, nomedepartamento = "Departamento 4", modelo = model, D = selected_inverse_index)
-        
-      }
+    if (model %in% c("Arima", "Holtwinters", "NN", "ETS")) {
+      print(paste("MODELO: ", model))
+      Pred1 <- Univariado_Forecast(departamento = d1, nomedepartamento = "Departamento 1", modelo = model, D = selected_inverse_index)
+      Pred2 <- Univariado_Forecast(departamento = d2, nomedepartamento = "Departamento 2", modelo = model, D = selected_inverse_index)
+      Pred3 <- Univariado_Forecast(departamento = d3, nomedepartamento = "Departamento 3", modelo = model, D = selected_inverse_index)
+      Pred4 <- Univariado_Forecast(departamento = d4, nomedepartamento = "Departamento 4", modelo = model, D = selected_inverse_index)
       
-      if (model %in% c("Random Forest", "mlpe", "xgboost", "lm", "mars", "ksvm")) {
-        Pred1 <- Univariado_Rminer(departamento = d1, nomedepartamento = "Departamento 1", modelo = model, D = selected_inverse_index)
-        Pred2 <- Univariado_Rminer(departamento = d2, nomedepartamento = "Departamento 2", modelo = model, D = selected_inverse_index)
-        Pred3 <- Univariado_Rminer(departamento = d3, nomedepartamento = "Departamento 3", modelo = model, D = selected_inverse_index)
-        Pred4 <- Univariado_Rminer(departamento = d4, nomedepartamento = "Departamento 4", modelo = model, D = selected_inverse_index)
-      }
-      
+    }
     
-      # Update the predictions reactive value
-      predictions_uni(data.frame(
-        Time = 1:length(Pred1),
-        Department1 = Pred1,
-        Department2 = Pred2,
-        Department3 = Pred3,
-        Department4 = Pred4
-      ))
-      
-      DataFrame=data.frame(Pred1,Pred2,Pred3,Pred4)
+    if (model %in% c("Random Forest", "mlpe", "xgboost", "lm", "mars", "ksvm")) {
+      Pred1 <- Univariado_Rminer(departamento = d1, nomedepartamento = "Departamento 1", modelo = model, D = selected_inverse_index)
+      Pred2 <- Univariado_Rminer(departamento = d2, nomedepartamento = "Departamento 2", modelo = model, D = selected_inverse_index)
+      Pred3 <- Univariado_Rminer(departamento = d3, nomedepartamento = "Departamento 3", modelo = model, D = selected_inverse_index)
+      Pred4 <- Univariado_Rminer(departamento = d4, nomedepartamento = "Departamento 4", modelo = model, D = selected_inverse_index)
+    }
     
-      
-      if (objective == "Uniobjetivo" && (otimization_uni=="Simulated Annealing" || otimization_uni=="RBGA.BIN" || otimization_uni == "RBGA")){
-        eval = "eval_min"
-      }
-      if (objective == "Uniobjetivo" && (otimization_uni != "Simulated Annealing" && otimization_uni != "RBGA.BIN" && otimization_uni != "RBGA")){
-        eval = "eval_max"
-      }
-      if (objective == "Multiobjetivo" && (otimization_uni=="Simulated Annealing" || otimization_uni=="RBGA.BIN" || otimization_uni == "RBGA")){
-        eval = "eval_mix_min"
-      }
-      if (objective == "Multiobjetivo" && (otimization_uni != "Simulated Annealing" && otimization_uni != "RBGA.BIN" && otimization_uni != "RBGA")){
-        eval = "eval_mix_max"
-      }
-
     
-      optimization_results <- Uniobjetivo(df = DataFrame, algoritmo = otimization_uni, func=eval)
-  
-      
+    # Update the predictions reactive value
+    predictions_uni(data.frame(
+      Time = 1:length(Pred1),
+      Department1 = round(Pred1),
+      Department2 = round(Pred2),
+      Department3 = round(Pred3),
+      Department4 = round(Pred4)
+    ))
+    
+    DataFrame=data.frame(Pred1,Pred2,Pred3,Pred4)
+    
+    
+    if (objective == "Uniobjetivo" && (otimization_uni=="Simulated Annealing" || otimization_uni=="RBGA.BIN" || otimization_uni == "RBGA")){
+      eval = "eval_min"
+    }
+    if (objective == "Uniobjetivo" && (otimization_uni != "Simulated Annealing" && otimization_uni != "RBGA.BIN" && otimization_uni != "RBGA")){
+      eval = "eval_max"
+    }
+    if (objective == "Multiobjetivo" && (otimization_uni=="Simulated Annealing" || otimization_uni=="RBGA.BIN" || otimization_uni == "RBGA")){
+      eval = "eval_mix_min"
+    }
+    if (objective == "Multiobjetivo" && (otimization_uni != "Simulated Annealing" && otimization_uni != "RBGA.BIN" && otimization_uni != "RBGA")){
+      eval = "eval_mix_max"
+    }
+    
+    
+    optimization_results <- Uniobjetivo(df = DataFrame, algoritmo = otimization_uni, func=eval)
+    
+    
     
     # Update UI with optimization results
-    output$hired_workers_table_uni <<- renderTable(optimization_results$hired_workers)
-    output$product_orders_table_uni <<- renderTable(optimization_results$product_orders)
+    output$hired_workers_table_uni <- renderTable({
+      hired_workers <- round(optimization_results$hired_workers)
+      
+      # Se optimization_results$hired_workers for uma matriz, converta-a em um data frame
+      hired_workers <- as.data.frame(hired_workers)
+      
+      # Defina os nomes das colunas
+      colnames(hired_workers) <- c("Dep1","Dep2","Dep3","Dep4")
+      
+      # Defina os nomes das linhas
+      rownames(hired_workers) <- c("Junior", "Normal", "Senior")
+      
+      
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      hired_workers
+    }, digits = 0, rownames = TRUE, caption = "Tabela de Trabalhadores a Contratar")
+    
+    output$product_orders_table_uni <- renderTable({
+      product_orders <- round(optimization_results$product_orders)
+      
+      # Se optimization_results$hired_workers for uma matriz, converta-a em um data frame
+      product_orders <- as.data.frame(product_orders)
+      
+      # Defina os nomes das colunas
+      colnames(product_orders) <- c("Dep1","Dep2","Dep3","Dep4")
+      
+      # Defina os nomes das linhas
+      rownames(product_orders) <- c("1º semana", "2º semana", "3º semana", "4º semana")
+      
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      product_orders
+    }, digits = 0, rownames = TRUE, caption = "Tabela de Produtos a Encomendar")
+    
+    
+    output$stock_uni <- renderTable({
+      product_orders <- round(optimization_results$product_orders)
+      sales <- round(optimization_results$sales)
+      
+      stock = calculate_stock(product_orders, sales)
+      # Se optimization_results$hired_workers for uma matriz, converta-a em um data frame
+      stock <- as.data.frame(stock)
+      
+      # Defina os nomes das colunas
+      colnames(stock) <- c("Dep1","Dep2","Dep3","Dep4")
+      
+      # Defina os nomes das linhas
+      rownames(stock) <- c("1º semana", "2º semana", "3º semana", "4º semana")
+      
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      stock
+    }, digits = 0, rownames = TRUE, caption = "Tabela de Stock")
+    
+    output$sales_uni <- renderTable({
+      sales <- round(optimization_results$sales)
+  
+      sales <- as.data.frame(sales)
+      
+      # Defina os nomes das colunas
+      colnames(sales) <- c("Dep1","Dep2","Dep3","Dep4")
+      
+      # Defina os nomes das linhas
+      rownames(sales) <- c("1º semana", "2º semana", "3º semana", "4º semana")
+      
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      sales
+    }, digits = 0, rownames = TRUE, caption = "Tabela de Vendas Atuais")
+    
     output$sales_table_uni <<- renderTable(optimization_results$sales)
     output$monthly_profit_output_uni <<- renderText({
-      paste("Monthly Profit: ", round(optimization_results$monthly_profit, 2))
+      paste("Profit Mensal: ", round(optimization_results$monthly_profit))
     })
+    output$total_number_workers_output_uni <<- renderText({
+      paste("Número Total Trabalhadores: ", round(total_number_of_workers(round(optimization_results$hired_workers))))
+    })
+    output$total_number_orders_output_uni <<- renderText({
+      paste("Número Total Encomendas: ", round(total_number_of_orders(round(optimization_results$product_orders))))
+    })
+    output$total_cost_workers_output_uni <<- renderText({
+      paste("Custo Trabalhadores: ", round(total_cost_workers(round(optimization_results$hired_workers))))
+    })
+    output$total_cost_orders_output_uni <<- renderText({
+      paste("Custo Encomendas: ", round(total_cost_orders(round(optimization_results$product_orders))))
+    })
+    output$total_cost_stock_output_uni <<- renderText({
+      product_orders <- round(optimization_results$product_orders)
+      sales <- round(optimization_results$sales)
+      stock = calculate_stock_in_usd(product_orders, sales)
+      paste("Custo Stock: ", round(stock))
+    })
+    output$total_cost_output_uni <<- renderText({
+      product_orders <- round(optimization_results$product_orders)
+      sales <- round(optimization_results$sales)
+      hired_workers <- round(optimization_results$hired_workers)
+      total = total_costs(hired_workers,product_orders, sales)
+      paste("Custo Total: ", round(total))
+    })
+    output$total_sales_output_uni <<- renderText({
+      sales <- round(optimization_results$sales)
+      sales = sales_in_usd(sales)
+      paste("Vendas Totais: ", round(sales))
+    })
+    # column(12, textOutput("total_cost_workers_output_uni")),
+    # column(12, textOutput("total_cost_orders_output_uni")),
+    # column(12, textOutput("total_cost_output_uni"))
+    # total_cost_stock_output_uni
     
     output$predictions_table_uni <- renderDT({
       predictions_rounded <- data.frame(lapply(predictions_uni(), function(x) {
@@ -523,7 +650,7 @@ server <- function(input, output, session) {
                 rownames = FALSE       
       )
     })
-  
+    
     output$selected_plot_uni <- renderPlot({
       req(input$predictions_table_uni_rows_selected)
       sel_row <- input$predictions_table_uni_rows_selected
@@ -634,7 +761,7 @@ server <- function(input, output, session) {
     
     DataFrame_multi=data.frame(Pred1,Pred2,Pred3,Pred4)
     
-   
+    
     
     
     if (objective == "Uniobjetivo" && (otimization_multi=="Simulated Annealing" || otimization_multi=="RBGA.BIN" || otimization_multi == "RBGA")){
@@ -748,8 +875,8 @@ server <- function(input, output, session) {
   output$gauge_WSdep4 <- renderPlotly({
     render_gauge_plot("WSdep4", mean_values())
   })
-
-
+  
+  
   render_gauge_plot <- function(department, mean_values) {
     mean_value <- mean_values[mean_values$Department == department, "Mean"]
     

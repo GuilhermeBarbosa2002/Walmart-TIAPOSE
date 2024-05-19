@@ -723,7 +723,6 @@ Uniobjetivo=function(df,algoritmo,func){
   if(algoritmo %in% c("RBGA.BIN", "Tabu")){
     
     
-    
     hired_workers  <- matrix(matrix_transform(solution        = s,
                                               start           = 1, 
                                               elements        = 12,
