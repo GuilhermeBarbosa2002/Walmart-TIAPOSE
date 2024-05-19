@@ -12,8 +12,8 @@ selected = ""
 # Convertendo a coluna Date para o formato correto
 walmart_data$Date <- as.Date(walmart_data$Date)
 
-start_date <- as.Date("2012-03-02")
-end_date <- as.Date("2012-11-09")
+start_date <- as.Date("2012-03-01")
+end_date <- as.Date("2012-11-07")
 date_sequence <- seq(from = start_date, to = end_date, by = "4 weeks")
 
 inverse_index <- 9:0
@@ -36,7 +36,7 @@ ui <- fluidPage(
                              choices = c("Uniobjetivo", "Multiobjetivo")),
                  uiOutput("objetivo_selector"),
                  selectInput("otimizacao_uni", "Modelo de Otimização:",
-                             choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo","RBGA","RBGA.BIN","Tabu")),
+                             choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo","RBGA","RBGA.BIN","Tabu","NSGA II")),
                  uiOutput("otimizacao_selector"),
                  actionButton("predict_button_uni", "Predict")
                ),
@@ -89,7 +89,7 @@ ui <- fluidPage(
                              choices = c("Uniobjetivo", "Multiobjetivo")),
                  uiOutput("objetivo_selector"),
                  selectInput("otimizacao_multi", "Modelo de Otimização:",
-                             choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo","RBGA","RBGA.BIN","Tabu")),
+                             choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo","RBGA","RBGA.BIN","Tabu","NSGA II")),
                  uiOutput("otimizacao_multi_selector"),
                  actionButton("predict_button_multi", "Predict")
                ),
@@ -163,7 +163,7 @@ ui <- fluidPage(
                ),
                mainPanel(
                  tabsetPanel(
-                   tabPanel("previsão",
+                   tabPanel("Previsões",
                             fluidRow(
                               column(12,
                                      DTOutput("predictions_table_best_model")
@@ -176,7 +176,7 @@ ui <- fluidPage(
                             )
                   
                  ),
-                 tabPanel("otimização",
+                 tabPanel("Otimização",
                           fluidRow(
                             column(4, tableOutput("hired_workers_table_best_model"))
                           ),
@@ -236,7 +236,7 @@ server <- function(input, output, session) {
                         choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo", "RBGA", "RBGA.BIN", "Tabu"))
     } else if (input$objetivo_uni == "Multiobjetivo") {
       updateSelectInput(session, "otimizacao_uni",
-                        choices = c("NGSA-II", "a definir"))
+                        choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo", "RBGA", "RBGA.BIN", "Tabu","NGSA-II"))
     }
   })
   
@@ -246,13 +246,14 @@ server <- function(input, output, session) {
                         choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo", "RBGA", "RBGA.BIN", "Tabu"))
     } else if (input$objetivo_multi == "Multiobjetivo") {
       updateSelectInput(session, "otimizacao_multi",
-                        choices = c("NGSA-II", "a definir"))
+                        choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo", "RBGA", "RBGA.BIN", "Tabu","NGSA-II"))
     }
   })
   
   
   predictions_uni <- reactiveVal(data.frame()) 
   predictions_multi <- reactiveVal(data.frame())  
+  predictions_best <- reactiveVal(data.frame()) 
   
   
   
@@ -271,14 +272,35 @@ server <- function(input, output, session) {
     selected_date <- as.Date(input$selected_dates_best_model)
     selected_position <- which(date_sequence == selected_date)
     selected_inverse_index <- inverse_index[selected_position]
-    model <- input$model_uni
-    objective <- input$objetivo_uni
-    otimization_uni <- input$otimizacao_uni
+    
     
     d1 <- walmart_data[,"WSdep1"]  
     d2 <- walmart_data[,"WSdep2"]  
     d3 <- walmart_data[,"WSdep3"]  
     d4 <- walmart_data[,"WSdep4"]  
+    
+    df <- read.csv("walmart.csv")
+    result_df = data.frame()
+    
+    get_real_data <- function(selected_inverse_index) {
+      if (selected_inverse_index == 0) {
+        return(NULL)
+      }
+      
+      start_row <- 143 - ( selected_inverse_index - 1) * 4 + 1
+      end_row <- start_row + 3
+      
+      result_df <<- df[start_row:end_row, c("WSdep1", "WSdep2", "WSdep3", "WSdep4")]
+      colnames(result_df)[1]<<-"Department1"
+      colnames(result_df)[2]<<-"Department2"
+      colnames(result_df)[3]<<-"Department3"
+      colnames(result_df)[4]<<-"Department4"
+      
+      result_df[is.na(result_df)] <<- 0
+      print(result_df)
+    }
+    
+    get_real_data(selected_inverse_index)
     
 
     Pred1 <- Univariado_Rminer(departamento = d1, nomedepartamento = "Departamento 1", modelo = "ksvm", D = selected_inverse_index)
@@ -288,7 +310,7 @@ server <- function(input, output, session) {
     
       
     # Update the predictions reactive value
-    predictions_uni(data.frame(
+    predictions_best(data.frame(
       Time = 1:length(Pred1),
       Department1 = Pred1,
       Department2 = Pred2,
@@ -299,16 +321,12 @@ server <- function(input, output, session) {
     DataFrame=data.frame(Pred1,Pred2,Pred3,Pred4)
     
     
-    # if(objetivo_uni == "Uniobjetivo"){
-    #   
-    #   
-    # }  
-    # else if(objetivo_uni == 'Multiobjetivo'){
-    #   
-    #   optimization_results <- mul(df = DataFrame, algoritmo = otimization_uni)
-    # }
-    # 
-    optimization_results <- Uniobjetivo(df = DataFrame, algoritmo = "RBGA")
+    
+    
+    
+   
+    
+    optimization_results <- Uniobjetivo(df = DataFrame, algoritmo = "RBGA", func="eval_min")
     
     
     
@@ -321,7 +339,7 @@ server <- function(input, output, session) {
     })
     
     output$predictions_table_best_model<- renderDT({
-      predictions_rounded <- data.frame(lapply(predictions_uni(), function(x) {
+      predictions_rounded <- data.frame(lapply(predictions_best(), function(x) {
         if (is.numeric(x)) return(round(x, 2))
         return(x)
       }))
@@ -342,14 +360,32 @@ server <- function(input, output, session) {
     output$selected_plot_best_model <- renderPlot({
       req(input$predictions_table_best_model_rows_selected)
       sel_row <- input$predictions_table_best_model_rows_selected
+      
       if (length(sel_row) == 0) return()
       
-      selected_data <- predictions_uni()[sel_row, ]
+      selected_data <- predictions_best()[sel_row, ]
       
-      barplot(as.numeric(selected_data[-1]), 
-              names.arg = colnames(selected_data)[-1], 
-              ylab = "Value",
-              col = "darkblue")
+      selected_values <- result_df[sel_row, ]
+      
+      
+      y_min <- min(c(as.numeric(selected_data[-1]), as.numeric(selected_values)))
+      y_max <- max(c(as.numeric(selected_data[-1]), as.numeric(selected_values)))
+      
+      
+      
+      plot(as.numeric(selected_data[-1]), 
+           type = "o", 
+           xlab = " ", 
+           ylab = " ", 
+           xaxt = "n",
+           col = "darkblue",
+           ylim = c(y_min, y_max))
+      if(all(selected_values)!=0){
+        lines(as.numeric(selected_values), 
+              type = "o", 
+              col = "red")}
+      
+      axis(1, at = 1:length(selected_data[-1]), labels = colnames(selected_data)[-1])
     })
     
     
@@ -390,6 +426,29 @@ server <- function(input, output, session) {
     d3 <- walmart_data[,"WSdep3"]  
     d4 <- walmart_data[,"WSdep4"]  
     
+    df <- read.csv("walmart.csv")
+    result_df = data.frame()
+    
+    get_real_data <- function(selected_inverse_index) {
+      if (selected_inverse_index == 0) {
+        return(NULL)
+      }
+      
+      start_row <- 143 - ( selected_inverse_index - 1) * 4 + 1
+      end_row <- start_row + 3
+      
+      result_df <<- df[start_row:end_row, c("WSdep1", "WSdep2", "WSdep3", "WSdep4")]
+      colnames(result_df)[1]<<-"Department1"
+      colnames(result_df)[2]<<-"Department2"
+      colnames(result_df)[3]<<-"Department3"
+      colnames(result_df)[4]<<-"Department4"
+      
+      result_df[is.na(result_df)] <<- 0
+      print(result_df)
+    }
+    
+    get_real_data(selected_inverse_index)
+    
     
       if (model %in% c("Arima", "Holtwinters", "NN", "ETS")) {
         print(paste("MODELO: ", model))
@@ -419,17 +478,22 @@ server <- function(input, output, session) {
       
       DataFrame=data.frame(Pred1,Pred2,Pred3,Pred4)
     
+      
+      if (objective == "Uniobjetivo" && (otimization_uni=="Simulated Annealing" || otimization_uni=="RBGA.BIN" || otimization_uni == "RBGA")){
+        eval = "eval_min"
+      }
+      if (objective == "Uniobjetivo" && (otimization_uni != "Simulated Annealing" && otimization_uni != "RBGA.BIN" && otimization_uni != "RBGA")){
+        eval = "eval_max"
+      }
+      if (objective == "Multiobjetivo" && (otimization_uni=="Simulated Annealing" || otimization_uni=="RBGA.BIN" || otimization_uni == "RBGA")){
+        eval = "eval_mix_min"
+      }
+      if (objective == "Multiobjetivo" && (otimization_uni != "Simulated Annealing" && otimization_uni != "RBGA.BIN" && otimization_uni != "RBGA")){
+        eval = "eval_mix_max"
+      }
 
-    # if(objetivo_uni == "Uniobjetivo"){
-    #   
-    #   
-    # }  
-    # else if(objetivo_uni == 'Multiobjetivo'){
-    #   
-    #   optimization_results <- mul(df = DataFrame, algoritmo = otimization_uni)
-    # }
-    # 
-      optimization_results <- Uniobjetivo(df = DataFrame, algoritmo = otimization_uni)
+    
+      optimization_results <- Uniobjetivo(df = DataFrame, algoritmo = otimization_uni, func=eval)
   
       
     
@@ -460,18 +524,36 @@ server <- function(input, output, session) {
       )
     })
   
-  output$selected_plot_uni <- renderPlot({
-    req(input$predictions_table_uni_rows_selected)
-    sel_row <- input$predictions_table_uni_rows_selected
-    if (length(sel_row) == 0) return()
-    
-    selected_data <- predictions_uni()[sel_row, ]
-    
-    barplot(as.numeric(selected_data[-1]), 
-            names.arg = colnames(selected_data)[-1], 
-            ylab = "Value",
-            col = "darkblue")
-  })
+    output$selected_plot_uni <- renderPlot({
+      req(input$predictions_table_uni_rows_selected)
+      sel_row <- input$predictions_table_uni_rows_selected
+      
+      if (length(sel_row) == 0) return()
+      
+      selected_data <- predictions_uni()[sel_row, ]
+      
+      selected_values <- result_df[sel_row, ]
+      
+      
+      y_min <- min(c(as.numeric(selected_data[-1]), as.numeric(selected_values)))
+      y_max <- max(c(as.numeric(selected_data[-1]), as.numeric(selected_values)))
+      
+      
+      
+      plot(as.numeric(selected_data[-1]), 
+           type = "o", 
+           xlab = " ", 
+           ylab = " ", 
+           xaxt = "n",
+           col = "darkblue",
+           ylim = c(y_min, y_max))
+      if(all(selected_values)!=0){
+        lines(as.numeric(selected_values), 
+              type = "o", 
+              col = "red")}
+      
+      axis(1, at = 1:length(selected_data[-1]), labels = colnames(selected_data)[-1])
+    })
   }) 
   
   ############################### MULTIVARIADO ###################################################
@@ -486,12 +568,35 @@ server <- function(input, output, session) {
     selected_inverse_index <- inverse_index[selected_position]
     model <- input$model_multi
     objective <- input$objetivo_multi
-    otimization_uni <- input$otimizacao_multi
+    otimization_multi <- input$otimizacao_multi
     
     d1 <- walmart_data[,"WSdep1"]  
     d2 <- walmart_data[,"WSdep2"]  
     d3 <- walmart_data[,"WSdep3"]  
     d4 <- walmart_data[,"WSdep4"]  
+    
+    df <- read.csv("walmart.csv")
+    result_df = data.frame()
+    
+    get_real_data <- function(selected_inverse_index) {
+      if (selected_inverse_index == 0) {
+        return(NULL)
+      }
+      
+      start_row <- 143 - ( selected_inverse_index - 1) * 4 + 1
+      end_row <- start_row + 3
+      
+      result_df <<- df[start_row:end_row, c("WSdep1", "WSdep2", "WSdep3", "WSdep4")]
+      colnames(result_df)[1]<<-"Department1"
+      colnames(result_df)[2]<<-"Department2"
+      colnames(result_df)[3]<<-"Department3"
+      colnames(result_df)[4]<<-"Department4"
+      
+      result_df[is.na(result_df)] <<- 0
+      print(result_df)
+    }
+    
+    get_real_data(selected_inverse_index)
     
     
     if (model %in% c("ARIMAX", "AUTOVAR", "MLPE")) {
@@ -517,12 +622,6 @@ server <- function(input, output, session) {
       Pred4 <- Multivariado(departamento = d4, nomedepartamento = "Departamento 4", modelo = model, D = selected_inverse_index, variaveis = selected_vars_d4)
     }
     
-    # if (model %in% c("ARIMAX")) {
-    #   Pred1 <- Multi_Exogen(departamento = d1, nomedepartamento = "Departamento 1", modelo = model, D = selected_inverse_index)
-    #   Pred2 <- Multi_Exogen(departamento = d2, nomedepartamento = "Departamento 2", modelo = model, D = selected_inverse_index)
-    #   Pred3 <- Multi_Exogen(departamento = d3, nomedepartamento = "Departamento 3", modelo = model, D = selected_inverse_index)
-    #   Pred4 <- Multi_Exogen(departamento = d4, nomedepartamento = "Departamento 4", modelo = model, D = selected_inverse_index)
-    # }
     
     # Update the predictions reactive value
     predictions_multi(data.frame(
@@ -535,17 +634,23 @@ server <- function(input, output, session) {
     
     DataFrame_multi=data.frame(Pred1,Pred2,Pred3,Pred4)
     
+   
     
-    # if(objetivo_uni == "Uniobjetivo"){
-    #   
-    #   
-    # }  
-    # else if(objetivo_uni == 'Multiobjetivo'){
-    #   
-    #   optimization_results <- mul(df = DataFrame, algoritmo = otimization_uni)
-    # }
-    # 
-    optimization_results_multi <- Uniobjetivo(df = DataFrame_multi, algoritmo = otimization_uni)
+    
+    if (objective == "Uniobjetivo" && (otimization_multi=="Simulated Annealing" || otimization_multi=="RBGA.BIN" || otimization_multi == "RBGA")){
+      eval = "eval_min"
+    }
+    if (objective == "Uniobjetivo" && (otimization_multi != "Simulated Annealing" && otimization_multi != "RBGA.BIN" && otimization_multi != "RBGA")){
+      eval = "eval_max"
+    }
+    if (objective == "Multiobjetivo" && (otimization_multi=="Simulated Annealing" || otimization_multi=="RBGA.BIN" || otimization_multi == "RBGA")){
+      eval = "eval_mix_min"
+    }
+    if (objective == "Multiobjetivo" && (otimization_multi != "Simulated Annealing" && otimization_multi != "RBGA.BIN" && otimization_multi != "RBGA")){
+      eval = "eval_mix_max"
+    }
+    
+    optimization_results_multi <- Uniobjetivo(df = DataFrame_multi, algoritmo = otimization_multi, func= eval)
     
     
     # Update UI with optimization results
@@ -578,14 +683,29 @@ server <- function(input, output, session) {
     output$selected_plot_multi <- renderPlot({
       req(input$predictions_table_multi_rows_selected)
       sel_row <- input$predictions_table_multi_rows_selected
+      print(result_df)
       if (length(sel_row) == 0) return()
       
       selected_data <- predictions_multi()[sel_row, ]
+      selected_values <- result_df[sel_row, ]
       
-      barplot(as.numeric(selected_data[-1]), 
-              names.arg = colnames(selected_data)[-1], 
-              ylab = "Value",
-              col = "darkblue")
+      y_min <- min(c(as.numeric(selected_data[-1]), as.numeric(selected_values)))
+      y_max <- max(c(as.numeric(selected_data[-1]), as.numeric(selected_values)))
+      
+      
+      plot(as.numeric(selected_data[-1]), 
+           type = "o", 
+           xlab = " ", 
+           ylab = " ", 
+           xaxt = "n",
+           col = "darkblue",
+           ylim = c(y_min, y_max))
+      if(all(selected_values)!=0){
+        lines(as.numeric(selected_values), 
+              type = "o", 
+              col = "red")}
+      
+      axis(1, at = 1:length(selected_data[-1]), labels = colnames(selected_data)[-1])
     })
     
   })    

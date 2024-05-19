@@ -233,7 +233,7 @@ Multivariado = function(departamento, nomedepartamento, modelo, D,variaveis){
 
 #-------------Uniobjetivo
 
-Uniobjetivo=function(df,algoritmo){
+Uniobjetivo=function(df,algoritmo,func){
   
   source("Functions_Otimization.R")
   source("blind.R") # fsearch is defined here
@@ -312,6 +312,70 @@ Uniobjetivo=function(df,algoritmo){
   }
   
   
+  eval_mix_max<- function(s){
+    s <- round(s)
+    hired_workers = matrix(s[1:12],nrow=3,ncol=4)
+    product_orders = matrix(s[13:28],nrow=4,ncol=4)
+    sales = calculate_sales(actual_sales,hired_workers, product_orders)
+    monthly_profit = sales_in_usd(sales) - total_costs(hired_workers,product_orders, sales)
+    
+    EV <<- EV + 1
+    if(monthly_profit > BEST){
+      BEST <<- monthly_profit
+    }
+    
+    if(EV <= N){
+      curve[EV] <<- BEST
+    }
+    
+    effort=F2(s)
+    
+    
+    return((0.5 * monthly_profit)-(50000*effort*0.5))
+  }
+  
+  
+  eval_mix_min<- function(s){
+    s <- round(s)
+    hired_workers = matrix(s[1:12],nrow=3,ncol=4)
+    product_orders = matrix(s[13:28],nrow=4,ncol=4)
+    sales = calculate_sales(actual_sales,hired_workers, product_orders)
+    monthly_profit = sales_in_usd(sales) - total_costs(hired_workers,product_orders, sales)
+    
+    EV <<- EV + 1
+    if(monthly_profit > BEST){
+      BEST <<- monthly_profit
+    }
+    
+    if(EV <= N){
+      curve[EV] <<- BEST
+    }
+    
+    effort=F2(s)
+    
+    
+    return((-0.5 * monthly_profit)+(50000*effort*0.5))
+  }
+  
+  
+  if (func == "eval_max"){
+    funct=eval_max
+  }
+  
+  if (func == "eval_min"){
+    funct=eval_min
+  }
+  
+  
+  if (func == "eval_mix_min"){
+    funct=eval_mix_min
+  }
+  
+  if (func == "eval_mix_max"){
+    funct=eval_mix_max
+  }
+  
+  
   ############# RGBA.BIN ################
   
   RBGABIN = function(){
@@ -335,6 +399,39 @@ Uniobjetivo=function(df,algoritmo){
       monthly_profit <- sales_in_usd(sales) - total_costs(hired_workers, product_orders, sales)
       
       return(-monthly_profit)
+    }
+    
+    
+    F2 <- function(solution){
+      hired_workers  <- matrix(matrix_transform(solution        = solution, 
+                                                start           = 1, 
+                                                elements        = 12,
+                                                dimension_start = 1,
+                                                bits            = bits_workers), nrow = 3, ncol = 4)
+      
+      product_orders <- matrix(matrix_transform(solution        = solution, 
+                                                start           = 12 * bits_workers + 1, 
+                                                elements        = 16, 
+                                                dimension_start = 13, 
+                                                bits            = bits_orders), nrow = 4, ncol = 4)
+      
+      monthly_effort <- total_number_of_workers(hired_workers) + total_number_of_orders(product_orders)
+      return(monthly_effort) # needs to be negative because tabuSearch only maximizes
+    }
+    
+    eval_mix_rbga <- function(solution){
+      
+      w1=0.5
+      w2=w1
+      
+      return(w1*eval_rbga(solution) + (w2*F2(solution)*50000))
+      
+    }
+    
+    if(func == "eval_mix_max"){
+      func= eval_mix_rgba
+    }else if(func == "eval_max"){
+      func= eval_rbga
     }
     
     
@@ -496,7 +593,16 @@ Uniobjetivo=function(df,algoritmo){
                                                 bits            = bits_orders), nrow = 4, ncol = 4)
       
       monthly_effort <- total_number_of_workers(hired_workers) + total_number_of_orders(product_orders)
-      return(-monthly_effort) # needs to be negative because tabuSearch only maximizes
+      return(monthly_effort) # needs to be negative because tabuSearch only maximizes
+    }
+    
+    eval_mix_tabu <- function(solution){
+      
+      w1=0.5
+      w2=w1
+      
+      return(w1*evaltabu(solution) - (w2*F2(solution)*50000))
+      
     }
     
     initial_config_build <- function(config, n_bits, dimensions){
@@ -527,9 +633,13 @@ Uniobjetivo=function(df,algoritmo){
     initial_config <- initial_config_build(config     = initial_config, 
                               n_bits     = bits_orders, 
                               dimensions = 16)
+    if(func == "eval_mix_max"){
+      func= eval_mix_tabu
+    }else if(func == "eval_max"){
+      func= evaltabu
+    }
     
-    
-    solution <- tabuSearch(size, iters = N, objFunc = evaltabu, config = initial_config, verbose = F)
+    solution <- tabuSearch(size, iters = N, objFunc = func, config = initial_config, verbose = F)
     
     b  <- which.max(solution$eUtilityKeep) # best index
     bs <- solution$configKeep[b,]
@@ -563,14 +673,14 @@ Uniobjetivo=function(df,algoritmo){
   # # #Simulated Annealing
   if(algoritmo=="Simulated Annealing"){
     
-    s <- SimulatedAnnealing(eval_min,lower,upper,x2,"max")
+    s <- SimulatedAnnealing(funct,lower,upper,x2,"max")
   }
   
   
   # RGBA genetic
   if(algoritmo=="RBGA"){
     
-    s <- RBGA(eval_max,lower,upper,N=100)
+    s <- RBGA(funct,lower,upper,N=100)
   }
   
   # TabuSearch
@@ -583,7 +693,7 @@ Uniobjetivo=function(df,algoritmo){
   #Montecarlo
   
   if(algoritmo=="Montecarlo"){
-    s <- montecarlo(eval_max,lower,upper,N,"max")
+    s <- montecarlo(funct,lower,upper,N,"max")
   }
   
   
@@ -599,7 +709,7 @@ Uniobjetivo=function(df,algoritmo){
   
   
   if(algoritmo=="Hill Climbing"){
-    s <- hill_climbing(eval_max,lower, upper, N, "max", x2, REPORT)
+    s <- hill_climbing(funct,lower, upper, N, "max", x2, REPORT)
   }
   
   if(algoritmo != "RBGA.BIN"){
