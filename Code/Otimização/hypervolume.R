@@ -52,13 +52,10 @@ grupos <- split(dados_growing, rep(1:8, each = 4))
 
 #######################################################################################
 
-
 # Definir os parâmetros da otimização
 D <- 28
 # Ponto de referência fixo
 reference_point <- c(200000, 1000)
-
-
 
 nsga_growing <- function(){
   nsga_values = vector(length = 8)
@@ -92,4 +89,7 @@ nsga_growing <- function(){
   
   return(median(nsga_values))
 }
+
+ngsa = nsga_growing()
+print(paste("NGSA - ", ngsa))
 

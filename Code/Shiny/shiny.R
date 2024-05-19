@@ -295,12 +295,6 @@ server <- function(input, output, session) {
   predictions_best <- reactiveVal(data.frame()) 
   
   
-  
-  
-  
-  
-  
-  
   ############################### BEST MODEL PREVISÃO ###################################################
   
   observeEvent(input$predict_button_best_model, {
@@ -358,16 +352,8 @@ server <- function(input, output, session) {
     ))
     
     DataFrame=data.frame(Pred1,Pred2,Pred3,Pred4)
-    
-    
-    
-    
-    
-    
-    
+   
     optimization_results <- Uniobjetivo(df = DataFrame, algoritmo = "RBGA", func="eval_min")
-    
-    
     
     # Update UI with optimization results
     output$hired_workers_table_best_model <<- renderTable(optimization_results$hired_workers)
@@ -411,7 +397,6 @@ server <- function(input, output, session) {
       y_max <- max(c(as.numeric(selected_data[-1]), as.numeric(selected_values)))
       
       
-      
       plot(as.numeric(selected_data[-1]), 
            type = "o", 
            xlab = " ", 
@@ -427,24 +412,8 @@ server <- function(input, output, session) {
       axis(1, at = 1:length(selected_data[-1]), labels = colnames(selected_data)[-1])
     })
     
-    
-    
-    
   }) 
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+ 
   
   ############################### UNIVARIADO ###################################################
   
@@ -649,8 +618,6 @@ server <- function(input, output, session) {
         return(x)
       }))
       
-      
-      
       datatable(predictions_rounded, 
                 selection = 'single',
                 options = list(
@@ -779,10 +746,7 @@ server <- function(input, output, session) {
     ))
     
     DataFrame_multi=data.frame(Pred1,Pred2,Pred3,Pred4)
-    
-    
-    
-    
+
     if (objective == "Uniobjetivo" && (otimization_multi=="Simulated Annealing" || otimization_multi=="RBGA.BIN" || otimization_multi == "RBGA")){
       eval = "eval_min"
     }
@@ -797,7 +761,6 @@ server <- function(input, output, session) {
     }
     
     optimization_results_multi <- Uniobjetivo(df = DataFrame_multi, algoritmo = otimization_multi, func= eval)
-    
     
     # Update UI with optimization results
     output$hired_workers_table_multi <<- renderTable(optimization_results_multi$hired_workers)
@@ -901,7 +864,6 @@ server <- function(input, output, session) {
   output$gauge_WSdep4 <- renderPlotly({
     render_gauge_plot("WSdep4", mean_values())
   })
-  
   
   render_gauge_plot <- function(department, mean_values) {
     mean_value <- mean_values[mean_values$Department == department, "Mean"]
