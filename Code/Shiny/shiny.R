@@ -150,10 +150,36 @@ ui <- fluidPage(
                       plotlyOutput("spearman_correlation_plot")
                )
              )
-    )
-  )
+    ),
+    
+    
+        tabPanel("Melhor Modelo Previsão",
+             sidebarLayout(
+               sidebarPanel(
+                 sliderTextInput("selected_dates_best_model", "Selecione um intervalo de datas:",
+                                 choices = date_sequence,
+                                 grid = FALSE),
+                 actionButton("predict_button_best_model", "Predict")
+               ),
+               mainPanel(
+                 tabsetPanel(
+                   tabPanel("uni",
+                            fluidRow(
+                              column(12,
+                                     DTOutput("predictions_table_best_model")
+                              )
+                            ),
+                  
+                 )
+               )
+             )
+             ))
+  ))
+
+    
   
-)
+  
+
 
 # Define a lógica do servidor
 server <- function(input, output, session) {
@@ -206,6 +232,116 @@ server <- function(input, output, session) {
   
   predictions_uni <- reactiveVal(data.frame()) 
   predictions_multi <- reactiveVal(data.frame())  
+  
+  
+  
+  
+  
+  
+  
+  
+  ############################### BEST MODEL ###################################################
+  
+  observeEvent(input$predict_button_best_model, {
+    source("Models4Shiny_2.R")
+    print("BEST MODEL")
+    
+    
+    selected_date <- as.Date(input$selected_dates_best_model)
+    selected_position <- which(date_sequence == selected_date)
+    selected_inverse_index <- inverse_index[selected_position]
+    model <- input$model_uni
+    objective <- input$objetivo_uni
+    otimization_uni <- input$otimizacao_uni
+    
+    d1 <- walmart_data[,"WSdep1"]  
+    d2 <- walmart_data[,"WSdep2"]  
+    d3 <- walmart_data[,"WSdep3"]  
+    d4 <- walmart_data[,"WSdep4"]  
+    
+
+    Pred1 <- Univariado_Rminer(departamento = d1, nomedepartamento = "Departamento 1", modelo = "ksvm", D = selected_inverse_index)
+    Pred2 <- Univariado_Rminer(departamento = d2, nomedepartamento = "Departamento 2", modelo = "lm", D = selected_inverse_index)
+    Pred3 <- Univariado_Rminer(departamento = d3, nomedepartamento = "Departamento 3", modelo = "mars", D = selected_inverse_index)
+    Pred4 <- Univariado_Rminer(departamento = d4, nomedepartamento = "Departamento 4", modelo = "ksvm", D = selected_inverse_index)
+    
+      
+    # Update the predictions reactive value
+    predictions_uni(data.frame(
+      Time = 1:length(Pred1),
+      Department1 = Pred1,
+      Department2 = Pred2,
+      Department3 = Pred3,
+      Department4 = Pred4
+    ))
+    
+    DataFrame=data.frame(Pred1,Pred2,Pred3,Pred4)
+    
+    
+    # if(objetivo_uni == "Uniobjetivo"){
+    #   
+    #   
+    # }  
+    # else if(objetivo_uni == 'Multiobjetivo'){
+    #   
+    #   optimization_results <- mul(df = DataFrame, algoritmo = otimization_uni)
+    # }
+    # 
+    optimization_results <- Uniobjetivo(df = DataFrame, algoritmo = otimization_uni)
+    
+    
+    
+    # Update UI with optimization results
+    output$hired_workers_table_uni <<- renderTable(optimization_results$hired_workers)
+    output$product_orders_table_uni <<- renderTable(optimization_results$product_orders)
+    output$sales_table_uni <<- renderTable(optimization_results$sales)
+    output$monthly_profit_output_uni <<- renderText({
+      paste("Monthly Profit: ", round(optimization_results$monthly_profit, 2))
+    })
+    
+    output$predictions_table_best_model<- renderDT({
+      predictions_rounded <- data.frame(lapply(predictions_uni(), function(x) {
+        if (is.numeric(x)) return(round(x, 2))
+        return(x)
+      }))
+      
+      datatable(predictions_rounded, 
+                selection = 'single',
+                options = list(
+                  pageLength = 10,     
+                  searching = FALSE,   
+                  paging = FALSE,      
+                  info = FALSE,        
+                  ordering = FALSE    
+                ),
+                rownames = FALSE       
+      )
+    })
+    
+    output$selected_plot_uni <- renderPlot({
+      req(input$predictions_table_best_model_rows_selected)
+      sel_row <- input$predictions_table_best_model_rows_selected
+      if (length(sel_row) == 0) return()
+      
+      selected_data <- predictions_uni()[sel_row, ]
+      
+      barplot(as.numeric(selected_data[-1]), 
+              names.arg = colnames(selected_data)[-1], 
+              ylab = "Value",
+              col = "darkblue")
+    })
+  }) 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   ############################### UNIVARIADO ###################################################

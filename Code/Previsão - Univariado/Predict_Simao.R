@@ -7,11 +7,13 @@ d2 <- d[,5] # d2 departamento 2
 d3 <- d[,6] # d1 departamento 3
 d4 <- d[,7] # d1 departamento 4
 
+d <- c()
+
 K        <- 4
 Test     <- K # H, the number of multi-ahead steps, adjust if needed
 H        <- 4
 S        <- H # step jump: set in this case to 4 months, a quarter
-Runs     <- 12 # number of growing window iterations, adjust if needed
+Runs     <- 8 # number of growing window iterations, adjust if needed
 timelags <- c(1:4)
 
 
@@ -57,7 +59,10 @@ Models <- function(departamento, nomedepartamento){
     #previsão
     Mars_Pred <- lforecast(naive, D, start = (length(H$tr) + 1), Test) # multi-step ahead forecasts
     Ksvm_Pred  <- lforecast(ksvm , D, start = (length(H$tr) + 1), Test) # multi-step ahead forecasts
-    
+
+    d <<- c(d,Mars_Pred)
+
+  
     
     ################################# METRICAS ################################
     M_MAE[b]  <- mmetric(y = ts[H$ts], x = Mars_Pred, metric = "MAE" , val = YR)
