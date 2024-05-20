@@ -61,46 +61,72 @@ ui <- fluidPage(
                                                div(style = "text-align: center;",
                                                    h4("Trabalhadores a Contratar"),
                                                    tableOutput("hired_workers_table_uni")
-                                               )
+                                               ),
+                                          column(6,
+                                                div(style = "text-align: center;",
+                                                    textOutput("total_number_workers_output_uni"),
+                                                    textOutput("total_cost_workers_output_uni")
+                                                )
+                                         )
+                                  
                                         ),
                                         column(6,
                                                div(style = "text-align: center;",
-                                                   h4("Produtos a Encomendar"),
-                                                   tableOutput("product_orders_table_uni")
-                                               )
+                                                   h4("Stock"),
+                                                   tableOutput("stock_uni")
+                                               ),
+                                         column(6,
+                                                div(style = "text-align: center;",
+                                                    textOutput("total_cost_stock_output_uni")
+                                                )
+                                         )
                                         )
                                         
                                       ),
                                       fluidRow(
                                         column(6, 
                                                div(style = "text-align: center;",
-                                                   h4("Vendas"),
-                                                   tableOutput("sales_uni")
-                                               )
+                                                   h4("Encomendas a Realizar"),
+                                                   tableOutput("product_orders_table_uni")
+                                               ),
+                                         column(6,
+                                                div(style = "text-align: center;",
+                                                    textOutput("total_number_orders_output_uni"),
+                                                    textOutput("total_cost_orders_output_uni")
+                                                )
+                                         )
                                         ),
                                         column(6,
                                                div(style = "text-align: center;",
-                                                   h4("Stock"),
-                                                   tableOutput("stock_uni")
+                                                   h4("Vendas"),
+                                                   tableOutput("sales_uni")
+                                               )
+                                
+                                        ),
+                                        
+                                      column(6,
+                                             div(style = "text-align: center;",
+                                                 textOutput("total_sales_output_uni"),
+                                             ),
+                                             br(), br(),br(),
+                                      ),
+                                      
+                                      fluidRow(
+                                        column(12, align = "center",
+                                               div(style = "margin-bottom: 20px;", 
+                                                   textOutput("monthly_profit_output_uni")
+                                               ),
+                                               div(style = "margin-bottom: 20px;", 
+                                                   textOutput("monthly_effort_output_uni")
+                                               ),
+                                               div(style = "margin-bottom: 20px;", 
+                                                   textOutput("total_cost_output_uni")
                                                )
                                         )
-                                      ),
-                                      fluidRow(
-                                        column(6, textOutput("monthly_profit_output_uni")),
-                                        column(6, textOutput("total_number_workers_output_uni"))
-                                      ),
-                                      fluidRow(
-                                        column(6, textOutput("total_sales_output_uni")),
-                                        column(6, textOutput("total_number_orders_output_uni"))
-                                      ),
-                                      fluidRow(
-                                        column(6, textOutput("total_cost_output_uni")),
-                                        column(6, textOutput("total_cost_workers_output_uni"))
-                                      ),
-                                      fluidRow(
-                                        column(6, textOutput("total_cost_orders_output_uni")),
-                                        column(6, textOutput("total_cost_stock_output_uni"))
                                       )
+                                      
+                                      
+                                )
                                       
                              ),
                              tabPanel("Curva de Convergência",
@@ -146,21 +172,75 @@ ui <- fluidPage(
                              ),
                              tabPanel("Otimização",
                                       fluidRow(
-                                        column(4, tableOutput("hired_workers_table_multi"))
+                                        column(6, 
+                                               div(style = "text-align: center;",
+                                                   h4("Trabalhadores a Contratar"),
+                                                   tableOutput("hired_workers_table_multi")
+                                               ),
+                                               column(6,
+                                                      div(style = "text-align: center;",
+                                                          textOutput("total_number_workers_output_multi"),
+                                                          textOutput("total_cost_workers_output_multi")
+                                                      )
+                                               )
+                                               
+                                        ),
+                                        column(6,
+                                               div(style = "text-align: center;",
+                                                   h4("Stock"),
+                                                   tableOutput("stock_multi")
+                                               ),
+                                               column(6,
+                                                      div(style = "text-align: center;",
+                                                          textOutput("total_cost_stock_output_multi")
+                                                      )
+                                               )
+                                        )
                                         
                                       ),
                                       fluidRow(
+                                        column(6, 
+                                               div(style = "text-align: center;",
+                                                   h4("Encomendas a Realizar"),
+                                                   tableOutput("product_orders_table_multi")
+                                               ),
+                                               column(6,
+                                                      div(style = "text-align: center;",
+                                                          textOutput("total_number_orders_output_multi"),
+                                                          textOutput("total_cost_orders_output_multi")
+                                                      )
+                                               )
+                                        ),
+                                        column(6,
+                                               div(style = "text-align: center;",
+                                                   h4("Vendas"),
+                                                   tableOutput("sales_multi")
+                                               )
+                                               
+                                        ),
                                         
-                                        column(4, tableOutput("product_orders_table_multi"))
+                                        column(6,
+                                               div(style = "text-align: center;",
+                                                   textOutput("total_sales_output_multi"),
+                                               ),
+                                               br(), br(),br(),
+                                        ),
                                         
-                                      ),
-                                      fluidRow(
+                                        fluidRow(
+                                          column(12, align = "center",
+                                                 div(style = "margin-bottom: 20px;", 
+                                                     textOutput("monthly_profit_output_multi")
+                                                 ),
+                                                 div(style = "margin-bottom: 20px;", 
+                                                     textOutput("monthly_effort_output_multi")
+                                                 ),
+                                                 div(style = "margin-bottom: 20px;", 
+                                                     textOutput("total_cost_output_multi")
+                                                 )
+                                          )
+                                        )
                                         
-                                        column(4, tableOutput("sales_table_multi"))
-                                      ),
-                                      fluidRow(
-                                        column(12, textOutput("monthly_profit_output_multi"))
-                                      )
+                                      )         
                              ),
                              tabPanel("Curva de Convergência",
                                       fluidRow(
@@ -220,17 +300,75 @@ ui <- fluidPage(
                              ),
                              tabPanel("Otimização",
                                       fluidRow(
-                                        column(4, tableOutput("hired_workers_table_best_model"))
-                                      ),
-                                      fluidRow(
-                                        column(4, tableOutput("product_orders_table_best_model"))
-                                      ),
-                                      fluidRow(
+                                        column(6, 
+                                               div(style = "text-align: center;",
+                                                   h4("Trabalhadores a Contratar"),
+                                                   tableOutput("hired_workers_table_best")
+                                               ),
+                                               column(6,
+                                                      div(style = "text-align: center;",
+                                                          textOutput("total_number_workers_output_best"),
+                                                          textOutput("total_cost_workers_output_best")
+                                                      )
+                                               )
+                                               
+                                        ),
+                                        column(6,
+                                               div(style = "text-align: center;",
+                                                   h4("Stock"),
+                                                   tableOutput("stock_best")
+                                               ),
+                                               column(6,
+                                                      div(style = "text-align: center;",
+                                                          textOutput("total_cost_stock_output_best")
+                                                      )
+                                               )
+                                        )
                                         
-                                        column(4, tableOutput("sales_table_best_model"))
                                       ),
                                       fluidRow(
-                                        column(12, textOutput("monthly_profit_output_best_model"))
+                                        column(6, 
+                                               div(style = "text-align: center;",
+                                                   h4("Encomendas a Realizar"),
+                                                   tableOutput("product_orders_table_best")
+                                               ),
+                                               column(6,
+                                                      div(style = "text-align: center;",
+                                                          textOutput("total_number_orders_output_best"),
+                                                          textOutput("total_cost_orders_output_best")
+                                                      )
+                                               )
+                                        ),
+                                        column(6,
+                                               div(style = "text-align: center;",
+                                                   h4("Vendas"),
+                                                   tableOutput("sales_best")
+                                               )
+                                               
+                                        ),
+                                        
+                                        column(6,
+                                               div(style = "text-align: center;",
+                                                   textOutput("total_sales_output_best"),
+                                               ),
+                                               br(), br(),br(),
+                                        ),
+                                        
+                                        fluidRow(
+                                          column(12, align = "center",
+                                                 div(style = "margin-bottom: 20px;", 
+                                                     textOutput("monthly_profit_output_best")
+                                                 ),
+                                                 div(style = "margin-bottom: 20px;", 
+                                                     textOutput("monthly_effort_output_best")
+                                                 ),
+                                                 div(style = "margin-bottom: 20px;", 
+                                                     textOutput("total_cost_output_best")
+                                                 )
+                                          )
+                                        )
+                                        
+                                        
                                       )
                                       
                              )
@@ -345,22 +483,141 @@ server <- function(input, output, session) {
     # Update the predictions reactive value
     predictions_best(data.frame(
       Time = 1:length(Pred1),
-      Department1 = Pred1,
-      Department2 = Pred2,
-      Department3 = Pred3,
-      Department4 = Pred4
+      Department1 = round(Pred1),
+      Department2 = round(Pred2),
+      Department3 = round(Pred3),
+      Department4 = round(Pred4)
     ))
     
     DataFrame=data.frame(Pred1,Pred2,Pred3,Pred4)
    
-    optimization_results <- Uniobjetivo(df = DataFrame, algoritmo = "RBGA", func="eval_min")
+    optimization_results_best <- Uniobjetivo(df = DataFrame, algoritmo = "RBGA", func="eval_min")
     
     # Update UI with optimization results
-    output$hired_workers_table_best_model <<- renderTable(optimization_results$hired_workers)
-    output$product_orders_table_best_model <<- renderTable(optimization_results$product_orders)
-    output$sales_table_best_model <<- renderTable(optimization_results$sales)
-    output$monthly_profit_output_best_model <<- renderText({
-      paste("Monthly Profit: ", round(optimization_results$monthly_profit, 2))
+    output$hired_workers_table_best <- renderTable({
+      hired_workers <- round(optimization_results_best$hired_workers)
+      
+      # Se optimization_results$hired_workers for uma matriz, converta-a em um data frame
+      hired_workers <- as.data.frame(hired_workers)
+      
+      # Defina os nomes das colunas
+      colnames(hired_workers) <- c("Dep1","Dep2","Dep3","Dep4")
+      
+      # Defina os nomes das linhas
+      rownames(hired_workers) <- c("Junior", "Normal", "Senior")
+      
+      # Calcula o somatório de cada coluna
+      total <- colSums(hired_workers)
+      
+      # Adiciona a linha "Total" ao data frame
+      hired_workers <- rbind(hired_workers, Total = total)
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      hired_workers
+    }, digits = 0, rownames = TRUE, caption = "Tabela de Trabalhadores a Contratar")
+    
+    output$product_orders_table_best <- renderTable({
+      product_orders <- round(optimization_results_best$product_orders)
+      
+      # Se optimization_results$hired_workers for uma matriz, converta-a em um data frame
+      product_orders <- as.data.frame(product_orders)
+      
+      # Defina os nomes das colunas
+      colnames(product_orders) <- c("Dep1","Dep2","Dep3","Dep4")
+      
+      # Defina os nomes das linhas
+      rownames(product_orders) <- c("1º semana", "2º semana", "3º semana", "4º semana")
+      # Calcula o somatório de cada coluna
+      total <- colSums(product_orders)
+      
+      # Adiciona a linha "Total" ao data frame
+      product_orders <- rbind(product_orders, Total = total)
+      
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      product_orders
+    }, digits = 0, rownames = TRUE, caption = "Tabela de Produtos a Encomendar")
+    
+    
+    output$stock_best <- renderTable({
+      product_orders <- round(optimization_results_best$product_orders)
+      sales <- round(optimization_results_best$sales)
+      
+      stock = calculate_stock(product_orders, sales)
+      # Se optimization_results$hired_workers for uma matriz, converta-a em um data frame
+      stock <- as.data.frame(stock)
+      
+      # Defina os nomes das colunas
+      colnames(stock) <- c("Dep1","Dep2","Dep3","Dep4")
+      
+      # Defina os nomes das linhas
+      rownames(stock) <- c("1º semana", "2º semana", "3º semana", "4º semana")
+      
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      stock
+    }, digits = 0, rownames = TRUE, caption = "Tabela de Stock")
+    
+    output$sales_best <- renderTable({
+      sales <- round(optimization_results_best$sales)
+      
+      sales <- as.data.frame(sales)
+      
+      # Defina os nomes das colunas
+      colnames(sales) <- c("Dep1","Dep2","Dep3","Dep4")
+      
+      # Defina os nomes das linhas
+      rownames(sales) <- c("1º semana", "2º semana", "3º semana", "4º semana")
+      
+      # Calcula o somatório de cada coluna
+      total <- colSums(sales)
+      
+      # Adiciona a linha "Total" ao data frame
+      sales <- rbind(sales, Total = total)
+      
+      
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      sales
+    }, digits = 0, rownames = TRUE, caption = "Tabela de Vendas Atuais")
+    
+    output$sales_table_best <<- renderTable(optimization_results_best$sales)
+    output$monthly_profit_output_best <<- renderText({
+      paste("Profit Mensal: ", round(optimization_results_best$monthly_profit))
+    })
+    output$total_number_workers_output_best <<- renderText({
+      paste("Número Trabalhadores: ", round(total_number_of_workers(round(optimization_results_best$hired_workers))))
+    })
+    output$total_number_orders_output_best <<- renderText({
+      paste("Número Encomendas: ", round(total_number_of_orders(round(optimization_results_best$product_orders))))
+    })
+    output$total_cost_workers_output_best <<- renderText({
+      paste("Custo Trabalhadores: ", round(total_cost_workers(round(optimization_results_best$hired_workers))))
+    })
+    output$total_cost_orders_output_best <<- renderText({
+      paste("Custo Encomendas: ", round(total_cost_orders(round(optimization_results_best$product_orders))))
+    })
+    output$total_cost_stock_output_best <<- renderText({
+      product_orders <- round(optimization_results_best$product_orders)
+      sales <- round(optimization_results_best$sales)
+      stock = calculate_stock_in_usd(product_orders, sales)
+      paste("Custo Stock: ", round(stock))
+    })
+    output$total_cost_output_best <<- renderText({
+      product_orders <- round(optimization_results_best$product_orders)
+      sales <- round(optimization_results_best$sales)
+      hired_workers <- round(optimization_results_best$hired_workers)
+      total = total_costs(hired_workers,product_orders, sales)
+      paste("Custo Total: ", round(total))
+    })
+    output$monthly_effort_output_best <<- renderText({
+      product_orders <- round(optimization_results_best$product_orders)
+      hired_workers <- round(optimization_results_best$hired_workers)
+      total_number_of_workers = total_number_of_workers(hired_workers)
+      total_number_of_orders = total_number_of_orders(product_orders)
+      total = total_number_of_workers + total_number_of_orders
+      paste("Effort Mensal: ", round(total))
+    })
+    output$total_sales_output_best<<- renderText({
+      sales <- round(optimization_results_best$sales)
+      sales = sales_in_usd(sales)
+      paste("Vendas Totais: ", round(sales))
     })
     
     output$predictions_table_best_model<- renderDT({
@@ -518,7 +775,11 @@ server <- function(input, output, session) {
       # Defina os nomes das linhas
       rownames(hired_workers) <- c("Junior", "Normal", "Senior")
       
+      # Calcula o somatório de cada coluna
+      total <- colSums(hired_workers)
       
+      # Adiciona a linha "Total" ao data frame
+      hired_workers <- rbind(hired_workers, Total = total)
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
       hired_workers
     }, digits = 0, rownames = TRUE, caption = "Tabela de Trabalhadores a Contratar")
@@ -534,6 +795,11 @@ server <- function(input, output, session) {
       
       # Defina os nomes das linhas
       rownames(product_orders) <- c("1º semana", "2º semana", "3º semana", "4º semana")
+      # Calcula o somatório de cada coluna
+      total <- colSums(product_orders)
+      
+      # Adiciona a linha "Total" ao data frame
+      product_orders <- rbind(product_orders, Total = total)
       
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
       product_orders
@@ -569,6 +835,13 @@ server <- function(input, output, session) {
       # Defina os nomes das linhas
       rownames(sales) <- c("1º semana", "2º semana", "3º semana", "4º semana")
       
+      # Calcula o somatório de cada coluna
+      total <- colSums(sales)
+      
+      # Adiciona a linha "Total" ao data frame
+      sales <- rbind(sales, Total = total)
+      
+      
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
       sales
     }, digits = 0, rownames = TRUE, caption = "Tabela de Vendas Atuais")
@@ -578,10 +851,10 @@ server <- function(input, output, session) {
       paste("Profit Mensal: ", round(optimization_results$monthly_profit))
     })
     output$total_number_workers_output_uni <<- renderText({
-      paste("Número Total Trabalhadores: ", round(total_number_of_workers(round(optimization_results$hired_workers))))
+      paste("Número Trabalhadores: ", round(total_number_of_workers(round(optimization_results$hired_workers))))
     })
     output$total_number_orders_output_uni <<- renderText({
-      paste("Número Total Encomendas: ", round(total_number_of_orders(round(optimization_results$product_orders))))
+      paste("Número Encomendas: ", round(total_number_of_orders(round(optimization_results$product_orders))))
     })
     output$total_cost_workers_output_uni <<- renderText({
       paste("Custo Trabalhadores: ", round(total_cost_workers(round(optimization_results$hired_workers))))
@@ -601,6 +874,14 @@ server <- function(input, output, session) {
       hired_workers <- round(optimization_results$hired_workers)
       total = total_costs(hired_workers,product_orders, sales)
       paste("Custo Total: ", round(total))
+    })
+    output$monthly_effort_output_uni <<- renderText({
+      product_orders <- round(optimization_results$product_orders)
+      hired_workers <- round(optimization_results$hired_workers)
+      total_number_of_workers = total_number_of_workers(hired_workers)
+      total_number_of_orders = total_number_of_orders(product_orders)
+      total = total_number_of_workers + total_number_of_orders
+      paste("Effort Mensal: ", round(total))
     })
     output$total_sales_output_uni <<- renderText({
       sales <- round(optimization_results$sales)
@@ -739,10 +1020,10 @@ server <- function(input, output, session) {
     # Update the predictions reactive value
     predictions_multi(data.frame(
       Time = 1:length(Pred1),
-      Department1 = Pred1,
-      Department2 = Pred2,
-      Department3 = Pred3,
-      Department4 = Pred4
+      Department1 = round(Pred1),
+      Department2 = round(Pred2),
+      Department3 = round(Pred3),
+      Department4 = round(Pred4)
     ))
     
     DataFrame_multi=data.frame(Pred1,Pred2,Pred3,Pred4)
@@ -763,11 +1044,131 @@ server <- function(input, output, session) {
     optimization_results_multi <- Uniobjetivo(df = DataFrame_multi, algoritmo = otimization_multi, func= eval)
     
     # Update UI with optimization results
-    output$hired_workers_table_multi <<- renderTable(optimization_results_multi$hired_workers)
-    output$product_orders_table_multi <<- renderTable(optimization_results_multi$product_orders)
+    # Update UI with optimization results
+    output$hired_workers_table_multi <- renderTable({
+      hired_workers <- round(optimization_results_multi$hired_workers)
+      
+      # Se optimization_results$hired_workers for uma matriz, converta-a em um data frame
+      hired_workers <- as.data.frame(hired_workers)
+      
+      # Defina os nomes das colunas
+      colnames(hired_workers) <- c("Dep1","Dep2","Dep3","Dep4")
+      
+      # Defina os nomes das linhas
+      rownames(hired_workers) <- c("Junior", "Normal", "Senior")
+      
+      # Calcula o somatório de cada coluna
+      total <- colSums(hired_workers)
+      
+      # Adiciona a linha "Total" ao data frame
+      hired_workers <- rbind(hired_workers, Total = total)
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      hired_workers
+    }, digits = 0, rownames = TRUE, caption = "Tabela de Trabalhadores a Contratar")
+    
+    output$product_orders_table_multi <- renderTable({
+      product_orders <- round(optimization_results_multi$product_orders)
+      
+      # Se optimization_results$hired_workers for uma matriz, converta-a em um data frame
+      product_orders <- as.data.frame(product_orders)
+      
+      # Defina os nomes das colunas
+      colnames(product_orders) <- c("Dep1","Dep2","Dep3","Dep4")
+      
+      # Defina os nomes das linhas
+      rownames(product_orders) <- c("1º semana", "2º semana", "3º semana", "4º semana")
+      # Calcula o somatório de cada coluna
+      total <- colSums(product_orders)
+      
+      # Adiciona a linha "Total" ao data frame
+      product_orders <- rbind(product_orders, Total = total)
+      
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      product_orders
+    }, digits = 0, rownames = TRUE, caption = "Tabela de Produtos a Encomendar")
+    
+    
+    output$stock_multi <- renderTable({
+      product_orders <- round(optimization_results_multi$product_orders)
+      sales <- round(optimization_results_multi$sales)
+      
+      stock = calculate_stock(product_orders, sales)
+      # Se optimization_results$hired_workers for uma matriz, converta-a em um data frame
+      stock <- as.data.frame(stock)
+      
+      # Defina os nomes das colunas
+      colnames(stock) <- c("Dep1","Dep2","Dep3","Dep4")
+      
+      # Defina os nomes das linhas
+      rownames(stock) <- c("1º semana", "2º semana", "3º semana", "4º semana")
+      
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      stock
+    }, digits = 0, rownames = TRUE, caption = "Tabela de Stock")
+    
+    output$sales_multi <- renderTable({
+      sales <- round(optimization_results_multi$sales)
+      
+      sales <- as.data.frame(sales)
+      
+      # Defina os nomes das colunas
+      colnames(sales) <- c("Dep1","Dep2","Dep3","Dep4")
+      
+      # Defina os nomes das linhas
+      rownames(sales) <- c("1º semana", "2º semana", "3º semana", "4º semana")
+      
+      # Calcula o somatório de cada coluna
+      total <- colSums(sales)
+      
+      # Adiciona a linha "Total" ao data frame
+      sales <- rbind(sales, Total = total)
+      
+      
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      sales
+    }, digits = 0, rownames = TRUE, caption = "Tabela de Vendas Atuais")
+    
     output$sales_table_multi <<- renderTable(optimization_results_multi$sales)
     output$monthly_profit_output_multi <<- renderText({
-      paste("Monthly Profit: ", round(optimization_results_multi$monthly_profit, 2))
+      paste("Profit Mensal: ", round(optimization_results_multi$monthly_profit))
+    })
+    output$total_number_workers_output_multi <<- renderText({
+      paste("Número Trabalhadores: ", round(total_number_of_workers(round(optimization_results_multi$hired_workers))))
+    })
+    output$total_number_orders_output_multi <<- renderText({
+      paste("Número Encomendas: ", round(total_number_of_orders(round(optimization_results_multi$product_orders))))
+    })
+    output$total_cost_workers_output_multi <<- renderText({
+      paste("Custo Trabalhadores: ", round(total_cost_workers(round(optimization_results_multi$hired_workers))))
+    })
+    output$total_cost_orders_output_multi <<- renderText({
+      paste("Custo Encomendas: ", round(total_cost_orders(round(optimization_results_multi$product_orders))))
+    })
+    output$total_cost_stock_output_multi <<- renderText({
+      product_orders <- round(optimization_results_multi$product_orders)
+      sales <- round(optimization_results_multi$sales)
+      stock = calculate_stock_in_usd(product_orders, sales)
+      paste("Custo Stock: ", round(stock))
+    })
+    output$total_cost_output_multi <<- renderText({
+      product_orders <- round(optimization_results_multi$product_orders)
+      sales <- round(optimization_results_multi$sales)
+      hired_workers <- round(optimization_results_multi$hired_workers)
+      total = total_costs(hired_workers,product_orders, sales)
+      paste("Custo Total: ", round(total))
+    })
+    output$monthly_effort_output_multi <<- renderText({
+      product_orders <- round(optimization_results_multi$product_orders)
+      hired_workers <- round(optimization_results_multi$hired_workers)
+      total_number_of_workers = total_number_of_workers(hired_workers)
+      total_number_of_orders = total_number_of_orders(product_orders)
+      total = total_number_of_workers + total_number_of_orders
+      paste("Effort Mensal: ", round(total))
+    })
+    output$total_sales_output_multi <<- renderText({
+      sales <- round(optimization_results_multi$sales)
+      sales = sales_in_usd(sales)
+      paste("Vendas Totais: ", round(sales))
     })
     
     output$predictions_table_multi <- renderDT({
