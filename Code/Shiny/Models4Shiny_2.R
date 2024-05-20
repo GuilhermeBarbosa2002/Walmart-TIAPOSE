@@ -696,17 +696,25 @@ Uniobjetivo=function(df,algoritmo,func){
     
     return(bs)
     
-    
-    
   }
   
   ####################### NSGA-II ###########################
+  nsga <- function(objective_function, lower, upper){
+    
+    # Executar a otimização multiobjetivo
+    G <- nsga2(fn = objective_function, idim = D, odim = 2, lower.bounds = lower, upper.bounds = upper, popsize = 200, generations = 20)
+    
+    # Extrair soluções ótimas de Pareto da geração final
+    pareto_optimal_solutions <- G$value[which(G$pareto.optimal), ]
+    
+    return(pareto_optimal_solutions)
+  }
+  
   
   ##################### PARAMETERS #################
-  # dimension
-  D=28
+  D=28 #dimension
   N <- 10000 #número de pesquisas
-  REPORT=N/20 # report results
+  REPORT=N/20 #report results
   
   lower <- rep(0, D) # limites inferiores
   upper <- calculate_uppers(actual_sales)# limites superiores
@@ -719,49 +727,41 @@ Uniobjetivo=function(df,algoritmo,func){
   BEST=-Inf # initial best is -Inf
   curve=rep(NA,N) # vector with the convergence values
   
-  
-  # # #Simulated Annealing
+  # Simulated Annealing
   if(algoritmo=="Simulated Annealing"){
-    
     s <- SimulatedAnnealing(funct,lower,upper,x2,"max")
   }
   
-  
   # RGBA genetic
   if(algoritmo=="RBGA"){
-    
     s <- RBGA(funct,lower,upper,N=100)
   }
   
   # TabuSearch
   if(algoritmo=="Tabu"){
-    
     s <- Tabu()
   }
   
-  
   #Montecarlo
-  
   if(algoritmo=="Montecarlo"){
     s <- montecarlo(funct,lower,upper,N,"max")
   }
   
-  
   #RGBABIN
-  
   if(algoritmo=="RBGA.BIN"){
     s <- RBGABIN()
   }
-  
-  
-  
+
   #Hill_Climbing
-  
-  
   if(algoritmo=="Hill Climbing"){
     s <- hill_climbing(funct,lower, upper, N, "max", x2, REPORT)
   }
   
+  #NGSA-II
+  if(algoritmo=="NGSA-II"){
+    s <- nsga(funct,lower,upper)
+  }
+    
   if(algoritmo != "RBGA.BIN"){
     hired_workers  <- matrix(s[1:12] , nrow = 3, ncol = 4)
     product_orders <- matrix(s[13:28], nrow = 4, ncol = 4)
@@ -791,7 +791,6 @@ Uniobjetivo=function(df,algoritmo,func){
   }
   
  
-  
   cat("Best Solution: \nHired Workers \n")
   print(hired_workers) 
   cat("\nProduct Orders \n")

@@ -19,6 +19,8 @@ date_sequence <- seq(from = start_date, to = end_date, by = "4 weeks")
 
 inverse_index <- 9:0
 
+
+
 # Define a UI para a aplicação
 ui <- fluidPage(
   theme = shinytheme("flatly"),
@@ -42,7 +44,7 @@ ui <- fluidPage(
                            actionButton("predict_button_uni", "Predict")
                          ),
                          mainPanel(
-                           tabsetPanel(
+                           tabsetPanel(id = "uni_tabs",
                              tabPanel("Previsões",
                                       fluidRow(
                                         column(12,
@@ -128,13 +130,13 @@ ui <- fluidPage(
                                       
                                 )
                                       
-                             ),
-                             tabPanel("Curva de Convergência",
-                                      fluidRow(
-                                        column(12,
-                                               plotOutput("convergence_curve"))
-                                      )
                              )
+                             # tabPanel("Curva de Convergência",
+                             #          fluidRow(
+                             #            column(12,
+                             #                   plotOutput("convergence_curve"))
+                             #          )
+                             # )
                            )
                          )
                        )
@@ -427,7 +429,23 @@ server <- function(input, output, session) {
     }
   })
   
-  
+  observeEvent(input$objetivo_uni, {
+      removeTab(inputId = "uni_tabs", target = "convergence_curve_tab")
+      
+      # Add a new tab with the updated title
+      if (input$objetivo_uni != "Multiobjetivo") {
+        appendTab(inputId = "uni_tabs",
+                  tabPanel("Curva de Convergência", value = "convergence_curve_tab",
+                           fluidRow(
+                             column(
+                               12,
+                               plotOutput("convergence_curve")
+                             )
+                           )
+                  ))
+      }
+  })
+    
   predictions_uni <- reactiveVal(data.frame()) 
   predictions_multi <- reactiveVal(data.frame())  
   predictions_best <- reactiveVal(data.frame()) 
