@@ -18,7 +18,12 @@ end_date <- as.Date("2012-11-07")
 date_sequence <- seq(from = start_date, to = end_date, by = "4 weeks")
 
 inverse_index <- 9:0
-optimization_results <- list()
+optimization_results <- list(hired_workers  = matrix(rep(0, 12), ncol = 4, nrow = 3),
+                             product_orders = matrix(rep(0, 16), ncol = 4, nrow = 4),
+                             sales          = matrix(rep(0, 16), ncol = 4, nrow = 4),
+                             monthly_profit = 0,
+                             convergence_curve = NA,
+                             nsga_results = NA)
 DataFrame <- data.frame()
 
 
@@ -483,7 +488,7 @@ server <- function(input, output, session) {
         I <- which(G$pareto.optimal)
         P <- matrix(NA, nrow = length(I), ncol = 2)
         for(i in 1:length(I)){
-          P[i,1] <- G$value[,1][I[i]]
+          P[i,1] <- -G$value[,1][I[i]]
           P[i,2] <- G$value[,2][I[i]]
         }
         
@@ -507,7 +512,7 @@ server <- function(input, output, session) {
         I <- which(G$pareto.optimal)
         P <- matrix(NA, nrow = length(I), ncol = 3)
         for(i in 1:length(I)){
-          P[i,1] <- G$value[,1][I[i]]
+          P[i,1] <- -G$value[,1][I[i]]
           P[i,2] <- G$value[,2][I[i]]
           P[i,3] <- I[i]
         }
@@ -544,7 +549,7 @@ server <- function(input, output, session) {
         I <- which(G$pareto.optimal)
         P <- matrix(NA, nrow = length(I), ncol = 3)
         for(i in 1:length(I)){
-          P[i,1] <- G$value[,1][I[i]]
+          P[i,1] <- -G$value[,1][I[i]]
           P[i,2] <- G$value[,2][I[i]]
           P[i,3] <- I[i]
         }
@@ -581,7 +586,7 @@ server <- function(input, output, session) {
         I <- which(G$pareto.optimal)
         P <- matrix(NA, nrow = length(I), ncol = 3)
         for(i in 1:length(I)){
-          P[i,1] <- G$value[,1][I[i]]
+          P[i,1] <- -G$value[,1][I[i]]
           P[i,2] <- G$value[,2][I[i]]
           P[i,3] <- I[i]
         }
@@ -616,7 +621,7 @@ server <- function(input, output, session) {
         I <- which(G$pareto.optimal)
         P <- matrix(NA, nrow = length(I), ncol = 3)
         for(i in 1:length(I)){
-          P[i,1] <- G$value[,1][I[i]]
+          P[i,1] <- -G$value[,1][I[i]]
           P[i,2] <- G$value[,2][I[i]]
           P[i,3] <- I[i]
         }
@@ -657,7 +662,7 @@ server <- function(input, output, session) {
         I <- which(G$pareto.optimal)
         P <- matrix(NA, nrow = length(I), ncol = 3)
         for(i in 1:length(I)){
-          P[i,1] <- G$value[,1][I[i]]
+          P[i,1] <- -G$value[,1][I[i]]
           P[i,2] <- G$value[,2][I[i]]
           P[i,3] <- I[i]
         }
@@ -681,7 +686,7 @@ server <- function(input, output, session) {
         I <- which(G$pareto.optimal)
         P <- matrix(NA, nrow = length(I), ncol = 3)
         for(i in 1:length(I)){
-          P[i,1] <- G$value[,1][I[i]]
+          P[i,1] <- -G$value[,1][I[i]]
           P[i,2] <- G$value[,2][I[i]]
           P[i,3] <- I[i]
         }
@@ -702,7 +707,7 @@ server <- function(input, output, session) {
         I <- which(G$pareto.optimal)
         P <- matrix(NA, nrow = length(I), ncol = 3)
         for(i in 1:length(I)){
-          P[i,1] <- G$value[,1][I[i]]
+          P[i,1] <- -G$value[,1][I[i]]
           P[i,2] <- G$value[,2][I[i]]
           P[i,3] <- I[i]
         }
@@ -723,7 +728,7 @@ server <- function(input, output, session) {
         I <- which(G$pareto.optimal)
         P <- matrix(NA, nrow = length(I), ncol = 3)
         for(i in 1:length(I)){
-          P[i,1] <- G$value[,1][I[i]]
+          P[i,1] <- -G$value[,1][I[i]]
           P[i,2] <- G$value[,2][I[i]]
           P[i,3] <- I[i]
         }
@@ -744,7 +749,7 @@ server <- function(input, output, session) {
         I <- which(G$pareto.optimal)
         P <- matrix(NA, nrow = length(I), ncol = 3)
         for(i in 1:length(I)){
-          P[i,1] <- G$value[,1][I[i]]
+          P[i,1] <- -G$value[,1][I[i]]
           P[i,2] <- G$value[,2][I[i]]
           P[i,3] <- I[i]
         }
@@ -766,7 +771,7 @@ server <- function(input, output, session) {
         I <- which(G$pareto.optimal)
         P <- matrix(NA, nrow = length(I), ncol = 3)
         for(i in 1:length(I)){
-          P[i,1] <- G$value[,1][I[i]]
+          P[i,1] <- -G$value[,1][I[i]]
           P[i,2] <- G$value[,2][I[i]]
           P[i,3] <- I[i]
         }
@@ -792,7 +797,7 @@ server <- function(input, output, session) {
         I <- which(G$pareto.optimal)
         P <- matrix(NA, nrow = length(I), ncol = 3)
         for(i in 1:length(I)){
-          P[i,1] <- G$value[,1][I[i]]
+          P[i,1] <- -G$value[,1][I[i]]
           P[i,2] <- G$value[,2][I[i]]
           P[i,3] <- I[i]
         }
@@ -817,7 +822,7 @@ server <- function(input, output, session) {
         I <- which(G$pareto.optimal)
         P <- matrix(NA, nrow = length(I), ncol = 3)
         for(i in 1:length(I)){
-          P[i,1] <- G$value[,1][I[i]]
+          P[i,1] <- -G$value[,1][I[i]]
           P[i,2] <- G$value[,2][I[i]]
           P[i,3] <- I[i]
         }
@@ -842,7 +847,7 @@ server <- function(input, output, session) {
         I <- which(G$pareto.optimal)
         P <- matrix(NA, nrow = length(I), ncol = 3)
         for(i in 1:length(I)){
-          P[i,1] <- G$value[,1][I[i]]
+          P[i,1] <- -G$value[,1][I[i]]
           P[i,2] <- G$value[,2][I[i]]
           P[i,3] <- I[i]
         }
@@ -1201,7 +1206,7 @@ server <- function(input, output, session) {
          I <- which(G$pareto.optimal)
          P <- matrix(NA, nrow = length(I), ncol = 2)
          for(i in 1:length(I)){
-           P[i,1] <- G$value[,1][I[i]]
+           P[i,1] <- -G$value[,1][I[i]]
            P[i,2] <- G$value[,2][I[i]]
          }
          
@@ -1232,7 +1237,16 @@ server <- function(input, output, session) {
       }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
-        x <- ceiling(G$par[I[1],])
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
         hired_workers <- matrix(x[1:12], ncol = 4, nrow = 3)
         
       }
@@ -1261,7 +1275,16 @@ server <- function(input, output, session) {
       }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
-        x <- ceiling(G$par[I[1],])
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
       }
       # Se optimization_results$hired_workers for uma matriz, converta-a em um data frame
@@ -1290,7 +1313,16 @@ server <- function(input, output, session) {
       }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
-        x <- ceiling(G$par[I[1],])
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
         hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
         sales          <- calculate_sales(DataFrame, hired_workers, product_orders)
@@ -1316,7 +1348,16 @@ server <- function(input, output, session) {
       }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
-        x <- ceiling(G$par[I[1],])
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
         hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
         sales          <- calculate_sales(DataFrame, hired_workers, product_orders)
@@ -1348,7 +1389,16 @@ server <- function(input, output, session) {
       }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
-        x <- ceiling(G$par[I[1],])
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
         hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
         sales          <- calculate_sales(DataFrame, hired_workers, product_orders)
@@ -1363,7 +1413,16 @@ server <- function(input, output, session) {
       }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
-        x <- ceiling(G$par[I[1],])
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
         hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
         paste("Número Trabalhadores:", round(total_number_of_workers(round(hired_workers))))
       }
@@ -1375,7 +1434,16 @@ server <- function(input, output, session) {
       }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
-        x <- ceiling(G$par[I[1],])
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
         paste("Número Encomendas: ", round(total_number_of_orders(round(product_orders))))
       }
@@ -1387,7 +1455,16 @@ server <- function(input, output, session) {
       }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
-        x <- ceiling(G$par[I[1],])
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
         hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
         paste("Custo Trabalhadores: ", round(total_cost_workers(round(hired_workers))))
       }
@@ -1399,7 +1476,16 @@ server <- function(input, output, session) {
       }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
-        x <- ceiling(G$par[I[1],])
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
         paste("Custo Encomendas: ", round(total_cost_orders(round(product_orders))))
       }
@@ -1412,7 +1498,16 @@ server <- function(input, output, session) {
       }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
-        x <- ceiling(G$par[I[1],])
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
         hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
         sales          <- calculate_sales(DataFrame, hired_workers, product_orders)
@@ -1429,7 +1524,16 @@ server <- function(input, output, session) {
       }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
-        x <- ceiling(G$par[I[1],])
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
         hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
         sales          <- calculate_sales(DataFrame, hired_workers, product_orders)
@@ -1445,7 +1549,16 @@ server <- function(input, output, session) {
       }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
-        x <- ceiling(G$par[I[1],])
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
         hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
       }
@@ -1461,7 +1574,16 @@ server <- function(input, output, session) {
       }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
-        x <- ceiling(G$par[I[1],])
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
         hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
         sales          <- calculate_sales(DataFrame, hired_workers, product_orders)

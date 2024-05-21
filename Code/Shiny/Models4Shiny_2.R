@@ -300,7 +300,6 @@ Uniobjetivo=function(df,algoritmo,func){
   }
   
   F1 <- function(s){
-    s <- round(s)
     hired_workers = matrix(s[1:12], nrow=3, ncol=4)
     product_orders = matrix(s[13:28], nrow=4, ncol=4)
     sales = calculate_sales(actual_sales, hired_workers, product_orders)
@@ -319,7 +318,7 @@ Uniobjetivo=function(df,algoritmo,func){
   }
   
   objective_function <- function(x) {
-    x <- round(x)
+    x <- ceiling(x)
     c(F1(x), F2(x))
   }
   
