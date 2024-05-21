@@ -23,9 +23,20 @@ optimization_results <- list(hired_workers  = matrix(rep(0, 12), ncol = 4, nrow 
                              sales          = matrix(rep(0, 16), ncol = 4, nrow = 4),
                              monthly_profit = 0,
                              convergence_curve = NA,
-                             nsga_results = NA)
-DataFrame <- data.frame()
+                             nsga_results = list(pareto.optimal = c(TRUE, TRUE),
+                                                 value = matrix(c(0,0,0,0), nrow = 2, ncol = 2),
+                                                 par = matrix(rep(0, 56), ncol = 28)))
+DataFrame <- data.frame(matrix(rep(0,16), nrow = 4, ncol = 4))
 
+optimization_results_multi <- list(hired_workers  = matrix(rep(0, 12), ncol = 4, nrow = 3),
+                                   product_orders = matrix(rep(0, 16), ncol = 4, nrow = 4),
+                                   sales          = matrix(rep(0, 16), ncol = 4, nrow = 4),
+                                   monthly_profit = 0,
+                                   convergence_curve = NA,
+                                   nsga_results = list(pareto.optimal = c(TRUE, TRUE),
+                                                       value = matrix(c(0,0,0,0), nrow = 2, ncol = 2),
+                                                       par = matrix(rep(0, 56), ncol = 28)))
+DataFrame_multi <- data.frame(matrix(rep(0,16), nrow = 4, ncol = 4))
 
 # Define a UI para a aplicação
 ui <- fluidPage(
@@ -192,10 +203,25 @@ ui <- fluidPage(
                              ),
                              tabPanel("Otimização",
                                       fluidRow(
-                                        column(12,
-                                          plotOutput(outputId="pareto_curve_multi")
-                                        )
-                                      ),
+                                        conditionalPanel(
+                                          condition = "input.otimizacao_multi == 'NGSA-II'",
+                                          column(6,
+                                                 numericInput("pareto_numeric_multi",
+                                                              label=paste("Pareto front point"), 
+                                                              min=1,
+                                                              max=1,
+                                                              step=1,
+                                                              value=1
+                                                 )
+                                          )
+                                        )),
+                                      fluidRow(
+                                        conditionalPanel(
+                                          condition = "input.otimizacao_multi == 'NGSA-II'",
+                                          column(12,
+                                                 plotOutput("pareto_curve_multi")
+                                          )
+                                        )),
                                       fluidRow(
                                         column(6, 
                                                div(style = "text-align: center;",
@@ -864,6 +890,389 @@ server <- function(input, output, session) {
     })
   })
   
+  observeEvent(input$pareto_numeric_multi, {
+    output$pareto_curve_multi <- renderPlot({
+      if(input$otimizacao_multi == "NGSA-II"){
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 2)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        
+        for(i in 1:length(I)){
+          if(i == 1)  plot(Pareto, xlim = c(min(Pareto[,1]), max(Pareto[,1]) * 1.1), ylim = c(0, max(Pareto[,2]) * 1.1),
+                           xlab = "f1", ylab = "f2", main = "Curva de Pareto")
+        }
+        lines(Pareto)
+        points(Pareto[input$pareto_numeric_multi, 1], Pareto[input$pareto_numeric_multi, 2], col = "red", pch = 19)
+      }
+    })
+    
+    output$hired_workers_table_multi <- renderTable({
+      if(input$otimizacao_multi != "NGSA-II"){
+        hired_workers <- round(optimization_results_multi$hired_workers)
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[input$pareto_numeric_multi, 3],])
+        hired_workers <- matrix(x[1:12], ncol = 4, nrow = 3)
+      }
+      
+      # Se optimization_results$hired_workers for uma matriz, converta-a em um data frame
+      hired_workers <- as.data.frame(hired_workers)
+      
+      # Defina os nomes das colunas
+      colnames(hired_workers) <- c("Dep1","Dep2","Dep3","Dep4")
+      
+      # Defina os nomes das linhas
+      rownames(hired_workers) <- c("Junior", "Normal", "Senior")
+      
+      # Calcula o somatório de cada coluna
+      total <- colSums(hired_workers)
+      
+      # Adiciona a linha "Total" ao data frame
+      hired_workers <- rbind(hired_workers, Total = total)
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      hired_workers
+    }, digits = 0, rownames = TRUE, caption = "Tabela de Trabalhadores a Contratar")
+    
+    output$product_orders_table_multi <- renderTable({
+      if(input$otimizacao_multi != "NGSA-II"){
+        product_orders <- round(optimization_results_multi$product_orders)
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[input$pareto_numeric_multi, 3],])
+        product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
+      }
+      # Se optimization_results$hired_workers for uma matriz, converta-a em um data frame
+      product_orders <- as.data.frame(product_orders)
+      
+      # Defina os nomes das colunas
+      colnames(product_orders) <- c("Dep1","Dep2","Dep3","Dep4")
+      
+      # Defina os nomes das linhas
+      rownames(product_orders) <- c("1º semana", "2º semana", "3º semana", "4º semana")
+      # Calcula o somatório de cada coluna
+      total <- colSums(product_orders)
+      
+      # Adiciona a linha "Total" ao data frame
+      product_orders <- rbind(product_orders, Total = total)
+      
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      product_orders
+    }, digits = 0, rownames = TRUE, caption = "Tabela de Produtos a Encomendar")
+    
+    output$stock_multi <- renderTable({
+      if(input$otimizacao_multi != "NGSA-II"){
+        product_orders <- round(optimization_results_multi$product_orders)
+        sales <- round(optimization_results_multi$sales)
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[input$pareto_numeric_multi, 3],])
+        hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
+        product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
+        sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
+        
+      }
+      stock = calculate_stock(product_orders, sales)
+      # Se optimization_results$hired_workers for uma matriz, converta-a em um data frame
+      stock <- as.data.frame(stock)
+      
+      # Defina os nomes das colunas
+      colnames(stock) <- c("Dep1","Dep2","Dep3","Dep4")
+      
+      # Defina os nomes das linhas
+      rownames(stock) <- c("1º semana", "2º semana", "3º semana", "4º semana")
+      
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      stock
+    }, digits = 0, rownames = TRUE, caption = "Tabela de Stock")
+    
+    output$sales_multi <- renderTable({
+      if(input$otimizacao_multi != "NGSA-II"){
+        sales <- round(optimization_results_multi$sales)
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[input$pareto_numeric_multi, 3],])
+        hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
+        product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
+        sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
+      }
+      sales <- as.data.frame(sales)
+      
+      # Defina os nomes das colunas
+      colnames(sales) <- c("Dep1","Dep2","Dep3","Dep4")
+      
+      # Defina os nomes das linhas
+      rownames(sales) <- c("1º semana", "2º semana", "3º semana", "4º semana")
+      
+      # Calcula o somatório de cada coluna
+      total <- colSums(sales)
+      
+      # Adiciona a linha "Total" ao data frame
+      sales <- rbind(sales, Total = total)
+      
+      
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      sales
+    }, digits = 0, rownames = TRUE, caption = "Tabela de Vendas Atuais")
+    
+    #output$sales_table_uni <<- renderTable(optimization_results$sales)
+    
+    output$monthly_profit_output_multi <<- renderText({
+      if(input$otimizacao_multi != "NGSA-II"){
+        paste("Profit Mensal: ", round(optimization_results_multi$monthly_profit))
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[input$pareto_numeric_multi, 3],])
+        hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
+        product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
+        sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
+        monthly_profit <- sales_in_usd(sales) - total_costs(hired_workers, product_orders, sales)
+        paste("Profit Mensal:", round(monthly_profit))
+      }
+    })
+    
+    output$total_number_workers_output_multi <<- renderText({
+      if(input$otimizacao_multi != "NGSA-II"){
+        paste("Número Trabalhadores: ", round(total_number_of_workers(round(optimization_results_multi$hired_workers))))
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[input$pareto_numeric_multi, 3],])
+        hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
+        paste("Número Trabalhadores:", round(total_number_of_workers(round(hired_workers))))
+      }
+    })
+    
+    output$total_number_orders_output_multi <<- renderText({
+      if(input$otimizacao_multi != "NGSA-II"){
+        paste("Número Encomendas: ", round(total_number_of_orders(round(optimization_results_multi$product_orders))))
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[input$pareto_numeric_multi, 3],])
+        product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
+        paste("Número Encomendas: ", round(total_number_of_orders(round(product_orders))))
+      }
+    })
+    
+    output$total_cost_workers_output_multi <<- renderText({
+      if(input$otimizacao_multi != "NGSA-II"){
+        paste("Custo Trabalhadores: ", round(total_cost_workers(round(optimization_results_multi$hired_workers))))
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[input$pareto_numeric_multi, 3],])
+        hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
+        paste("Custo Trabalhadores: ", round(total_cost_workers(round(hired_workers))))
+      }
+    })
+    
+    output$total_cost_orders_output_multi <<- renderText({
+      if(input$otimizacao_multi != "NGSA-II"){
+        paste("Custo Encomendas: ", round(total_cost_orders(round(optimization_results_multi$product_orders))))
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[input$pareto_numeric_multi, 3],])
+        product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
+        paste("Custo Encomendas: ", round(total_cost_orders(round(product_orders))))
+      }
+    })
+    
+    output$total_cost_stock_output_multi <<- renderText({
+      if(input$otimizacao_multi != "NGSA-II"){
+        product_orders <- round(optimization_results_multi$product_orders)
+        sales <- round(optimization_results$sales)
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[input$pareto_numeric_multi, 3],])
+        hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
+        product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
+        sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
+      }
+      stock <- calculate_stock_in_usd(product_orders, sales)
+      paste("Custo Stock: ", round(stock))
+    })
+    
+    output$total_cost_output_multi <<- renderText({
+      if(input$otimizacao_multi != "NGSA-II"){
+        product_orders <- round(optimization_results_multi$product_orders)
+        sales <- round(optimization_results_multi$sales)
+        hired_workers <- round(optimization_results_multi$hired_workers)
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[input$pareto_numeric_multi, 3],])
+        hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
+        product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
+        sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
+      }
+      total = total_costs(hired_workers,product_orders, sales)
+      paste("Custo Total: ", round(total))
+    })
+    
+    output$monthly_effort_output_multi <<- renderText({
+      if(input$otimizacao_multi != "NGSA-II"){
+        product_orders <- round(optimization_results_multi$product_orders)
+        hired_workers <- round(optimization_results_multi$hired_workers)
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[input$pareto_numeric_multi, 3],])
+        hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
+        product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
+      }
+      total_number_of_workers = total_number_of_workers(hired_workers)
+      total_number_of_orders = total_number_of_orders(product_orders)
+      total = total_number_of_workers + total_number_of_orders
+      paste("Effort Mensal: ", round(total))
+    })
+    
+    output$total_sales_output_multi <<- renderText({
+      if(input$otimizacao_multi != "NGSA-II"){
+        sales <- round(optimization_results_multi$sales)
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[input$pareto_numeric_multi, 3],])
+        hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
+        product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
+        sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
+      }
+      sales = sales_in_usd(sales)
+      paste("Vendas Totais: ", round(sales))
+    })
+  })
+  
   predictions_uni <- reactiveVal(data.frame()) 
   predictions_multi <- reactiveVal(data.frame())  
   predictions_best <- reactiveVal(data.frame()) 
@@ -931,6 +1340,7 @@ server <- function(input, output, session) {
     
     # Update UI with optimization results
     output$hired_workers_table_best <- renderTable({
+     
       hired_workers <- round(optimization_results_best$hired_workers)
       
       # Se optimization_results$hired_workers for uma matriz, converta-a em um data frame
@@ -952,6 +1362,7 @@ server <- function(input, output, session) {
     }, digits = 0, rownames = TRUE, caption = "Tabela de Trabalhadores a Contratar")
     
     output$product_orders_table_best <- renderTable({
+      
       product_orders <- round(optimization_results_best$product_orders)
       
       # Se optimization_results$hired_workers for uma matriz, converta-a em um data frame
@@ -974,6 +1385,7 @@ server <- function(input, output, session) {
     
     
     output$stock_best <- renderTable({
+      
       product_orders <- round(optimization_results_best$product_orders)
       sales <- round(optimization_results_best$sales)
       
@@ -992,6 +1404,7 @@ server <- function(input, output, session) {
     }, digits = 0, rownames = TRUE, caption = "Tabela de Stock")
     
     output$sales_best <- renderTable({
+      
       sales <- round(optimization_results_best$sales)
       
       sales <- as.data.frame(sales)
@@ -1017,12 +1430,15 @@ server <- function(input, output, session) {
     output$monthly_profit_output_best <<- renderText({
       paste("Profit Mensal: ", round(optimization_results_best$monthly_profit))
     })
+    
     output$total_number_workers_output_best <<- renderText({
       paste("Número Trabalhadores: ", round(total_number_of_workers(round(optimization_results_best$hired_workers))))
     })
+    
     output$total_number_orders_output_best <<- renderText({
       paste("Número Encomendas: ", round(total_number_of_orders(round(optimization_results_best$product_orders))))
     })
+    
     output$total_cost_workers_output_best <<- renderText({
       paste("Custo Trabalhadores: ", round(total_cost_workers(round(optimization_results_best$hired_workers))))
     })
@@ -1035,6 +1451,7 @@ server <- function(input, output, session) {
       stock = calculate_stock_in_usd(product_orders, sales)
       paste("Custo Stock: ", round(stock))
     })
+    
     output$total_cost_output_best <<- renderText({
       product_orders <- round(optimization_results_best$product_orders)
       sales <- round(optimization_results_best$sales)
@@ -1042,6 +1459,7 @@ server <- function(input, output, session) {
       total = total_costs(hired_workers,product_orders, sales)
       paste("Custo Total: ", round(total))
     })
+    
     output$monthly_effort_output_best <<- renderText({
       product_orders <- round(optimization_results_best$product_orders)
       hired_workers <- round(optimization_results_best$hired_workers)
@@ -1654,7 +2072,8 @@ server <- function(input, output, session) {
   }) 
   
   ############################### MULTIVARIADO ###################################################
-  
+    
+    
   observeEvent(input$predict_button_multi, {
     source("Models4Shiny_2.R")
     print("MULTIVARIADO")
@@ -1728,7 +2147,7 @@ server <- function(input, output, session) {
       Department4 = round(Pred4)
     ))
     
-    DataFrame_multi=data.frame(Pred1,Pred2,Pred3,Pred4)
+    DataFrame_multi <<- data.frame(Pred1,Pred2,Pred3,Pred4)
 
     if (objective == "Uniobjetivo" && (otimization_multi=="Simulated Annealing" || otimization_multi=="RBGA.BIN" || otimization_multi == "RBGA")){
       eval = "eval_min"
@@ -1743,12 +2162,57 @@ server <- function(input, output, session) {
       eval = "eval_mix_max"
     }
     
-    optimization_results_multi <- Uniobjetivo(df = DataFrame_multi, algoritmo = otimization_multi, func= eval)
+    optimization_results_multi <<- Uniobjetivo(df = DataFrame_multi, algoritmo = otimization_multi, func= eval)
     
     # Update UI with optimization results
     # Update UI with optimization results
+    
+    output$pareto_curve_multi <- renderPlot({
+      if(input$otimizacao_multi == "NGSA-II"){
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 2)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        
+        for(i in 1:length(I)){
+          if(i == 1)  plot(Pareto, xlim = c(min(Pareto[,1]), max(Pareto[,1]) * 1.1), ylim = c(0, max(Pareto[,2]) * 1.1),
+                           xlab = "f1", ylab = "f2", main = "Curva de Pareto")
+        }
+        lines(Pareto)
+        points(Pareto[input$pareto_numeric_multi, 1], Pareto[input$pareto_numeric_multi, 2], col = "red", pch = 19)
+        updateNumericInput(session, "pareto_numeric_multi", label=paste("Pareto front point (1 to ",length(I),"):"), 
+                           min=1,
+                           max=length(I), 
+                           step=1, 
+                           value=1
+        )
+      }
+    })
+    
     output$hired_workers_table_multi <- renderTable({
-      hired_workers <- round(optimization_results_multi$hired_workers)
+      if(input$otimizacao_multi != "NGSA-II"){
+        hired_workers <- round(optimization_results_multi$hired_workers)
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
+        hired_workers <- matrix(x[1:12], ncol = 4, nrow = 3)
+      }
       
       # Se optimization_results$hired_workers for uma matriz, converta-a em um data frame
       hired_workers <- as.data.frame(hired_workers)
@@ -1769,7 +2233,23 @@ server <- function(input, output, session) {
     }, digits = 0, rownames = TRUE, caption = "Tabela de Trabalhadores a Contratar")
     
     output$product_orders_table_multi <- renderTable({
-      product_orders <- round(optimization_results_multi$product_orders)
+      if(input$otimizacao_multi != "NGSA-II"){
+        product_orders <- round(optimization_results_multi$product_orders)
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
+        product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
+      }
       
       # Se optimization_results$hired_workers for uma matriz, converta-a em um data frame
       product_orders <- as.data.frame(product_orders)
@@ -1791,8 +2271,27 @@ server <- function(input, output, session) {
     
     
     output$stock_multi <- renderTable({
-      product_orders <- round(optimization_results_multi$product_orders)
-      sales <- round(optimization_results_multi$sales)
+      if(input$otimizacao_multi != "NGSA-II"){
+        product_orders <- round(optimization_results_multi$product_orders)
+        sales <- round(optimization_results_multi$sales)
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
+        hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
+        product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
+        sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
+        
+      }
       
       stock = calculate_stock(product_orders, sales)
       # Se optimization_results$hired_workers for uma matriz, converta-a em um data frame
@@ -1809,7 +2308,25 @@ server <- function(input, output, session) {
     }, digits = 0, rownames = TRUE, caption = "Tabela de Stock")
     
     output$sales_multi <- renderTable({
-      sales <- round(optimization_results_multi$sales)
+      if(input$otimizacao_multi != "NGSA-II"){
+        sales <- round(optimization_results_multi$sales)
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
+        hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
+        product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
+        sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
+      }
       
       sales <- as.data.frame(sales)
       
@@ -1832,43 +2349,206 @@ server <- function(input, output, session) {
     
     output$sales_table_multi <<- renderTable(optimization_results_multi$sales)
     output$monthly_profit_output_multi <<- renderText({
-      paste("Profit Mensal: ", round(optimization_results_multi$monthly_profit))
+      if(input$otimizacao_multi != "NGSA-II"){
+        paste("Profit Mensal: ", round(optimization_results_multi$monthly_profit))
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
+        hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
+        product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
+        sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
+        monthly_profit <- sales_in_usd(sales) - total_costs(hired_workers, product_orders, sales)
+        paste("Profit Mensal:", round(monthly_profit))
+      }
     })
     output$total_number_workers_output_multi <<- renderText({
-      paste("Número Trabalhadores: ", round(total_number_of_workers(round(optimization_results_multi$hired_workers))))
+      if(input$otimizacao_multi != "NGSA-II"){
+        paste("Número Trabalhadores: ", round(total_number_of_workers(round(optimization_results_multi$hired_workers))))
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
+        hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
+        paste("Número Trabalhadores:", round(total_number_of_workers(round(hired_workers))))
+      }
     })
     output$total_number_orders_output_multi <<- renderText({
-      paste("Número Encomendas: ", round(total_number_of_orders(round(optimization_results_multi$product_orders))))
+      if(input$otimizacao_multi != "NGSA-II"){
+        paste("Número Encomendas: ", round(total_number_of_orders(round(optimization_results_multi$product_orders))))
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
+        product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
+        paste("Número Encomendas: ", round(total_number_of_orders(round(product_orders))))
+      }
     })
     output$total_cost_workers_output_multi <<- renderText({
-      paste("Custo Trabalhadores: ", round(total_cost_workers(round(optimization_results_multi$hired_workers))))
+      if(input$otimizacao_multi != "NGSA-II"){
+        paste("Custo Trabalhadores: ", round(total_cost_workers(round(optimization_results_multi$hired_workers))))
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
+        hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
+        paste("Custo Trabalhadores: ", round(total_cost_workers(round(hired_workers))))
+      }
     })
     output$total_cost_orders_output_multi <<- renderText({
-      paste("Custo Encomendas: ", round(total_cost_orders(round(optimization_results_multi$product_orders))))
+      if(input$otimizacao_multi != "NGSA-II"){
+        paste("Custo Encomendas: ", round(total_cost_orders(round(optimization_results_multi$product_orders))))
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
+        product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
+        paste("Custo Encomendas: ", round(total_cost_orders(round(product_orders))))
+      }
     })
+    
     output$total_cost_stock_output_multi <<- renderText({
-      product_orders <- round(optimization_results_multi$product_orders)
-      sales <- round(optimization_results_multi$sales)
+      if(input$otimizacao_multi != "NGSA-II"){
+        product_orders <- round(optimization_results_multi$product_orders)
+        sales <- round(optimization_results_multi$sales)
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
+        hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
+        product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
+        sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
+      }
       stock = calculate_stock_in_usd(product_orders, sales)
       paste("Custo Stock: ", round(stock))
     })
+    
     output$total_cost_output_multi <<- renderText({
-      product_orders <- round(optimization_results_multi$product_orders)
-      sales <- round(optimization_results_multi$sales)
-      hired_workers <- round(optimization_results_multi$hired_workers)
+      if(input$otimizacao_multi != "NGSA-II"){
+        product_orders <- round(optimization_results_multi$product_orders)
+        sales <- round(optimization_results_multi$sales)
+        hired_workers <- round(optimization_results_multi$hired_workers)
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
+        hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
+        product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
+        sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
+      }
       total = total_costs(hired_workers,product_orders, sales)
       paste("Custo Total: ", round(total))
     })
+    
     output$monthly_effort_output_multi <<- renderText({
-      product_orders <- round(optimization_results_multi$product_orders)
-      hired_workers <- round(optimization_results_multi$hired_workers)
+      if(input$otimizacao_multi != "NGSA-II"){
+        product_orders <- round(optimization_results_multi$product_orders)
+        hired_workers <- round(optimization_results_multi$hired_workers)
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
+        hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
+        product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
+      }
       total_number_of_workers = total_number_of_workers(hired_workers)
       total_number_of_orders = total_number_of_orders(product_orders)
       total = total_number_of_workers + total_number_of_orders
       paste("Effort Mensal: ", round(total))
     })
+    
     output$total_sales_output_multi <<- renderText({
-      sales <- round(optimization_results_multi$sales)
+      if(input$otimizacao_multi != "NGSA-II"){
+        sales <- round(optimization_results_multi$sales)
+      }else{
+        G <- optimization_results_multi$nsga_results
+        I <- which(G$pareto.optimal)
+        P <- matrix(NA, nrow = length(I), ncol = 3)
+        for(i in 1:length(I)){
+          P[i,1] <- -G$value[,1][I[i]]
+          P[i,2] <- G$value[,2][I[i]]
+          P[i,3] <- I[i]
+        }
+        
+        st <- sort.int(P[,1], index.return = TRUE)
+        Pareto <- P[st$ix, ]
+        x <- ceiling(G$par[Pareto[1, 3],])
+        hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
+        product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
+        sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
+      }
       sales = sales_in_usd(sales)
       paste("Vendas Totais: ", round(sales))
     })
