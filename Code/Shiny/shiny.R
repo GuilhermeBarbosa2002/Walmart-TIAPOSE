@@ -118,7 +118,7 @@ ui <- fluidPage(
                                                           textOutput("total_number_orders_output_uni"),
                                                           textOutput("total_cost_orders_output_uni")
                                                       )
-                                               ),
+                                               )),
                                                column(6,
                                                      div(style = "text-align: center;",
                                                          h4("Vendas"),
@@ -132,7 +132,7 @@ ui <- fluidPage(
                                                        ),
                                                        br(), br(),br(),
                                                )
-                                        )
+                                        
                                       ),
                                       
                                       fluidRow(
