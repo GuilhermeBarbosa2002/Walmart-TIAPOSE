@@ -71,14 +71,13 @@ for (i in I) {
 # create PDF com a evolução da fronteira de Pareto
 #pdf(file = "nsga-eval-F2.pdf", paper = "special", height = 5, width = 5)
 par(mar = c(4.0, 4.0, 0.1, 0.1))
-I <- 1:100
-for (i in I) {
-  P <- G[[i]]$value  # objetivos f1 e f2
+for (i in 1:length(I)) {
+  P <- G[I[i]]$value  # objetivos f1 e f2
   # color from light gray (75) to dark (1):
-  COL <- paste("gray", round(76 - i * 0.75), sep = "")
+  COL <- paste("gray", round(76 - I[i] * 0.75), sep = "")
   if (i == 1) plot(P, xlim = c(0, max(P[,1]) * 1.1), ylim = c(0, max(P[,2]) * 1.1),
                    xlab = "f1", ylab = "f2", cex = 0.5, col = COL, main = "Pareto Front Evolution")
-  Pareto <- P[G[[i]]$pareto.optimal, ]
+  Pareto <- P[G[I[i]]$pareto.optimal, ]
   # sort Pareto according to x axis:
   points(P, type = "p", pch = 1, cex = 0.5, col = COL)
   if (is.matrix(Pareto)) {  # if Pareto has more than 1 point

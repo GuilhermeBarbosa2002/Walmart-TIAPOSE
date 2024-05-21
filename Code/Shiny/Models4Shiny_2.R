@@ -1,13 +1,15 @@
-library(forecast)
-library(rminer)
-library(vars)
-library(lubridate)
-library(genalg)
-library(adana)
-library(tabuSearch)
-library(vars)
+suppressMessages(suppressWarnings(library(forecast)))
+suppressMessages(suppressWarnings(library(rminer)))
+suppressMessages(suppressWarnings(library(vars)))
+suppressMessages(suppressWarnings(library(lubridate)))
+suppressMessages(suppressWarnings(library(genalg)))
+suppressMessages(suppressWarnings(library(adana)))
+suppressMessages(suppressWarnings(library(tabuSearch)))
+suppressMessages(suppressWarnings(library(vars)))
+suppressMessages(suppressWarnings(library(mco)))
+suppressMessages(suppressWarnings(library(emoa)))
 
-source("multi-utils.R")
+suppressMessages(suppressWarnings(source("multi-utils.R")))
 
 
 data=read.csv("walmart.csv",header=TRUE,sep=",")
@@ -24,6 +26,7 @@ week=data[,"Week"]
 
 bits_workers <- 0
 bits_orders  <- 0
+nsga_results <- NA
 
 matrix_transform <- function(solution, start, elements, dimension_start, bits){
   matrix_final <- c()
@@ -703,7 +706,7 @@ Uniobjetivo=function(df,algoritmo,func){
     
     # Executar a otimização multiobjetivo
     G <- nsga2(fn = objective_function, idim = D, odim = 2, lower.bounds = lower, upper.bounds = upper, popsize = 200, generations = 20)
-    
+    nsga_results <<- G
     # Extrair soluções ótimas de Pareto da geração final
     pareto_optimal_solutions <- G$value[which(G$pareto.optimal), ]
     
@@ -759,7 +762,7 @@ Uniobjetivo=function(df,algoritmo,func){
   
   #NGSA-II
   if(algoritmo=="NGSA-II"){
-    s <- nsga(funct,lower,upper)
+    s <- nsga(objective_function,lower,upper)
   }
     
   if(algoritmo != "RBGA.BIN"){
@@ -804,8 +807,8 @@ Uniobjetivo=function(df,algoritmo,func){
     product_orders = product_orders,
     sales = sales,
     monthly_profit = monthly_profit,
-    convergence_curve = curve
-    #pareto_curve = pareto_curve
+    convergence_curve = curve,
+    nsga_results = nsga_results
   ))
   
 }
