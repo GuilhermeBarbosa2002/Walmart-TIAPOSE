@@ -1326,15 +1326,17 @@ server <- function(input, output, session) {
     
     
     # Update the predictions reactive value
-    predictions_best(data.frame(
-      Time = 1:length(Pred1),
-      Department1 = round(Pred1),
-      Department2 = round(Pred2),
-      Department3 = round(Pred3),
-      Department4 = round(Pred4)
-    ))
+    predictions_best <- data.frame(
+      Department = c(1,2,3,4),
+      Week1 = round(c(Pred1[1], Pred2[1], Pred3[1], Pred4[1])),
+      Week2 = round(c(Pred1[2], Pred2[2], Pred3[2], Pred4[2])),
+      Week3 = round(c(Pred1[3], Pred2[3], Pred3[3], Pred4[3])),
+      Week4 = round(c(Pred1[4], Pred2[4], Pred3[4], Pred4[4]))
+    )
+    
     
     DataFrame <<- data.frame(Pred1,Pred2,Pred3,Pred4)
+    
    
     optimization_results_best <- Uniobjetivo(df = DataFrame, algoritmo = "RBGA", func="eval_min")
     
@@ -1475,12 +1477,9 @@ server <- function(input, output, session) {
     })
     
     output$predictions_table_best_model<- renderDT({
-      predictions_rounded <- data.frame(lapply(predictions_best(), function(x) {
-        if (is.numeric(x)) return(round(x, 2))
-        return(x)
-      }))
       
-      datatable(predictions_rounded, 
+      
+      datatable(predictions_best, 
                 selection = 'single',
                 options = list(
                   pageLength = 10,     
@@ -1499,28 +1498,51 @@ server <- function(input, output, session) {
       
       if (length(sel_row) == 0) return()
       
-      selected_data <- predictions_best()[sel_row, ]
+      # Seleciona os dados da linha selecionada
+      selected_data <- predictions_best[sel_row, 2:5]
       
-      selected_values <- result_df[sel_row, ]
+      # Converte os dados selecionados para um vetor numérico
+      selected_data <- as.numeric(selected_data)
+      
+      print(result_df)
+      
+      selected_values <- as.numeric(c(result_df[1, sel_row], result_df[2, sel_row], result_df[3, sel_row], result_df[4, sel_row]))
+      
+      # Calcula os limites do gráfico
+      y_min <- min(selected_values,selected_data)
+      y_max <- max(selected_values,selected_data)
       
       
-      y_min <- min(c(as.numeric(selected_data[-1]), as.numeric(selected_values)))
-      y_max <- max(c(as.numeric(selected_data[-1]), as.numeric(selected_values)))
+      if(all(selected_values)==0){
+        y_min <- min(selected_data)
+        y_max <- max(selected_data)}
       
       
-      plot(as.numeric(selected_data[-1]), 
+      
+      # Plota os dados selecionados
+      plot(selected_data, 
            type = "o", 
-           xlab = " ", 
-           ylab = " ", 
+           xlab = "Weeks", 
+           ylab = "Sales", 
            xaxt = "n",
            col = "darkblue",
            ylim = c(y_min, y_max))
+           
       if(all(selected_values)!=0){
+        
         lines(as.numeric(selected_values), 
               type = "o", 
               col = "red")}
       
-      axis(1, at = 1:length(selected_data[-1]), labels = colnames(selected_data)[-1])
+      
+    
+      # Adiciona os rótulos do eixo x
+      axis(1, at = 1:4, labels = paste("Week", 1:4))
+      
+      if(all(selected_values)!=0){
+      
+      legend("topright", legend = c("Predictions", "Real Values"), col = c("darkblue", "red"), lty = 1, pch = 1)}
+      else{legend("topright", legend = c("Predictions"), col = c("darkblue"), lty = 1, pch = 1)}
     })
     
   }) 
@@ -1587,13 +1609,13 @@ server <- function(input, output, session) {
     
     
     # Update the predictions reactive value
-    predictions_uni(data.frame(
-      Time = 1:length(Pred1),
-      Department1 = round(Pred1),
-      Department2 = round(Pred2),
-      Department3 = round(Pred3),
-      Department4 = round(Pred4)
-    ))
+    predictions_uni = data.frame(
+      Department = c(1,2,3,4),
+      Week1 = round(c(Pred1[1], Pred2[1], Pred3[1], Pred4[1])),
+      Week2 = round(c(Pred1[2], Pred2[2], Pred3[2], Pred4[2])),
+      Week3 = round(c(Pred1[3], Pred2[3], Pred3[3], Pred4[3])),
+      Week4 = round(c(Pred1[4], Pred2[4], Pred3[4], Pred4[4]))
+    )
     
     DataFrame <<- data.frame(Pred1,Pred2,Pred3,Pred4)
     
@@ -2015,12 +2037,9 @@ server <- function(input, output, session) {
     # total_cost_stock_output_uni
     
     output$predictions_table_uni <- renderDT({
-      predictions_rounded <- data.frame(lapply(predictions_uni(), function(x) {
-        if (is.numeric(x)) return(round(x, 2))
-        return(x)
-      }))
       
-      datatable(predictions_rounded, 
+      
+      datatable(predictions_uni, 
                 selection = 'single',
                 options = list(
                   pageLength = 10,     
@@ -2045,29 +2064,50 @@ server <- function(input, output, session) {
       
       if (length(sel_row) == 0) return()
       
-      selected_data <- predictions_uni()[sel_row, ]
+      # Seleciona os dados da linha selecionada
+      selected_data <- predictions_uni[sel_row, 2:5]
       
-      selected_values <- result_df[sel_row, ]
+      # Converte os dados selecionados para um vetor numérico
+      selected_data <- as.numeric(selected_data)
+      
+      print(result_df)
+      
+      selected_values <- as.numeric(c(result_df[1, sel_row], result_df[2, sel_row], result_df[3, sel_row], result_df[4, sel_row]))
+      
+      # Calcula os limites do gráfico
+      y_min <- min(selected_values,selected_data)
+      y_max <- max(selected_values,selected_data)
+      
+      if(all(selected_values)==0){
+        y_min <- min(selected_data)
+        y_max <- max(selected_data)}
       
       
-      y_min <- min(c(as.numeric(selected_data[-1]), as.numeric(selected_values)))
-      y_max <- max(c(as.numeric(selected_data[-1]), as.numeric(selected_values)))
       
-      
-      
-      plot(as.numeric(selected_data[-1]), 
+      # Plota os dados selecionados
+      plot(selected_data, 
            type = "o", 
-           xlab = " ", 
-           ylab = " ", 
+           xlab = "Weeks", 
+           ylab = "Sales", 
            xaxt = "n",
            col = "darkblue",
            ylim = c(y_min, y_max))
+      
       if(all(selected_values)!=0){
+        
         lines(as.numeric(selected_values), 
               type = "o", 
               col = "red")}
       
-      axis(1, at = 1:length(selected_data[-1]), labels = colnames(selected_data)[-1])
+      
+      
+      # Adiciona os rótulos do eixo x
+      axis(1, at = 1:4, labels = paste("Week", 1:4))
+      
+      if(all(selected_values)!=0){
+        legend("topright", legend = c("Predictions", "Real Values"), col = c("darkblue", "red"), lty = 1, pch = 1)}
+      else{legend("topright", legend = c("Predictions"), col = c("darkblue"), lty = 1, pch = 1)}
+      
     })
   }) 
   
@@ -2139,13 +2179,13 @@ server <- function(input, output, session) {
     
     
     # Update the predictions reactive value
-    predictions_multi(data.frame(
-      Time = 1:length(Pred1),
-      Department1 = round(Pred1),
-      Department2 = round(Pred2),
-      Department3 = round(Pred3),
-      Department4 = round(Pred4)
-    ))
+    predictions_multi = data.frame(
+      Department = c(1,2,3,4),
+      Week1 = round(c(Pred1[1], Pred2[1], Pred3[1], Pred4[1])),
+      Week2 = round(c(Pred1[2], Pred2[2], Pred3[2], Pred4[2])),
+      Week3 = round(c(Pred1[3], Pred2[3], Pred3[3], Pred4[3])),
+      Week4 = round(c(Pred1[4], Pred2[4], Pred3[4], Pred4[4]))
+    )
     
     DataFrame_multi <<- data.frame(Pred1,Pred2,Pred3,Pred4)
 
@@ -2554,12 +2594,9 @@ server <- function(input, output, session) {
     })
     
     output$predictions_table_multi <- renderDT({
-      predictions_rounded_multi <- data.frame(lapply(predictions_multi(), function(x) {
-        if (is.numeric(x)) return(round(x, 2))
-        return(x)
-      }))
       
-      datatable(predictions_rounded_multi, 
+      
+      datatable(predictions_multi, 
                 selection = 'single',
                 options = list(
                   pageLength = 10,     
@@ -2585,26 +2622,42 @@ server <- function(input, output, session) {
       print(result_df)
       if (length(sel_row) == 0) return()
       
-      selected_data <- predictions_multi()[sel_row, ]
-      selected_values <- result_df[sel_row, ]
+      selected_data <- predictions_multi[sel_row, 2:5]
       
-      y_min <- min(c(as.numeric(selected_data[-1]), as.numeric(selected_values)))
-      y_max <- max(c(as.numeric(selected_data[-1]), as.numeric(selected_values)))
+      selected_data <- as.numeric(selected_data)
       
+      selected_values <- as.numeric(c(result_df[1, sel_row], result_df[2, sel_row], result_df[3, sel_row], result_df[4, sel_row]))
       
-      plot(as.numeric(selected_data[-1]), 
+      y_min <- min(selected_values,selected_data)
+      y_max <- max(selected_values,selected_data)
+      
+      if(all(selected_values)==0){
+        y_min <- min(selected_data)
+        y_max <- max(selected_data)}
+      
+      # Plota os dados selecionados
+      plot(selected_data, 
            type = "o", 
-           xlab = " ", 
-           ylab = " ", 
+           xlab = "Weeks", 
+           ylab = "Sales", 
            xaxt = "n",
            col = "darkblue",
            ylim = c(y_min, y_max))
+      
       if(all(selected_values)!=0){
+        
         lines(as.numeric(selected_values), 
               type = "o", 
               col = "red")}
       
-      axis(1, at = 1:length(selected_data[-1]), labels = colnames(selected_data)[-1])
+      
+      # Adiciona os rótulos do eixo x
+      axis(1, at = 1:4, labels = paste("Week", 1:4))
+      
+      if(all(selected_values)!=0){
+        legend("topright", legend = c("Predictions", "Real Values"), col = c("darkblue", "red"), lty = 1, pch = 1)}
+      else{legend("topright", legend = c("Predictions"), col = c("darkblue"), lty = 1, pch = 1)}
+      
     })
     
   })    
