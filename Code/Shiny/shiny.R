@@ -39,389 +39,397 @@ optimization_results_multi <- list(hired_workers  = matrix(rep(0, 12), ncol = 4,
 DataFrame_multi <- data.frame(matrix(rep(0,16), nrow = 4, ncol = 4))
 
 # Define a UI para a aplicação
-ui <- fluidPage(
+# Define a UI para a aplicação
+# Define a UI para a aplicação
+# Define a UI para a aplicação
+ui <- navbarPage(
+  title = "Análise de Vendas do Walmart",
   theme = shinytheme("flatly"),
-  titlePanel("Análise de Vendas do Walmart"),
-  tabsetPanel(id = 'opcoes',
-              tabPanel("Univariado",
-                       sidebarLayout(
-                         sidebarPanel(
-                           sliderTextInput("selected_dates_uni", "Selecione um intervalo de datas:",
-                                           choices = date_sequence,
-                                           grid = FALSE),
-                           selectInput("package", "Pacote:",
-                                       choices = c("rminer" = "rminer", "forecast" = "forecast")),
-                           uiOutput("model_selector_uni"),
-                           selectInput("objetivo_uni", "Escolha o objetivo:",
-                                       choices = c("Uniobjetivo", "Multiobjetivo")),
-                           uiOutput("objetivo_selector"),
-                           selectInput("otimizacao_uni", "Modelo de Otimização:",
-                                       choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo","RBGA","RBGA.BIN","Tabu","NSGA II")),
-                           uiOutput("otimizacao_selector"),
-                           actionButton("predict_button_uni", "Predict")
-                         ),
-                         mainPanel(
-                           tabsetPanel(id = "uni_tabs",
-                             tabPanel("Previsões",
-                                      fluidRow(
-                                        column(12,
-                                               DTOutput("predictions_table_uni")
-                                        )
-                                      ),
-                                      fluidRow(
-                                        column(12,
-                                               plotOutput("selected_plot_uni")
-                                        )
-                                      )
-                             ),
-                             tabPanel("Otimização",
-                                      fluidRow(
-                                        conditionalPanel(
-                                          condition = "input.otimizacao_uni == 'NGSA-II'",
-                                          column(6,
-                                               numericInput("pareto_numeric",
-                                                            label=paste("Pareto front point)"), 
-                                                            min=1,
-                                                            max=1,
-                                                            step=1,
-                                                            value=1
-                                               )
-                                      )
-                                      )),
-                                      fluidRow(
-                                        conditionalPanel(
-                                          condition = "input.otimizacao_uni == 'NGSA-II'",
-                                          column(12,
-                                               plotOutput("pareto_curve")
-                                        )
-                                      )),
-                                      fluidRow(
-                                    
-                                        column(6, 
-                                               div(style = "text-align: center;",
-                                                   h4("Trabalhadores a Contratar"),
-                                                   tableOutput("hired_workers_table_uni")
-                                               ),
-                                          column(6,
-                                                div(style = "text-align: center;",
-                                                    textOutput("total_number_workers_output_uni"),
-                                                    textOutput("total_cost_workers_output_uni")
-                                                )
-                                         )
-                                  
-                                        ),
-                                        column(6,
-                                               div(style = "text-align: center;",
-                                                   h4("Stock"),
-                                                   tableOutput("stock_uni")
-                                               ),
-                                         column(6,
-                                                div(style = "text-align: center;",
-                                                    textOutput("total_cost_stock_output_uni")
-                                                )
-                                         )
-                                        )
-                                        
-                                      ),
-                                      fluidRow(
-                                        column(6, 
-                                               div(style = "text-align: center;",
-                                                   h4("Encomendas a Realizar"),
-                                                   tableOutput("product_orders_table_uni")
-                                               ),
-                                               column(6,
-                                                      div(style = "text-align: center;",
-                                                          textOutput("total_number_orders_output_uni"),
-                                                          textOutput("total_cost_orders_output_uni")
-                                                      )
-                                               )),
-                                               column(6,
-                                                     div(style = "text-align: center;",
-                                                         h4("Vendas"),
-                                                         tableOutput("sales_uni")
-                                                     )
-                                
-                                               ),
-                                               column(6,
-                                                       div(style = "text-align: center;",
-                                                           textOutput("total_sales_output_uni"),
-                                                       ),
-                                                       br(), br(),br(),
-                                               )
-                                        
-                                      ),
-                                      
-                                      fluidRow(
-                                        column(12, align = "center",
-                                               div(style = "margin-bottom: 20px;", 
-                                                   textOutput("monthly_profit_output_uni")
-                                               ),
-                                               div(style = "margin-bottom: 20px;", 
-                                                   textOutput("monthly_effort_output_uni")
-                                               ),
-                                               div(style = "margin-bottom: 20px;", 
-                                                   textOutput("total_cost_output_uni")
-                                               )
-                                        
-                                        )
-                                      )
-                                )
-                             )
-                         )
-                       )
-              ),
-              tabPanel("Multivariado",
-                       sidebarLayout(
-                         sidebarPanel(
-                           sliderTextInput("selected_dates_multi", "Selecione um intervalo de datas:",
-                                           choices = date_sequence,
-                                           grid = FALSE),
-                           selectInput("variable_type", "Tipo de variaveis:",
-                                       choices = c("Endogenas" = "Endogenas", "Exogenas" = "Exogenas")),
-                           uiOutput("type_selector"),
-                           selectInput("objetivo_multi", "Escolha o objetivo:",
-                                       choices = c("Uniobjetivo", "Multiobjetivo")),
-                           uiOutput("objetivo_selector"),
-                           selectInput("otimizacao_multi", "Modelo de Otimização:",
-                                       choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo","RBGA","RBGA.BIN","Tabu","NSGA II")),
-                           uiOutput("otimizacao_multi_selector"),
-                           actionButton("predict_button_multi", "Predict")
-                         ),
-                         mainPanel(
-                           tabsetPanel(id = "multi_tabs",
-                             tabPanel("Previsões",
-                                      fluidRow(
-                                        column(12,
-                                               DTOutput("predictions_table_multi")
-                                        )
-                                      ),
-                                      fluidRow(
-                                        column(12,
-                                               plotOutput("selected_plot_multi")
-                                        )
-                                      )
-                             ),
-                             tabPanel("Otimização",
-                                      fluidRow(
-                                        conditionalPanel(
-                                          condition = "input.otimizacao_multi == 'NGSA-II'",
-                                          column(6,
-                                                 numericInput("pareto_numeric_multi",
-                                                              label=paste("Pareto front point"), 
-                                                              min=1,
-                                                              max=1,
-                                                              step=1,
-                                                              value=1
-                                                 )
+  
+  # Tab "Melhor Modelo"
+  tabPanel("Melhor Modelo",
+           sidebarLayout(
+             sidebarPanel(
+               sliderTextInput("selected_dates_best_model", "Selecione um intervalo de datas:",
+                               choices = date_sequence,
+                               grid = FALSE),
+               actionButton("predict_button_best_model", "Predict")
+             ),
+             mainPanel(
+               tabsetPanel(
+                 tabPanel("Previsões",
+                          fluidRow(
+                            column(12,
+                                   DTOutput("predictions_table_best_model")
+                            )
+                          ),
+                          fluidRow(
+                            column(12,
+                                   plotOutput("selected_plot_best_model")
+                            )
+                          ),
+                          fluidRow(
+                            column(12, div(style = "text-align: center;", textOutput("rmse_best_model"))),
+                            column(12, div(style = "text-align: center;", textOutput("nmae_best_model"))),
+                            column(12, div(style = "text-align: center;", textOutput("r2_best_model")))
+                          )
+                 ),
+                 tabPanel("Otimização",
+                          fluidRow(
+                            column(6, 
+                                   div(style = "text-align: center;",
+                                       h4("Trabalhadores a Contratar"),
+                                       tableOutput("hired_workers_table_best")
+                                   ),
+                                   column(6,
+                                          div(style = "text-align: center;",
+                                              textOutput("total_number_workers_output_best"),
+                                              textOutput("total_cost_workers_output_best")
                                           )
-                                        )),
-                                      fluidRow(
-                                        conditionalPanel(
-                                          condition = "input.otimizacao_multi == 'NGSA-II'",
-                                          column(12,
-                                                 plotOutput("pareto_curve_multi")
+                                   )
+                            ),
+                            column(6,
+                                   div(style = "text-align: center;",
+                                       h4("Stock"),
+                                       tableOutput("stock_best")
+                                   ),
+                                   column(6,
+                                          div(style = "text-align: center;",
+                                              textOutput("total_cost_stock_output_best")
                                           )
-                                        )),
-                                      fluidRow(
-                                        column(6, 
-                                               div(style = "text-align: center;",
-                                                   h4("Trabalhadores a Contratar"),
-                                                   tableOutput("hired_workers_table_multi")
-                                               ),
-                                               column(6,
-                                                      div(style = "text-align: center;",
-                                                          textOutput("total_number_workers_output_multi"),
-                                                          textOutput("total_cost_workers_output_multi")
-                                                      )
-                                               )
-                                               
-                                        ),
-                                        column(6,
-                                               div(style = "text-align: center;",
-                                                   h4("Stock"),
-                                                   tableOutput("stock_multi")
-                                               ),
-                                               column(6,
-                                                      div(style = "text-align: center;",
-                                                          textOutput("total_cost_stock_output_multi")
-                                                      )
-                                               )
-                                        )
-                                        
-                                      ),
-                                      fluidRow(
-                                        column(6, 
-                                               div(style = "text-align: center;",
-                                                   h4("Encomendas a Realizar"),
-                                                   tableOutput("product_orders_table_multi")
-                                               ),
-                                               column(6,
-                                                      div(style = "text-align: center;",
-                                                          textOutput("total_number_orders_output_multi"),
-                                                          textOutput("total_cost_orders_output_multi")
-                                                      )
-                                               )
-                                        ),
-                                        column(6,
-                                               div(style = "text-align: center;",
-                                                   h4("Vendas"),
-                                                   tableOutput("sales_multi")
-                                               )
-                                               
-                                        ),
-                                        
-                                        column(6,
-                                               div(style = "text-align: center;",
-                                                   textOutput("total_sales_output_multi"),
-                                               ),
-                                               br(), br(),br(),
-                                        ),
-                                        
-                                        fluidRow(
-                                          column(12, align = "center",
-                                                 div(style = "margin-bottom: 20px;", 
-                                                     textOutput("monthly_profit_output_multi")
-                                                 ),
-                                                 div(style = "margin-bottom: 20px;", 
-                                                     textOutput("monthly_effort_output_multi")
-                                                 ),
-                                                 div(style = "margin-bottom: 20px;", 
-                                                     textOutput("total_cost_output_multi")
-                                                 )
+                                   )
+                            )
+                          ),
+                          fluidRow(
+                            column(6, 
+                                   div(style = "text-align: center;",
+                                       h4("Encomendas a Realizar"),
+                                       tableOutput("product_orders_table_best")
+                                   ),
+                                   column(6,
+                                          div(style = "text-align: center;",
+                                              textOutput("total_number_orders_output_best"),
+                                              textOutput("total_cost_orders_output_best")
                                           )
+                                   )
+                            ),
+                            column(6,
+                                   div(style = "text-align: center;",
+                                       h4("Vendas"),
+                                       tableOutput("sales_best")
+                                   )
+                            ),
+                            column(6,
+                                   div(style = "text-align: center;",
+                                       textOutput("total_sales_output_best"),
+                                   ),
+                                   br(), br(),br(),
+                            )
+                          ),
+                          fluidRow(
+                            column(12, align = "center",
+                                   div(style = "margin-bottom: 20px;", 
+                                       textOutput("monthly_profit_output_best")
+                                   ),
+                                   div(style = "margin-bottom: 20px;", 
+                                       textOutput("monthly_effort_output_best")
+                                   ),
+                                   div(style = "margin-bottom: 20px;", 
+                                       textOutput("total_cost_output_best")
+                                   )
+                            )
+                          )
+                 )
+               )
+             )
+           )
+  ),
+  
+  # Tab "Univariado"
+  tabPanel("Univariado",
+           sidebarLayout(
+             sidebarPanel(
+               sliderTextInput("selected_dates_uni", "Selecione um intervalo de datas:",
+                               choices = date_sequence,
+                               grid = FALSE),
+               selectInput("package", "Pacote:",
+                           choices = c("rminer" = "rminer", "forecast" = "forecast")),
+               uiOutput("model_selector_uni"),
+               selectInput("objetivo_uni", "Escolha o objetivo:",
+                           choices = c("Uniobjetivo", "Multiobjetivo")),
+               uiOutput("objetivo_selector"),
+               selectInput("otimizacao_uni", "Modelo de Otimização:",
+                           choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo","RBGA","RBGA.BIN","Tabu","NSGA II")),
+               uiOutput("otimizacao_selector"),
+               actionButton("predict_button_uni", "Predict")
+             ),
+             mainPanel(
+               tabsetPanel(id = "uni_tabs",
+                 tabPanel("Previsões",
+                          fluidRow(
+                            column(12,
+                                   DTOutput("predictions_table_uni")
+                            )
+                          ),
+                          fluidRow(
+                            column(12,
+                                   plotOutput("selected_plot_uni")
+                            )
+                          ),
+                          fluidRow(
+                            column(12, div(style = "text-align: center;", textOutput("rmse_uni"))),
+                            column(12, div(style = "text-align: center;", textOutput("nmae_uni"))),
+                            column(12, div(style = "text-align: center;", textOutput("r2_uni")))
+                          )
+                 ),
+                 tabPanel("Otimização",
+                          fluidRow(
+                            conditionalPanel(
+                              condition = "input.otimizacao_uni == 'NGSA-II'",
+                              column(6,
+                                   numericInput("pareto_numeric",
+                                                label=paste("Pareto front point"), 
+                                                min=1,
+                                                max=1,
+                                                step=1,
+                                                value=1
+                                   )
+                              )
+                            )
+                          ),
+                          fluidRow(
+                            conditionalPanel(
+                              condition = "input.otimizacao_uni == 'NGSA-II'",
+                              column(12,
+                                   plotOutput("pareto_curve")
+                              )
+                            )
+                          ),
+                          fluidRow(
+                            column(6, 
+                                   div(style = "text-align: center;",
+                                       h4("Trabalhadores a Contratar"),
+                                       tableOutput("hired_workers_table_uni")
+                                   ),
+                              column(6,
+                                    div(style = "text-align: center;",
+                                        textOutput("total_number_workers_output_uni"),
+                                        textOutput("total_cost_workers_output_uni")
+                                    )
+                              
+                              )
+                            ),
+                            column(6,
+                                   div(style = "text-align: center;",
+                                       h4("Stock"),
+                                       tableOutput("stock_uni")
+                                   ),
+                                 column(6,
+                                        div(style = "text-align: center;",
+                                            textOutput("total_cost_stock_output_uni")
                                         )
-                                        
-                                      )         
-                             )
-                           )
-                         )
-                       )
-              ),
-              tabPanel("Dataset",
-                       fluidRow(
-                         column(12,
-                                DTOutput("data_table")
-                         )
-                       )
-              ),
-              tabPanel("Vendas totais por departamento",
-                       fluidRow(
-                         column(6, plotlyOutput("gauge_WSdep1")),
-                         column(6, plotlyOutput("gauge_WSdep2")),
-                         column(6, plotlyOutput("gauge_WSdep3")),
-                         column(6, plotlyOutput("gauge_WSdep4"))
-                       )
-              ),
-              tabPanel("Correlação de Spearman",
-                       fluidRow(
-                         column(12,
-                                plotlyOutput("spearman_correlation_plot")
-                         )
-                       )
-              ),
-              
-              
-              tabPanel("Melhor Modelo",
-                       sidebarLayout(
-                         sidebarPanel(
-                           sliderTextInput("selected_dates_best_model", "Selecione um intervalo de datas:",
-                                           choices = date_sequence,
-                                           grid = FALSE),
-                           actionButton("predict_button_best_model", "Predict")
-                         ),
-                         mainPanel(
-                           tabsetPanel(
-                             tabPanel("Previsões",
-                                      fluidRow(
-                                        column(12,
-                                               DTOutput("predictions_table_best_model")
-                                        )
-                                      ),
-                                      fluidRow(
-                                        column(12,
-                                               plotOutput("selected_plot_best_model")
-                                        )
-                                      )
-                                      
-                             ),
-                             tabPanel("Otimização",
-                                      fluidRow(
-                                        column(6, 
-                                               div(style = "text-align: center;",
-                                                   h4("Trabalhadores a Contratar"),
-                                                   tableOutput("hired_workers_table_best")
-                                               ),
-                                               column(6,
-                                                      div(style = "text-align: center;",
-                                                          textOutput("total_number_workers_output_best"),
-                                                          textOutput("total_cost_workers_output_best")
-                                                      )
-                                               )
-                                               
-                                        ),
-                                        column(6,
-                                               div(style = "text-align: center;",
-                                                   h4("Stock"),
-                                                   tableOutput("stock_best")
-                                               ),
-                                               column(6,
-                                                      div(style = "text-align: center;",
-                                                          textOutput("total_cost_stock_output_best")
-                                                      )
-                                               )
-                                        )
-                                        
-                                      ),
-                                      fluidRow(
-                                        column(6, 
-                                               div(style = "text-align: center;",
-                                                   h4("Encomendas a Realizar"),
-                                                   tableOutput("product_orders_table_best")
-                                               ),
-                                               column(6,
-                                                      div(style = "text-align: center;",
-                                                          textOutput("total_number_orders_output_best"),
-                                                          textOutput("total_cost_orders_output_best")
-                                                      )
-                                               )
-                                        ),
-                                        column(6,
-                                               div(style = "text-align: center;",
-                                                   h4("Vendas"),
-                                                   tableOutput("sales_best")
-                                               )
-                                               
-                                        ),
-                                        
-                                        column(6,
-                                               div(style = "text-align: center;",
-                                                   textOutput("total_sales_output_best"),
-                                               ),
-                                               br(), br(),br(),
-                                        ),
-                                        
-                                        fluidRow(
-                                          column(12, align = "center",
-                                                 div(style = "margin-bottom: 20px;", 
-                                                     textOutput("monthly_profit_output_best")
-                                                 ),
-                                                 div(style = "margin-bottom: 20px;", 
-                                                     textOutput("monthly_effort_output_best")
-                                                 ),
-                                                 div(style = "margin-bottom: 20px;", 
-                                                     textOutput("total_cost_output_best")
-                                                 )
+                                 )
+                            )
+                          ),
+                          fluidRow(
+                            column(6, 
+                                   div(style = "text-align: center;",
+                                       h4("Encomendas a Realizar"),
+                                       tableOutput("product_orders_table_uni")
+                                   ),
+                                   column(6,
+                                          div(style = "text-align: center;",
+                                              textOutput("total_number_orders_output_uni"),
+                                              textOutput("total_cost_orders_output_uni")
                                           )
-                                        )
-                                        
-                                        
-                                      )
-                                      
-                             )
-                           )
-                         )
-                       ))
-  ))
+                                   )
+                            ),
+                            column(6,
+                                   div(style = "text-align: center;",
+                                       h4("Vendas"),
+                                       tableOutput("sales_uni")
+                                   )
+                            ),
+                            column(6,
+                                   div(style = "text-align: center;",
+                                       textOutput("total_sales_output_uni"),
+                                   ),
+                                   br(), br(),br(),
+                            )
+                          ),
+                          fluidRow(
+                            column(12, align = "center",
+                                   div(style = "margin-bottom: 20px;", 
+                                       textOutput("monthly_profit_output_uni")
+                                   ),
+                                   div(style = "margin-bottom: 20px;", 
+                                       textOutput("monthly_effort_output_uni")
+                                   ),
+                                   div(style = "margin-bottom: 20px;", 
+                                       textOutput("total_cost_output_uni")
+                                   )
+                            )
+                          )
+                 )
+               )
+             )
+           )
+  ),
+  
+  # Tab "Multivariado"
+  tabPanel("Multivariado",
+           sidebarLayout(
+             sidebarPanel(
+               sliderTextInput("selected_dates_multi", "Selecione um intervalo de datas:",
+                               choices = date_sequence,
+                               grid = FALSE),
+               selectInput("variable_type", "Tipo de variaveis:",
+                           choices = c("Endogenas" = "Endogenas", "Exogenas" = "Exogenas")),
+               uiOutput("type_selector"),
+               selectInput("objetivo_multi", "Escolha o objetivo:",
+                           choices = c("Uniobjetivo", "Multiobjetivo")),
+               uiOutput("objetivo_selector"),
+               selectInput("otimizacao_multi", "Modelo de Otimização:",
+                           choices = c("Hill Climbing", "Simulated Annealing", "Montecarlo","RBGA","RBGA.BIN","Tabu","NSGA II")),
+               uiOutput("otimizacao_multi_selector"),
+               actionButton("predict_button_multi", "Predict")
+             ),
+             mainPanel(
+               tabsetPanel(id = "multi_tabs",
+                 tabPanel("Previsões",
+                          fluidRow(
+                            column(12,
+                                   DTOutput("predictions_table_multi")
+                            )
+                          ),
+                          fluidRow(
+                            column(12,
+                                   plotOutput("selected_plot_multi")
+                            )
+                          ),
+                          fluidRow(
+                            column(12, div(style = "text-align: center;", textOutput("rmse_multi"))),
+                            column(12, div(style = "text-align: center;", textOutput("nmae_multi"))),
+                            column(12, div(style = "text-align: center;", textOutput("r2_multi")))
+                          )
+                 ),
+                 tabPanel("Otimização",
+                          fluidRow(
+                            conditionalPanel(
+                              condition = "input.otimizacao_multi == 'NGSA-II'",
+                              column(6,
+                                     numericInput("pareto_numeric_multi",
+                                                  label=paste("Pareto front point"), 
+                                                  min=1,
+                                                  max=1,
+                                                  step=1,
+                                                  value=1
+                                     )
+                              )
+                            )
+                          ),
+                          fluidRow(
+                            conditionalPanel(
+                              condition = "input.otimizacao_multi == 'NGSA-II'",
+                              column(12,
+                                     plotOutput("pareto_curve_multi")
+                              )
+                            )
+                          ),
+                          fluidRow(
+                            column(6, 
+                                   div(style = "text-align: center;",
+                                       h4("Trabalhadores a Contratar"),
+                                       tableOutput("hired_workers_table_multi")
+                                   ),
+                                   column(6,
+                                          div(style = "text-align: center;",
+                                              textOutput("total_number_workers_output_multi"),
+                                              textOutput("total_cost_workers_output_multi")
+                                          )
+                                   )
+                            ),
+                            column(6,
+                                   div(style = "text-align: center;",
+                                       h4("Stock"),
+                                       tableOutput("stock_multi")
+                                   ),
+                                   column(6,
+                                          div(style = "text-align: center;",
+                                              textOutput("total_cost_stock_output_multi")
+                                          )
+                                   )
+                            )
+                          ),
+                          fluidRow(
+                            column(6, 
+                                   div(style = "text-align: center;",
+                                       h4("Encomendas a Realizar"),
+                                       tableOutput("product_orders_table_multi")
+                                   ),
+                                   column(6,
+                                          div(style = "text-align: center;",
+                                              textOutput("total_number_orders_output_multi"),
+                                              textOutput("total_cost_orders_output_multi")
+                                          )
+                                   )
+                            ),
+                            column(6,
+                                   div(style = "text-align: center;",
+                                       h4("Vendas"),
+                                       tableOutput("sales_multi")
+                                   )
+                            ),
+                            column(6,
+                                   div(style = "text-align: center;",
+                                       textOutput("total_sales_output_multi"),
+                                   ),
+                                   br(), br(),br(),
+                            )
+                          ),
+                          fluidRow(
+                            column(12, align = "center",
+                                   div(style = "margin-bottom: 20px;", 
+                                       textOutput("monthly_profit_output_multi")
+                                   ),
+                                   div(style = "margin-bottom: 20px;", 
+                                       textOutput("monthly_effort_output_multi")
+                                   ),
+                                   div(style = "margin-bottom: 20px;", 
+                                       textOutput("total_cost_output_multi")
+                                   )
+                            )
+                          )
+                 )
+               )
+             )
+           )
+  ),
+  tabPanel("Dataset",
+           fluidRow(
+             column(12,
+                    DTOutput("data_table")
+             )
+           )
+  ),
+  tabPanel("Vendas totais por departamento",
+           fluidRow(
+             column(6, plotlyOutput("gauge_WSdep1")),
+             column(6, plotlyOutput("gauge_WSdep2")),
+             column(6, plotlyOutput("gauge_WSdep3")),
+             column(6, plotlyOutput("gauge_WSdep4"))
+           )
+  ),
+  tabPanel("Correlação de Spearman",
+           fluidRow(
+             column(12,
+                    plotlyOutput("spearman_correlation_plot")
+             )
+           )
+  )
+)
+
+
 
 
 
@@ -1319,10 +1327,10 @@ server <- function(input, output, session) {
     get_real_data(selected_inverse_index)
     
     
-    Pred1 <- Univariado_Rminer(departamento = d1, nomedepartamento = "Departamento 1", modelo = "ksvm", D = selected_inverse_index)
+    Pred1 <- Univariado_Rminer(departamento = d1, nomedepartamento = "Departamento 1", modelo = "lm", D = selected_inverse_index)
     Pred2 <- Univariado_Rminer(departamento = d2, nomedepartamento = "Departamento 2", modelo = "lm", D = selected_inverse_index)
     Pred3 <- Univariado_Rminer(departamento = d3, nomedepartamento = "Departamento 3", modelo = "mars", D = selected_inverse_index)
-    Pred4 <- Univariado_Rminer(departamento = d4, nomedepartamento = "Departamento 4", modelo = "ksvm", D = selected_inverse_index)
+    Pred4 <- Univariado_Rminer(departamento = d4, nomedepartamento = "Departamento 4", modelo = "lm", D = selected_inverse_index)
     
     
     # Update the predictions reactive value
@@ -1508,6 +1516,41 @@ server <- function(input, output, session) {
       
       selected_values <- as.numeric(c(result_df[1, sel_row], result_df[2, sel_row], result_df[3, sel_row], result_df[4, sel_row]))
       
+      MAE=round(mmetric(y=selected_values,x=selected_data,metric="MAE"),2)
+      print(MAE)
+      NMAE=round(mmetric(y=selected_values,x=selected_data,metric="NMAE"),2)
+      print(NMAE)
+      RMSE=round(mmetric(y=selected_values,x=selected_data,metric="RMSE"),2)
+      print(RMSE)
+      RRSE=round(mmetric(y=selected_values,x=selected_data,metric="RRSE"),2)
+      print(RRSE)
+      R2=round(mmetric(y=selected_values,x=selected_data,metric="R22"),2)
+      print(R2)
+      
+      output$rmse_best_model <- renderText({ 
+        if (any(selected_values != 0)) {
+          paste("MAE: ", MAE)
+        } else {
+          ""
+        }
+      })
+      
+      output$nmae_best_model <- renderText({ 
+        if (any(selected_values != 0)) {
+          paste("NMAE: ", NMAE)
+        } else {
+          ""
+        }
+      })
+      
+      output$r2_best_model <- renderText({ 
+        if (any(selected_values != 0)) {
+          paste("R2: ", R2)
+        } else {
+          ""
+        }
+      })
+      
       # Calcula os limites do gráfico
       y_min <- min(selected_values,selected_data)
       y_max <- max(selected_values,selected_data)
@@ -1544,6 +1587,8 @@ server <- function(input, output, session) {
       legend("topright", legend = c("Predictions", "Real Values"), col = c("darkblue", "red"), lty = 1, pch = 1)}
       else{legend("topright", legend = c("Predictions"), col = c("darkblue"), lty = 1, pch = 1)}
     })
+    
+    
     
   }) 
  
@@ -2073,6 +2118,42 @@ server <- function(input, output, session) {
       print(result_df)
       
       selected_values <- as.numeric(c(result_df[1, sel_row], result_df[2, sel_row], result_df[3, sel_row], result_df[4, sel_row]))
+      
+      MAE=round(mmetric(y=selected_values,x=selected_data,metric="MAE"),2)
+      print(MAE)
+      NMAE=round(mmetric(y=selected_values,x=selected_data,metric="NMAE"),2)
+      print(NMAE)
+      RMSE=round(mmetric(y=selected_values,x=selected_data,metric="RMSE"),2)
+      print(RMSE)
+      RRSE=round(mmetric(y=selected_values,x=selected_data,metric="RRSE"),2)
+      print(RRSE)
+      R2=round(mmetric(y=selected_values,x=selected_data,metric="R22"),2)
+      print(R2)
+      
+      
+      output$rmse_uni <- renderText({ 
+        if (any(selected_values != 0)) {
+          paste("MAE: ", NMAE)
+        } else {
+          ""
+        }
+      })
+      
+      output$nmae_uni <- renderText({ 
+        if (any(selected_values != 0)) {
+          paste("NMAE: ", NMAE)
+        } else {
+          ""
+        }
+      })
+      
+      output$r2_uni <- renderText({ 
+        if (any(selected_values != 0)) {
+          paste("R2: ", R2)
+        } else {
+          ""
+        }
+      })
       
       # Calcula os limites do gráfico
       y_min <- min(selected_values,selected_data)
@@ -2627,6 +2708,45 @@ server <- function(input, output, session) {
       selected_data <- as.numeric(selected_data)
       
       selected_values <- as.numeric(c(result_df[1, sel_row], result_df[2, sel_row], result_df[3, sel_row], result_df[4, sel_row]))
+      
+      MAE=round(mmetric(y=selected_values,x=selected_data,metric="MAE"),2)
+      print(MAE)
+      NMAE=round(mmetric(y=selected_values,x=selected_data,metric="NMAE"),2)
+      print(NMAE)
+      RMSE=round(mmetric(y=selected_values,x=selected_data,metric="RMSE"),2)
+      print(RMSE)
+      RRSE=round(mmetric(y=selected_values,x=selected_data,metric="RRSE"),2)
+      print(RRSE)
+      R2=round(mmetric(y=selected_values,x=selected_data,metric="R22"),2)
+      print(R2)
+      
+      
+      output$nmae_multi <- renderText({ 
+        if (all(selected_values != 0)) {
+          paste("NMAE: ", NMAE)
+        } else {
+          ""
+        }
+      })
+      
+      output$rmse_multi <- renderText({ 
+        if (all(selected_values != 0)) {
+          paste("MAE: ", MAE)
+        } else {
+          ""
+        }
+      })
+      
+      
+      
+      output$r2_multi <- renderText({ 
+        if (all(selected_values != 0)) {
+          paste("R2: ", R2)
+        } else {
+          ""
+        }
+      })
+      
       
       y_min <- min(selected_values,selected_data)
       y_max <- max(selected_values,selected_data)
