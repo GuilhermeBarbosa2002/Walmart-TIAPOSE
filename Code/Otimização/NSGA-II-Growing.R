@@ -98,9 +98,10 @@ nsga_growing <- function(){
 
   for (i in I) {
     P <- G$value  # objetivos f1 e f2
+    P[,1] <- -P[,1]
     # color from light gray (75) to dark (1):
     COL <- paste("gray", round(76 - i * 0.75), sep = "")
-    if (i == 1) plot(P, xlim = c(0, max(P[,1]) * 1.1), ylim = c(0, max(P[,2]) * 1.1),
+    if (i == 1) plot(P, xlim = c(min(P[,1]), max(P[,1]) * 1.1), ylim = c(0, max(P[,2]) * 1.1),
                      xlab = "f1", ylab = "f2", cex = 0.5, col = COL, main = "Pareto Front Evolution")
     Pareto <- P[G$pareto.optimal, ]
     # sort Pareto according to x axis:
@@ -116,5 +117,5 @@ nsga_growing <- function(){
 }
 
 ngsa = nsga_growing()
-print(paste("NGSA - ", ngsa))
+print(paste("NGSA-II HyperVolume -", ngsa))
 
