@@ -76,70 +76,66 @@ ui <- navbarPage(
                  ),
                  tabPanel("Otimização",
                           fluidRow(
-                            column(6, 
+                            column(6, align = "center",
                                    div(style = "text-align: center;",
-                                       h4("Trabalhadores a Contratar"),
-                                       tableOutput("hired_workers_table_best")
+                                       DTOutput("hired_workers_table_best")
                                    ),
-                                   column(6,
-                                          div(style = "text-align: center;",
-                                              textOutput("total_number_workers_output_best"),
-                                              textOutput("total_cost_workers_output_best")
-                                          )
+                                   div(style = "text-align: center; width: 150px; display: inline-block; margin:20px;", # Adicione margin: 10px; para a margem
+                                       uiOutput("total_number_workers_output_best")
+                                   ),
+                                   div(style = "text-align: center; width: 150px; display: inline-block; margin:20px;", # Adicione margin: 10px; para a margem
+                                       uiOutput("total_cost_workers_output_best")
                                    )
                             ),
-                            column(6,
+                            column(6, align = "center",
                                    div(style = "text-align: center;",
-                                       h4("Stock"),
-                                       tableOutput("stock_best")
+                                       DTOutput("stock_best")
                                    ),
-                                   column(6,
-                                          div(style = "text-align: center;",
-                                              textOutput("total_cost_stock_output_best")
-                                          )
+                                   div(style = "text-align: center; width: 150px; display: inline-block; margin: 20px;", # Adicione margin: 10px; para a margem
+                                       uiOutput("total_cost_stock_output_best")
                                    )
                             )
                           ),
                           fluidRow(
-                            column(6, 
+                            column(6, align = "center",
                                    div(style = "text-align: center;",
-                                       h4("Encomendas a Realizar"),
-                                       tableOutput("product_orders_table_best")
+                                       DTOutput("product_orders_table_best")
                                    ),
-                                   column(6,
-                                          div(style = "text-align: center;",
-                                              textOutput("total_number_orders_output_best"),
-                                              textOutput("total_cost_orders_output_best")
-                                          )
+                                   div(style = "text-align: center; width: 150px; display: inline-block; margin: 20px;", # Adicione margin: 10px; para a margem
+                                       uiOutput("total_number_orders_output_best")
+                                   ),
+                                   div(style = "text-align: center; width: 150px; display: inline-block; margin: 20px;", # Adicione margin: 10px; para a margem
+                                       uiOutput("total_cost_orders_output_best")
                                    )
                             ),
-                            column(6,
+                            column(6, align = "center",
                                    div(style = "text-align: center;",
-                                       h4("Vendas"),
-                                       tableOutput("sales_best")
-                                   )
-                            ),
-                            column(6,
-                                   div(style = "text-align: center;",
-                                       textOutput("total_sales_output_best"),
+                                       DTOutput("sales_best")
                                    ),
-                                   br(), br(),br(),
+                                   div(style = "text-align: center; width: 150px; display: inline-block; margin: 20px;", # Adicione margin: 10px; para a margem
+                                       uiOutput("total_sales_output_best")
+                                   )
                             )
                           ),
                           fluidRow(
                             column(12, align = "center",
-                                   div(style = "margin-bottom: 20px;", 
-                                       textOutput("monthly_profit_output_best")
-                                   ),
-                                   div(style = "margin-bottom: 20px;", 
-                                       textOutput("monthly_effort_output_best")
-                                   ),
-                                   div(style = "margin-bottom: 20px;", 
-                                       textOutput("total_cost_output_best")
+                                   div(style = "margin-bottom: 10px; text-align: center;",
+                                       div(style = "display: inline-block; width: 200px; margin: 20px;", # Defina a largura fixa e adicione display: inline-block; e margin-right: 10px; para fazer os divs ficarem lado a lado
+                                           uiOutput("monthly_profit_output_best")
+                                       ),
+                                       div(style = "display: inline-block; width: 200px; margin: 20px;", # Defina a largura fixa e adicione display: inline-block; e margin-right: 10px; para fazer os divs ficarem lado a lado
+                                           uiOutput("monthly_effort_output_best")
+                                       ),
+                                       div(style = "display: inline-block; width: 200px; margin: 20px", # Defina a largura fixa e adicione display: inline-block; para fazer os divs ficarem lado a lado
+                                           uiOutput("total_cost_output_best")
+                                       )
                                    )
                             )
                           )
+                          
                  )
+                 
+                 #####
                )
              )
            )
@@ -187,13 +183,13 @@ ui <- navbarPage(
                             conditionalPanel(
                               condition = "input.otimizacao_uni == 'NGSA-II'",
                               column(6,
-                                   numericInput("pareto_numeric",
-                                                label=paste("Pareto front point"), 
-                                                min=1,
-                                                max=1,
-                                                step=1,
-                                                value=1
-                                   )
+                                     numericInput("pareto_numeric",
+                                                  label=paste("Pareto front point"), 
+                                                  min=1,
+                                                  max=1,
+                                                  step=1,
+                                                  value=1
+                                     )
                               )
                             )
                           ),
@@ -201,76 +197,70 @@ ui <- navbarPage(
                             conditionalPanel(
                               condition = "input.otimizacao_uni == 'NGSA-II'",
                               column(12,
-                                   plotOutput("pareto_curve")
+                                     plotOutput("pareto_curve")
                               )
                             )
                           ),
                           fluidRow(
-                            column(6, 
+                            column(6, align = "center",
                                    div(style = "text-align: center;",
-                                       h4("Trabalhadores a Contratar"),
-                                       tableOutput("hired_workers_table_uni")
+                                       DTOutput("hired_workers_table_uni")
                                    ),
-                              column(6,
-                                    div(style = "text-align: center;",
-                                        textOutput("total_number_workers_output_uni"),
-                                        textOutput("total_cost_workers_output_uni")
-                                    )
-                              
-                              )
+                                   div(style = "text-align: center; width: 150px; display: inline-block; margin:20px;", # Adicione margin: 20px; para a margem
+                                       uiOutput("total_number_workers_output_uni")
+                                   ),
+                                   div(style = "text-align: center; width: 150px; display: inline-block; margin:20px;",
+                                       uiOutput("total_cost_workers_output_uni")
+                                   )
                             ),
-                            column(6,
+                            column(6, align = "center",
                                    div(style = "text-align: center;",
-                                       h4("Stock"),
-                                       tableOutput("stock_uni")
+                                       DTOutput("stock_uni")
                                    ),
-                                 column(6,
-                                        div(style = "text-align: center;",
-                                            textOutput("total_cost_stock_output_uni")
-                                        )
-                                 )
+                                   div(style = "text-align: center; width: 150px; display: inline-block; margin:20px;",
+                                       uiOutput("total_cost_stock_output_uni")
+                                   )
                             )
                           ),
                           fluidRow(
-                            column(6, 
+                            column(6, align = "center",
                                    div(style = "text-align: center;",
-                                       h4("Encomendas a Realizar"),
-                                       tableOutput("product_orders_table_uni")
+                                       DTOutput("product_orders_table_uni")
                                    ),
-                                   column(6,
-                                          div(style = "text-align: center;",
-                                              textOutput("total_number_orders_output_uni"),
-                                              textOutput("total_cost_orders_output_uni")
-                                          )
+                                   div(style = "text-align: center; width: 150px; display: inline-block; margin:20px;",
+                                       uiOutput("total_number_orders_output_uni")
+                                   ),
+                                   div(style = "text-align: center; width: 150px; display: inline-block; margin:20px;",
+                                       uiOutput("total_cost_orders_output_uni")
                                    )
                             ),
-                            column(6,
+                            column(6, align = "center",
                                    div(style = "text-align: center;",
-                                       h4("Vendas"),
-                                       tableOutput("sales_uni")
-                                   )
-                            ),
-                            column(6,
-                                   div(style = "text-align: center;",
-                                       textOutput("total_sales_output_uni"),
+                                       DTOutput("sales_uni")
                                    ),
-                                   br(), br(),br(),
+                                   div(style = "text-align: center; width: 150px; display: inline-block; margin:20px;",
+                                       uiOutput("total_sales_output_uni")
+                                   )
                             )
                           ),
                           fluidRow(
                             column(12, align = "center",
-                                   div(style = "margin-bottom: 20px;", 
-                                       textOutput("monthly_profit_output_uni")
-                                   ),
-                                   div(style = "margin-bottom: 20px;", 
-                                       textOutput("monthly_effort_output_uni")
-                                   ),
-                                   div(style = "margin-bottom: 20px;", 
-                                       textOutput("total_cost_output_uni")
+                                   div(style = "margin-bottom: 10px; text-align: center;",
+                                       div(style = "text-align: center; width: 150px; display: inline-block; margin:20px;",
+                                           uiOutput("monthly_profit_output_uni")
+                                       ),
+                                       div(style = "text-align: center; width: 150px; display: inline-block; margin:20px;", # Defina a largura fixa e adicione display: inline-block; e margin-right: 10px; para fazer os divs ficarem lado a lado
+                                           uiOutput("monthly_effort_output_uni")
+                                       ),
+                                       div(style = "text-align: center; width: 150px; display: inline-block; margin:20px;", # Defina a largura fixa e adicione display: inline-block; e margin-right: 10px; para fazer os divs ficarem lado a lado
+                                           uiOutput("total_cost_output_uni")
+                                       )
                                    )
                             )
                           )
                  )
+                 
+                 ###
                )
              )
            )
@@ -337,73 +327,67 @@ ui <- navbarPage(
                             )
                           ),
                           fluidRow(
-                            column(6, 
-                                   div(style = "text-align: center;",
-                                       h4("Trabalhadores a Contratar"),
-                                       tableOutput("hired_workers_table_multi")
-                                   ),
-                                   column(6,
-                                          div(style = "text-align: center;",
-                                              textOutput("total_number_workers_output_multi"),
-                                              textOutput("total_cost_workers_output_multi")
-                                          )
-                                   )
+                            fluidRow(
+                              column(6, align = "center",
+                                     div(style = "text-align: center;",
+                                         DTOutput("hired_workers_table_multi")
+                                     ),
+                                     div(style = "text-align: center; width: 150px; display: inline-block; margin:20px;", # Adicione margin: 20px; para a margem
+                                         uiOutput("total_number_workers_output_multi")
+                                     ),
+                                     div(style = "text-align: center; width: 150px; display: inline-block; margin:20px;",
+                                         uiOutput("total_cost_workers_output_multi")
+                                     )
+                              ),
+                              column(6, align = "center",
+                                     div(style = "text-align: center;",
+                                         DTOutput("stock_multi")
+                                     ),
+                                     div(style = "text-align: center; width: 150px; display: inline-block; margin:20px;",
+                                         uiOutput("total_cost_stock_output_multi")
+                                     )
+                              )
                             ),
-                            column(6,
-                                   div(style = "text-align: center;",
-                                       h4("Stock"),
-                                       tableOutput("stock_multi")
-                                   ),
-                                   column(6,
-                                          div(style = "text-align: center;",
-                                              textOutput("total_cost_stock_output_multi")
-                                          )
-                                   )
-                            )
-                          ),
-                          fluidRow(
-                            column(6, 
-                                   div(style = "text-align: center;",
-                                       h4("Encomendas a Realizar"),
-                                       tableOutput("product_orders_table_multi")
-                                   ),
-                                   column(6,
-                                          div(style = "text-align: center;",
-                                              textOutput("total_number_orders_output_multi"),
-                                              textOutput("total_cost_orders_output_multi")
-                                          )
-                                   )
+                            fluidRow(
+                              column(6, align = "center",
+                                     div(style = "text-align: center;",
+                                         DTOutput("product_orders_table_multi")
+                                     ),
+                                     div(style = "text-align: center; width: 150px; display: inline-block; margin:20px;",
+                                         uiOutput("total_number_orders_output_multi")
+                                     ),
+                                     div(style = "text-align: center; width: 150px; display: inline-block; margin:20px;",
+                                         uiOutput("total_cost_orders_output_multi")
+                                     )
+                              ),
+                              column(6, align = "center",
+                                     div(style = "text-align: center;",
+                                         DTOutput("sales_multi")
+                                     ),
+                                     div(style = "text-align: center; width: 150px; display: inline-block; margin:20px;",
+                                         uiOutput("total_sales_output_multi")
+                                     )
+                              )
                             ),
-                            column(6,
-                                   div(style = "text-align: center;",
-                                       h4("Vendas"),
-                                       tableOutput("sales_multi")
-                                   )
-                            ),
-                            column(6,
-                                   div(style = "text-align: center;",
-                                       textOutput("total_sales_output_multi"),
-                                   ),
-                                   br(), br(),br(),
+                            fluidRow(
+                              column(12, align = "center",
+                                     div(style = "margin-bottom: 10px; text-align: center;",
+                                         div(style = "text-align: center; width: 150px; display: inline-block; margin:20px;",
+                                             uiOutput("monthly_profit_output_multi")
+                                         ),
+                                         div(style = "text-align: center; width: 150px; display: inline-block; margin:20px;", # Defina a largura fixa e adicione display: inline-block; e margin-right: 10px; para fazer os divs ficarem lado a lado
+                                             uiOutput("monthly_effort_output_multi")
+                                         ),
+                                         div(style = "text-align: center; width: 150px; display: inline-block; margin:20px;", # Defina a largura fixa e adicione display: inline-block; e margin-right: 10px; para fazer os divs ficarem lado a lado
+                                             uiOutput("total_cost_output_multi")
+                                         )
+                                     )
+                              )
                             )
-                          ),
-                          fluidRow(
-                            column(12, align = "center",
-                                   div(style = "margin-bottom: 20px;", 
-                                       textOutput("monthly_profit_output_multi")
-                                   ),
-                                   div(style = "margin-bottom: 20px;", 
-                                       textOutput("monthly_effort_output_multi")
-                                   ),
-                                   div(style = "margin-bottom: 20px;", 
-                                       textOutput("total_cost_output_multi")
-                                   )
-                            )
-                          )
                  )
                )
-             )
-           )
+               )
+           ))
   ),
   tabPanel("Dataset",
            fluidRow(
@@ -538,7 +522,7 @@ server <- function(input, output, session) {
       }
     })
     
-    output$hired_workers_table_uni <- renderTable({
+    output$hired_workers_table_uni <- renderDT({
       if(input$otimizacao_uni != "NGSA-II"){
         hired_workers <- round(optimization_results$hired_workers)
       }else{
@@ -572,10 +556,28 @@ server <- function(input, output, session) {
       # Adiciona a linha "Total" ao data frame
       hired_workers <- rbind(hired_workers, Total = total)
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
-      hired_workers
-    }, digits = 0, rownames = TRUE, caption = "Tabela de Trabalhadores a Contratar")
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      datatable(hired_workers, options = list(
+        paging = FALSE,       # Desativar a paginação
+        searching = FALSE,    # Desativar a barra de busca
+        info = FALSE,         # Desativar a informação da tabela
+        ordering = FALSE,     # Desativar a ordenação
+        dom = 't',         # Apenas a tabela, sem outros componentes
+        initComplete = JS("
+      function(settings, json) {
+        $(this.api().table().header()).css({
+          'background-color': '#1fbda8', // Cor de fundo do cabeçalho
+          'color': 'white'               // Cor do texto do cabeçalho
+        });
+      }
+    ")
+      ), rownames = TRUE, caption = tags$caption(
+        style = 'caption-side: top; text-align: center; font-size: 20px; color: white; font-weight: bold; background-color: #303c54;',
+        'TRABALHADORES A CONTRATAR'
+      ))
+    })
     
-    output$product_orders_table_uni <- renderTable({
+    output$product_orders_table_uni <- renderDT({
       if(input$otimizacao_uni != "NGSA-II"){
         product_orders <- round(optimization_results$product_orders)
       }else{
@@ -608,10 +610,27 @@ server <- function(input, output, session) {
       product_orders <- rbind(product_orders, Total = total)
       
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
-      product_orders
-    }, digits = 0, rownames = TRUE, caption = "Tabela de Produtos a Encomendar")
+      datatable(product_orders, options = list(
+        paging = FALSE,       # Desativar a paginação
+        searching = FALSE,    # Desativar a barra de busca
+        info = FALSE,         # Desativar a informação da tabela
+        ordering = FALSE,     # Desativar a ordenação
+        dom = 't',         # Apenas a tabela, sem outros componentes
+        initComplete = JS("
+      function(settings, json) {
+        $(this.api().table().header()).css({
+          'background-color': '#1fbda8', // Cor de fundo do cabeçalho
+          'color': 'white'               // Cor do texto do cabeçalho
+        });
+      }
+    ")
+      ), rownames = TRUE, caption = tags$caption(
+        style = 'caption-side: top; text-align: center; font-size: 20px; color: white; font-weight: bold; background-color: #303c54;',
+        'PRODUTOS A ENCOMENDAR'
+      ))
+    })
     
-    output$stock_uni <- renderTable({
+    output$stock_uni <- renderDT({
       if(input$otimizacao_uni != "NGSA-II"){
         product_orders <- round(optimization_results$product_orders)
         sales <- round(optimization_results$sales)
@@ -644,10 +663,28 @@ server <- function(input, output, session) {
       rownames(stock) <- c("1º semana", "2º semana", "3º semana", "4º semana")
       
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
-      stock
-    }, digits = 0, rownames = TRUE, caption = "Tabela de Stock")
+      datatable(stock, options = list(
+        paging = FALSE,       # Desativar a paginação
+        searching = FALSE,    # Desativar a barra de busca
+        info = FALSE,         # Desativar a informação da tabela
+        ordering = FALSE,     # Desativar a ordenação
+        dom = 't',
+        # Não permitir seleção de linhas,       # Apenas a tabela, sem outros componentes
+        initComplete = JS("
+      function(settings, json) {
+        $(this.api().table().header()).css({
+          'background-color': '#1fbda8', // Cor de fundo do cabeçalho
+          'color': 'white'               // Cor do texto do cabeçalho
+        });
+      }
+    ")
+      ), rownames = TRUE, caption = tags$caption(
+        style = 'caption-side: top; text-align: center; font-size: 20px; color: white; font-weight: bold; background-color: #303c54;',
+        'STOCK'
+      ))
+    })
     
-    output$sales_uni <- renderTable({
+    output$sales_uni <- renderDT({
       if(input$otimizacao_uni != "NGSA-II"){
         sales <- round(optimization_results$sales)
       }else{
@@ -681,16 +718,54 @@ server <- function(input, output, session) {
       # Adiciona a linha "Total" ao data frame
       sales <- rbind(sales, Total = total)
       
-      
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
-      sales
-    }, digits = 0, rownames = TRUE, caption = "Tabela de Vendas Atuais")
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      datatable(sales, options = list(
+        paging = FALSE,       # Desativar a paginação
+        searching = FALSE,    # Desativar a barra de busca
+        info = FALSE,         # Desativar a informação da tabela
+        ordering = FALSE,     # Desativar a ordenação
+        dom = 't',
+        # Não permitir seleção de linhas,       # Apenas a tabela, sem outros componentes
+        initComplete = JS("
+      function(settings, json) {
+        $(this.api().table().header()).css({
+          'background-color': '#1fbda8', // Cor de fundo do cabeçalho
+          'color': 'white'               // Cor do texto do cabeçalho
+        });
+      }
+    ")
+      ), rownames = TRUE, caption = tags$caption(
+        style = 'caption-side: top; text-align: center; font-size: 20px; color: white; font-weight: bold; background-color: #303c54;',
+        'VENDAS EFETIVAS'
+      ))
+    })
     
     #output$sales_table_uni <<- renderTable(optimization_results$sales)
     
-    output$monthly_profit_output_uni <<- renderText({
+    output$monthly_profit_output_uni <<- renderUI({
       if(input$otimizacao_uni != "NGSA-II"){
-        paste("Profit Mensal: ", round(optimization_results$monthly_profit))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem; background-color:#1fbda8',
+          tags$div(
+            class = "card-header",
+            "Lucro"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(optimization_results$monthly_profit))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
       }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
@@ -708,13 +783,57 @@ server <- function(input, output, session) {
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
         sales          <- calculate_sales(DataFrame, hired_workers, product_orders)
         monthly_profit <- sales_in_usd(sales) - total_costs(hired_workers, product_orders, sales)
-        paste("Profit Mensal:", round(monthly_profit))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem; background-color:#1fbda8',
+          tags$div(
+            class = "card-header",
+            "Lucro"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(monthly_profit))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
+        
       }
     })
     
-    output$total_number_workers_output_uni <<- renderText({
+    output$total_number_workers_output_uni <<- renderUI({
       if(input$otimizacao_uni != "NGSA-II"){
-        paste("Número Trabalhadores: ", round(total_number_of_workers(round(optimization_results$hired_workers))))
+
+        
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Trabalhadores"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_number_of_workers(round(optimization_results$hired_workers))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "Nº"
+          )
+        )
+        
       }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
@@ -729,14 +848,55 @@ server <- function(input, output, session) {
         Pareto <- P[st$ix, ]
         x <- ceiling(G$par[Pareto[input$pareto_numeric, 3],])
         hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
-        paste("Número Trabalhadores:", round(total_number_of_workers(round(hired_workers))))
+
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Trabalhadores"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_number_of_workers(round(hired_workers))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "Nº"
+          )
+        )
+        
       }
     })
     
-    output$total_number_orders_output_uni <<- renderText({
+    output$total_number_orders_output_uni <<- renderUI({
       if(input$otimizacao_uni != "NGSA-II"){
-        paste("Número Encomendas: ", round(total_number_of_orders(round(optimization_results$product_orders))))
-      }else{
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Encomendas"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_number_of_orders(round(optimization_results$product_orders))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "Nº"
+          )
+        )      }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
         P <- matrix(NA, nrow = length(I), ncol = 3)
@@ -750,13 +910,55 @@ server <- function(input, output, session) {
         Pareto <- P[st$ix, ]
         x <- ceiling(G$par[Pareto[input$pareto_numeric, 3],])
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
-        paste("Número Encomendas: ", round(total_number_of_orders(round(product_orders))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Encomendas"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_number_of_orders(round(product_orders))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "Nº"
+          )
+        )
+        
       }
     })
     
-    output$total_cost_workers_output_uni <<- renderText({
+    output$total_cost_workers_output_uni <<- renderUI({
       if(input$otimizacao_uni != "NGSA-II"){
-        paste("Custo Trabalhadores: ", round(total_cost_workers(round(optimization_results$hired_workers))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Custo Trabalhadoress"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_cost_workers(round(optimization_results$hired_workers))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
+        
       }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
@@ -771,13 +973,54 @@ server <- function(input, output, session) {
         Pareto <- P[st$ix, ]
         x <- ceiling(G$par[Pareto[input$pareto_numeric, 3],])
         hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
-        paste("Custo Trabalhadores: ", round(total_cost_workers(round(hired_workers))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Custo Trabalhadoress"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_cost_workers(round(hired_workers))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
       }
     })
     
-    output$total_cost_orders_output_uni <<- renderText({
+    output$total_cost_orders_output_uni <<- renderUI({
       if(input$otimizacao_uni != "NGSA-II"){
-        paste("Custo Encomendas: ", round(total_cost_orders(round(optimization_results$product_orders))))
+        
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Custo Encomendas"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_cost_orders(round(optimization_results$product_orders))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
       }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
@@ -792,11 +1035,31 @@ server <- function(input, output, session) {
         Pareto <- P[st$ix, ]
         x <- ceiling(G$par[Pareto[input$pareto_numeric, 3],])
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
-        paste("Custo Encomendas: ", round(total_cost_orders(round(product_orders))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Custo Encomendas"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_cost_orders(round(product_orders))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
       }
     })
     
-    output$total_cost_stock_output_uni <<- renderText({
+    output$total_cost_stock_output_uni <<- renderUI({
       if(input$otimizacao_uni != "NGSA-II"){
         product_orders <- round(optimization_results$product_orders)
         sales <- round(optimization_results$sales)
@@ -818,10 +1081,31 @@ server <- function(input, output, session) {
         sales          <- calculate_sales(DataFrame, hired_workers, product_orders)
       }
       stock <- calculate_stock_in_usd(product_orders, sales)
-      paste("Custo Stock: ", round(stock))
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem;',
+        tags$div(
+          class = "card-header",
+          "Custo Stock"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            
+            paste(round(stock))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "US$"
+        )
+      )
     })
     
-    output$total_cost_output_uni <<- renderText({
+    output$total_cost_output_uni <<- renderUI({
       if(input$otimizacao_uni != "NGSA-II"){
         product_orders <- round(optimization_results$product_orders)
         sales <- round(optimization_results$sales)
@@ -844,10 +1128,31 @@ server <- function(input, output, session) {
         sales          <- calculate_sales(DataFrame, hired_workers, product_orders)
       }
       total = total_costs(hired_workers,product_orders, sales)
-      paste("Custo Total: ", round(total))
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem; background-color:#1fbda8',
+        tags$div(
+          class = "card-header",
+          "Custo Total"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            
+            paste(round(total))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "US$"
+        )
+      )
     })
     
-    output$monthly_effort_output_uni <<- renderText({
+    output$monthly_effort_output_uni <<- renderUI({
       if(input$otimizacao_uni != "NGSA-II"){
         product_orders <- round(optimization_results$product_orders)
         hired_workers <- round(optimization_results$hired_workers)
@@ -870,10 +1175,31 @@ server <- function(input, output, session) {
       total_number_of_workers = total_number_of_workers(hired_workers)
       total_number_of_orders = total_number_of_orders(product_orders)
       total = total_number_of_workers + total_number_of_orders
-      paste("Effort Mensal: ", round(total))
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem; background-color:#1fbda8',
+        tags$div(
+          class = "card-header",
+          "Esforço total"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            
+            paste(round(total))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "Nº"
+        )
+      )
     })
     
-    output$total_sales_output_uni <<- renderText({
+    output$total_sales_output_uni <<- renderUI({
       if(input$otimizacao_uni != "NGSA-II"){
         sales <- round(optimization_results$sales)
       }else{
@@ -894,7 +1220,28 @@ server <- function(input, output, session) {
         sales          <- calculate_sales(DataFrame, hired_workers, product_orders)
       }
       sales = sales_in_usd(sales)
-      paste("Vendas Totais: ", round(sales))
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem;',
+        tags$div(
+          class = "card-header",
+          "Vendas"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            
+            paste(round(sales))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "US$"
+        )
+      )
     })
   })
   
@@ -921,7 +1268,7 @@ server <- function(input, output, session) {
       }
     })
     
-    output$hired_workers_table_multi <- renderTable({
+    output$hired_workers_table_multi <- renderDT({
       if(input$otimizacao_multi != "NGSA-II"){
         hired_workers <- round(optimization_results_multi$hired_workers)
       }else{
@@ -955,10 +1302,27 @@ server <- function(input, output, session) {
       # Adiciona a linha "Total" ao data frame
       hired_workers <- rbind(hired_workers, Total = total)
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
-      hired_workers
-    }, digits = 0, rownames = TRUE, caption = "Tabela de Trabalhadores a Contratar")
+      datatable(hired_workers, options = list(
+        paging = FALSE,       # Desativar a paginação
+        searching = FALSE,    # Desativar a barra de busca
+        info = FALSE,         # Desativar a informação da tabela
+        ordering = FALSE,     # Desativar a ordenação
+        dom = 't',         # Apenas a tabela, sem outros componentes
+        initComplete = JS("
+      function(settings, json) {
+        $(this.api().table().header()).css({
+          'background-color': '#1fbda8', // Cor de fundo do cabeçalho
+          'color': 'white'               // Cor do texto do cabeçalho
+        });
+      }
+    ")
+      ), rownames = TRUE, caption = tags$caption(
+        style = 'caption-side: top; text-align: center; font-size: 20px; color: white; font-weight: bold; background-color: #303c54;',
+        'TRABALHADORES A CONTRATAR'
+      ))
+    })
     
-    output$product_orders_table_multi <- renderTable({
+    output$product_orders_table_multi <- renderDT({
       if(input$otimizacao_multi != "NGSA-II"){
         product_orders <- round(optimization_results_multi$product_orders)
       }else{
@@ -991,10 +1355,28 @@ server <- function(input, output, session) {
       product_orders <- rbind(product_orders, Total = total)
       
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
-      product_orders
-    }, digits = 0, rownames = TRUE, caption = "Tabela de Produtos a Encomendar")
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      datatable(product_orders, options = list(
+        paging = FALSE,       # Desativar a paginação
+        searching = FALSE,    # Desativar a barra de busca
+        info = FALSE,         # Desativar a informação da tabela
+        ordering = FALSE,     # Desativar a ordenação
+        dom = 't',         # Apenas a tabela, sem outros componentes
+        initComplete = JS("
+      function(settings, json) {
+        $(this.api().table().header()).css({
+          'background-color': '#1fbda8', // Cor de fundo do cabeçalho
+          'color': 'white'               // Cor do texto do cabeçalho
+        });
+      }
+    ")
+      ), rownames = TRUE, caption = tags$caption(
+        style = 'caption-side: top; text-align: center; font-size: 20px; color: white; font-weight: bold; background-color: #303c54;',
+        'PRODUTOS A ENCOMENDAR'
+      ))
+    })
     
-    output$stock_multi <- renderTable({
+    output$stock_multi <- renderDT({
       if(input$otimizacao_multi != "NGSA-II"){
         product_orders <- round(optimization_results_multi$product_orders)
         sales <- round(optimization_results_multi$sales)
@@ -1027,10 +1409,29 @@ server <- function(input, output, session) {
       rownames(stock) <- c("1º semana", "2º semana", "3º semana", "4º semana")
       
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
-      stock
-    }, digits = 0, rownames = TRUE, caption = "Tabela de Stock")
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      datatable(stock, options = list(
+        paging = FALSE,       # Desativar a paginação
+        searching = FALSE,    # Desativar a barra de busca
+        info = FALSE,         # Desativar a informação da tabela
+        ordering = FALSE,     # Desativar a ordenação
+        dom = 't',
+        # Não permitir seleção de linhas,       # Apenas a tabela, sem outros componentes
+        initComplete = JS("
+      function(settings, json) {
+        $(this.api().table().header()).css({
+          'background-color': '#1fbda8', // Cor de fundo do cabeçalho
+          'color': 'white'               // Cor do texto do cabeçalho
+        });
+      }
+    ")
+      ), rownames = TRUE, caption = tags$caption(
+        style = 'caption-side: top; text-align: center; font-size: 20px; color: white; font-weight: bold; background-color: #303c54;',
+        'STOCK'
+      ))
+    })
     
-    output$sales_multi <- renderTable({
+    output$sales_multi <- renderDT({
       if(input$otimizacao_multi != "NGSA-II"){
         sales <- round(optimization_results_multi$sales)
       }else{
@@ -1066,14 +1467,53 @@ server <- function(input, output, session) {
       
       
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
-      sales
-    }, digits = 0, rownames = TRUE, caption = "Tabela de Vendas Atuais")
+      datatable(sales, options = list(
+        paging = FALSE,       # Desativar a paginação
+        searching = FALSE,    # Desativar a barra de busca
+        info = FALSE,         # Desativar a informação da tabela
+        ordering = FALSE,     # Desativar a ordenação
+        dom = 't',
+        # Não permitir seleção de linhas,       # Apenas a tabela, sem outros componentes
+        initComplete = JS("
+      function(settings, json) {
+        $(this.api().table().header()).css({
+          'background-color': '#1fbda8', // Cor de fundo do cabeçalho
+          'color': 'white'               // Cor do texto do cabeçalho
+        });
+      }
+    ")
+      ), rownames = TRUE, caption = tags$caption(
+        style = 'caption-side: top; text-align: center; font-size: 20px; color: white; font-weight: bold; background-color: #303c54;',
+        'VENDAS EFETIVAS'
+      ))
+    })
+    
     
     #output$sales_table_uni <<- renderTable(optimization_results$sales)
     
-    output$monthly_profit_output_multi <<- renderText({
+    output$monthly_profit_output_multi <<- renderUI({
       if(input$otimizacao_multi != "NGSA-II"){
-        paste("Profit Mensal: ", round(optimization_results_multi$monthly_profit))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem; background-color:#1fbda8',
+          tags$div(
+            class = "card-header",
+            "Lucro"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(optimization_results_multi$monthly_profit))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
       }else{
         G <- optimization_results_multi$nsga_results
         I <- which(G$pareto.optimal)
@@ -1091,13 +1531,54 @@ server <- function(input, output, session) {
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
         sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
         monthly_profit <- sales_in_usd(sales) - total_costs(hired_workers, product_orders, sales)
-        paste("Profit Mensal:", round(monthly_profit))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem; background-color:#1fbda8',
+          tags$div(
+            class = "card-header",
+            "Lucro"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(monthly_profit))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
       }
     })
     
-    output$total_number_workers_output_multi <<- renderText({
+    output$total_number_workers_output_multi <<- renderUI({
       if(input$otimizacao_multi != "NGSA-II"){
-        paste("Número Trabalhadores: ", round(total_number_of_workers(round(optimization_results_multi$hired_workers))))
+        
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Trabalhadores"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_number_of_workers(round(optimization_results_multi$hired_workers))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "Nº"
+          )
+        )
       }else{
         G <- optimization_results_multi$nsga_results
         I <- which(G$pareto.optimal)
@@ -1112,13 +1593,54 @@ server <- function(input, output, session) {
         Pareto <- P[st$ix, ]
         x <- ceiling(G$par[Pareto[input$pareto_numeric_multi, 3],])
         hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
-        paste("Número Trabalhadores:", round(total_number_of_workers(round(hired_workers))))
+        
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Trabalhadores"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_number_of_workers(round(hired_workers))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "Nº"
+          )
+        )
       }
     })
     
-    output$total_number_orders_output_multi <<- renderText({
+    output$total_number_orders_output_multi <<- renderUI({
       if(input$otimizacao_multi != "NGSA-II"){
-        paste("Número Encomendas: ", round(total_number_of_orders(round(optimization_results_multi$product_orders))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Encomendas"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_number_of_orders(round(optimization_results_multi$product_orders))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "Nº"
+          )
+        )
       }else{
         G <- optimization_results_multi$nsga_results
         I <- which(G$pareto.optimal)
@@ -1133,13 +1655,53 @@ server <- function(input, output, session) {
         Pareto <- P[st$ix, ]
         x <- ceiling(G$par[Pareto[input$pareto_numeric_multi, 3],])
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
-        paste("Número Encomendas: ", round(total_number_of_orders(round(product_orders))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Encomendas"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_number_of_orders(round(product_orders))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "Nº"
+          )
+        )
       }
     })
     
-    output$total_cost_workers_output_multi <<- renderText({
+    output$total_cost_workers_output_multi <<- renderUI({
       if(input$otimizacao_multi != "NGSA-II"){
-        paste("Custo Trabalhadores: ", round(total_cost_workers(round(optimization_results_multi$hired_workers))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Custo Trabalhadoress"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_cost_workers(round(optimization_results_multi$hired_workers))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
       }else{
         G <- optimization_results_multi$nsga_results
         I <- which(G$pareto.optimal)
@@ -1154,13 +1716,53 @@ server <- function(input, output, session) {
         Pareto <- P[st$ix, ]
         x <- ceiling(G$par[Pareto[input$pareto_numeric_multi, 3],])
         hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
-        paste("Custo Trabalhadores: ", round(total_cost_workers(round(hired_workers))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Custo Trabalhadoress"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_cost_workers(round(hired_workers))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
       }
     })
     
-    output$total_cost_orders_output_multi <<- renderText({
+    output$total_cost_orders_output_multi <<- renderUI({
       if(input$otimizacao_multi != "NGSA-II"){
-        paste("Custo Encomendas: ", round(total_cost_orders(round(optimization_results_multi$product_orders))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Custo Encomendas"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_cost_orders(round(optimization_results_multi$product_orders))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
       }else{
         G <- optimization_results_multi$nsga_results
         I <- which(G$pareto.optimal)
@@ -1175,11 +1777,31 @@ server <- function(input, output, session) {
         Pareto <- P[st$ix, ]
         x <- ceiling(G$par[Pareto[input$pareto_numeric_multi, 3],])
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
-        paste("Custo Encomendas: ", round(total_cost_orders(round(product_orders))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Custo Encomendas"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_cost_orders(round(product_orders))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
       }
     })
     
-    output$total_cost_stock_output_multi <<- renderText({
+    output$total_cost_stock_output_multi <<- renderUI({
       if(input$otimizacao_multi != "NGSA-II"){
         product_orders <- round(optimization_results_multi$product_orders)
         sales <- round(optimization_results$sales)
@@ -1201,10 +1823,31 @@ server <- function(input, output, session) {
         sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
       }
       stock <- calculate_stock_in_usd(product_orders, sales)
-      paste("Custo Stock: ", round(stock))
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem;',
+        tags$div(
+          class = "card-header",
+          "Custo Stock"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            
+            paste(round(stock))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "US$"
+        )
+      )
     })
     
-    output$total_cost_output_multi <<- renderText({
+    output$total_cost_output_multi <<- renderUI({
       if(input$otimizacao_multi != "NGSA-II"){
         product_orders <- round(optimization_results_multi$product_orders)
         sales <- round(optimization_results_multi$sales)
@@ -1227,10 +1870,31 @@ server <- function(input, output, session) {
         sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
       }
       total = total_costs(hired_workers,product_orders, sales)
-      paste("Custo Total: ", round(total))
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem; background-color:#1fbda8',
+        tags$div(
+          class = "card-header",
+          "Custo Total"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            
+            paste(round(total))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "US$"
+        )
+      )
     })
     
-    output$monthly_effort_output_multi <<- renderText({
+    output$monthly_effort_output_multi <<- renderUI({
       if(input$otimizacao_multi != "NGSA-II"){
         product_orders <- round(optimization_results_multi$product_orders)
         hired_workers <- round(optimization_results_multi$hired_workers)
@@ -1253,10 +1917,31 @@ server <- function(input, output, session) {
       total_number_of_workers = total_number_of_workers(hired_workers)
       total_number_of_orders = total_number_of_orders(product_orders)
       total = total_number_of_workers + total_number_of_orders
-      paste("Effort Mensal: ", round(total))
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem; background-color:#1fbda8',
+        tags$div(
+          class = "card-header",
+          "Esforço total"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            
+            paste(round(total))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "Nº"
+        )
+      )
     })
     
-    output$total_sales_output_multi <<- renderText({
+    output$total_sales_output_multi <<- renderUI({
       if(input$otimizacao_multi != "NGSA-II"){
         sales <- round(optimization_results_multi$sales)
       }else{
@@ -1277,7 +1962,28 @@ server <- function(input, output, session) {
         sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
       }
       sales = sales_in_usd(sales)
-      paste("Vendas Totais: ", round(sales))
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem;',
+        tags$div(
+          class = "card-header",
+          "Vendas"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            
+            paste(round(sales))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "US$"
+        )
+      )
     })
   })
   
@@ -1349,7 +2055,7 @@ server <- function(input, output, session) {
     optimization_results_best <- Uniobjetivo(df = DataFrame, algoritmo = "RBGA", func="eval_min")
     
     # Update UI with optimization results
-    output$hired_workers_table_best <- renderTable({
+    output$hired_workers_table_best <- renderDT({
      
       hired_workers <- round(optimization_results_best$hired_workers)
       
@@ -1368,10 +2074,29 @@ server <- function(input, output, session) {
       # Adiciona a linha "Total" ao data frame
       hired_workers <- rbind(hired_workers, Total = total)
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
-      hired_workers
-    }, digits = 0, rownames = TRUE, caption = "Tabela de Trabalhadores a Contratar")
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      datatable(hired_workers, options = list(
+        paging = FALSE,       # Desativar a paginação
+        searching = FALSE,    # Desativar a barra de busca
+        info = FALSE,         # Desativar a informação da tabela
+        ordering = FALSE,     # Desativar a ordenação
+        dom = 't',         # Apenas a tabela, sem outros componentes
+        initComplete = JS("
+      function(settings, json) {
+        $(this.api().table().header()).css({
+          'background-color': '#1fbda8', // Cor de fundo do cabeçalho
+          'color': 'white'               // Cor do texto do cabeçalho
+        });
+      }
+    ")
+      ), rownames = TRUE, caption = tags$caption(
+        style = 'caption-side: top; text-align: center; font-size: 20px; color: white; font-weight: bold; background-color: #303c54;',
+        'TRABALHADORES A CONTRATAR'
+      ))
     
-    output$product_orders_table_best <- renderTable({
+    })
+    
+    output$product_orders_table_best <- renderDT({
       
       product_orders <- round(optimization_results_best$product_orders)
       
@@ -1390,11 +2115,27 @@ server <- function(input, output, session) {
       product_orders <- rbind(product_orders, Total = total)
       
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
-      product_orders
-    }, digits = 0, rownames = TRUE, caption = "Tabela de Produtos a Encomendar")
+      datatable(product_orders, options = list(
+        paging = FALSE,       # Desativar a paginação
+        searching = FALSE,    # Desativar a barra de busca
+        info = FALSE,         # Desativar a informação da tabela
+        ordering = FALSE,     # Desativar a ordenação
+        dom = 't',         # Apenas a tabela, sem outros componentes
+        initComplete = JS("
+      function(settings, json) {
+        $(this.api().table().header()).css({
+          'background-color': '#1fbda8', // Cor de fundo do cabeçalho
+          'color': 'white'               // Cor do texto do cabeçalho
+        });
+      }
+    ")
+      ), rownames = TRUE, caption = tags$caption(
+        style = 'caption-side: top; text-align: center; font-size: 20px; color: white; font-weight: bold; background-color: #303c54;',
+        'PRODUTOS A ENCOMENDAR'
+      ))
+    })
     
-    
-    output$stock_best <- renderTable({
+    output$stock_best <- renderDT({
       
       product_orders <- round(optimization_results_best$product_orders)
       sales <- round(optimization_results_best$sales)
@@ -1410,10 +2151,29 @@ server <- function(input, output, session) {
       rownames(stock) <- c("1º semana", "2º semana", "3º semana", "4º semana")
       
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
-      stock
-    }, digits = 0, rownames = TRUE, caption = "Tabela de Stock")
+      datatable(stock, options = list(
+        paging = FALSE,       # Desativar a paginação
+        searching = FALSE,    # Desativar a barra de busca
+        info = FALSE,         # Desativar a informação da tabela
+        ordering = FALSE,     # Desativar a ordenação
+        dom = 't',            # Apenas a tabela, sem outros componentes
+        # Custom CSS to make the table smaller
+        initComplete = JS("
+      function(settings, json) {
+        $(this.api().table().header()).css({
+          'background-color': '#1fbda8', // Cor de fundo do cabeçalho
+          'color': 'white'               // Cor do texto do cabeçalho
+        });
+      }
+    ")
+      ), rownames = TRUE, caption = tags$caption(
+        style = 'caption-side: top; text-align: center; font-size: 20px; color: white; font-weight: bold; background-color: #303c54;',
+        'STOCK'
+      ))
+    })
     
-    output$sales_best <- renderTable({
+    
+    output$sales_best <- renderDT({
       
       sales <- round(optimization_results_best$sales)
       
@@ -1431,57 +2191,272 @@ server <- function(input, output, session) {
       # Adiciona a linha "Total" ao data frame
       sales <- rbind(sales, Total = total)
       
-      
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
-      sales
-    }, digits = 0, rownames = TRUE, caption = "Tabela de Vendas Atuais")
-    
-    output$sales_table_best <<- renderTable(optimization_results_best$sales)
-    output$monthly_profit_output_best <<- renderText({
-      paste("Profit Mensal: ", round(optimization_results_best$monthly_profit))
+      datatable(sales, options = list(
+        paging = FALSE,       # Desativar a paginação
+        searching = FALSE,    # Desativar a barra de busca
+        info = FALSE,         # Desativar a informação da tabela
+        ordering = FALSE,     # Desativar a ordenação
+        dom = 't',
+ # Não permitir seleção de linhas,       # Apenas a tabela, sem outros componentes
+        initComplete = JS("
+      function(settings, json) {
+        $(this.api().table().header()).css({
+          'background-color': '#1fbda8', // Cor de fundo do cabeçalho
+          'color': 'white'               // Cor do texto do cabeçalho
+        });
+      }
+    ")
+      ), rownames = TRUE, caption = tags$caption(
+        style = 'caption-side: top; text-align: center; font-size: 20px; color: white; font-weight: bold; background-color: #303c54;',
+        'VENDAS EFETIVAS'
+      ))
     })
     
-    output$total_number_workers_output_best <<- renderText({
-      paste("Número Trabalhadores: ", round(total_number_of_workers(round(optimization_results_best$hired_workers))))
+    
+
+    output$monthly_profit_output_best <<- renderUI({
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem; background-color:#1fbda8',
+        tags$div(
+          class = "card-header",
+          "Lucro"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            paste(round(optimization_results_best$monthly_profit))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "US$"
+        )
+      )
     })
     
-    output$total_number_orders_output_best <<- renderText({
-      paste("Número Encomendas: ", round(total_number_of_orders(round(optimization_results_best$product_orders))))
+    output$total_number_workers_output_best <- renderUI({
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem;',
+        tags$div(
+          class = "card-header",
+          "Trabalhadores"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            paste(round(total_number_of_workers(round(optimization_results_best$hired_workers))))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "Nº"
+        )
+      )
     })
     
-    output$total_cost_workers_output_best <<- renderText({
-      paste("Custo Trabalhadores: ", round(total_cost_workers(round(optimization_results_best$hired_workers))))
+    
+    output$total_number_orders_output_best <<- renderUI({
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem;',
+        tags$div(
+          class = "card-header",
+          "Encomendas"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            paste(round(total_number_of_orders(round(optimization_results_best$product_orders))))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "Nº"
+        )
+      )
     })
-    output$total_cost_orders_output_best <<- renderText({
-      paste("Custo Encomendas: ", round(total_cost_orders(round(optimization_results_best$product_orders))))
+    
+    output$total_cost_workers_output_best <- renderUI({
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem;',
+        tags$div(
+          class = "card-header",
+          "Custo Trabalhadoress"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            paste(round(total_cost_workers(optimization_results_best$hired_workers)))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "US$"
+        )
+      )
     })
-    output$total_cost_stock_output_best <<- renderText({
+    output$total_cost_orders_output_best <<- renderUI({
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem;',
+        tags$div(
+          class = "card-header",
+          "Custo Encomendas"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            paste(round(total_cost_orders(round(optimization_results_best$product_orders))))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "US$"
+        )
+      )
+    
+    })
+    output$total_cost_stock_output_best <<- renderUI({
       product_orders <- round(optimization_results_best$product_orders)
       sales <- round(optimization_results_best$sales)
       stock = calculate_stock_in_usd(product_orders, sales)
-      paste("Custo Stock: ", round(stock))
+      
+      
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem;',
+        tags$div(
+          class = "card-header",
+          "Custo Stock"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            
+            paste(round(stock))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "US$"
+        )
+      )
+    
+      
+      
     })
     
-    output$total_cost_output_best <<- renderText({
+    output$total_cost_output_best <<- renderUI({
       product_orders <- round(optimization_results_best$product_orders)
       sales <- round(optimization_results_best$sales)
       hired_workers <- round(optimization_results_best$hired_workers)
       total = total_costs(hired_workers,product_orders, sales)
-      paste("Custo Total: ", round(total))
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem; background-color:#1fbda8',
+        tags$div(
+          class = "card-header",
+          "Custo Total"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            
+            paste(round(total))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "US$"
+        )
+      )
+  
+
     })
     
-    output$monthly_effort_output_best <<- renderText({
+    output$monthly_effort_output_best <<- renderUI({
       product_orders <- round(optimization_results_best$product_orders)
       hired_workers <- round(optimization_results_best$hired_workers)
       total_number_of_workers = total_number_of_workers(hired_workers)
       total_number_of_orders = total_number_of_orders(product_orders)
       total = total_number_of_workers + total_number_of_orders
-      paste("Effort Mensal: ", round(total))
+      
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem; background-color:#1fbda8',
+        tags$div(
+          class = "card-header",
+          "Esforço total"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            
+            paste(round(total))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "Nº"
+        )
+      )
+
     })
-    output$total_sales_output_best<<- renderText({
+    output$total_sales_output_best<<- renderUI({
       sales <- round(optimization_results_best$sales)
       sales = sales_in_usd(sales)
-      paste("Vendas Totais: ", round(sales))
+      
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem;',
+        tags$div(
+          class = "card-header",
+          "Vendas"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            
+            paste(round(sales))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "US$"
+        )
+      )
+     
     })
     
     output$predictions_table_best_model<- renderDT({
@@ -1713,7 +2688,7 @@ server <- function(input, output, session) {
       }
     })
     
-    output$hired_workers_table_uni <- renderTable({
+    output$hired_workers_table_uni <- renderDT({
       
       if(input$otimizacao_uni != "NGSA-II"){
         
@@ -1751,10 +2726,27 @@ server <- function(input, output, session) {
       # Adiciona a linha "Total" ao data frame
       hired_workers <- rbind(hired_workers, Total = total)
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
-      hired_workers
-    }, digits = 0, rownames = TRUE, caption = "Tabela de Trabalhadores a Contratar")
+      datatable(hired_workers, options = list(
+        paging = FALSE,       # Desativar a paginação
+        searching = FALSE,    # Desativar a barra de busca
+        info = FALSE,         # Desativar a informação da tabela
+        ordering = FALSE,     # Desativar a ordenação
+        dom = 't',         # Apenas a tabela, sem outros componentes
+        initComplete = JS("
+      function(settings, json) {
+        $(this.api().table().header()).css({
+          'background-color': '#1fbda8', // Cor de fundo do cabeçalho
+          'color': 'white'               // Cor do texto do cabeçalho
+        });
+      }
+    ")
+      ), rownames = TRUE, caption = tags$caption(
+        style = 'caption-side: top; text-align: center; font-size: 20px; color: white; font-weight: bold; background-color: #303c54;',
+        'TRABALHADORES A CONTRATAR'
+      ))
+    })
     
-    output$product_orders_table_uni <- renderTable({
+    output$product_orders_table_uni <- renderDT({
       if(input$otimizacao_uni != "NGSA-II"){
         product_orders <- round(optimization_results$product_orders)
       }else{
@@ -1787,11 +2779,28 @@ server <- function(input, output, session) {
       product_orders <- rbind(product_orders, Total = total)
       
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
-      product_orders
-    }, digits = 0, rownames = TRUE, caption = "Tabela de Produtos a Encomendar")
+      datatable(product_orders, options = list(
+        paging = FALSE,       # Desativar a paginação
+        searching = FALSE,    # Desativar a barra de busca
+        info = FALSE,         # Desativar a informação da tabela
+        ordering = FALSE,     # Desativar a ordenação
+        dom = 't',         # Apenas a tabela, sem outros componentes
+        initComplete = JS("
+      function(settings, json) {
+        $(this.api().table().header()).css({
+          'background-color': '#1fbda8', // Cor de fundo do cabeçalho
+          'color': 'white'               // Cor do texto do cabeçalho
+        });
+      }
+    ")
+      ), rownames = TRUE, caption = tags$caption(
+        style = 'caption-side: top; text-align: center; font-size: 20px; color: white; font-weight: bold; background-color: #303c54;',
+        'PRODUTOS A ENCOMENDAR'
+      ))
+    })
     
     
-    output$stock_uni <- renderTable({
+    output$stock_uni <- renderDT({
       if(input$otimizacao_uni != "NGSA-II"){
         product_orders <- round(optimization_results$product_orders)
         sales <- round(optimization_results$sales)
@@ -1824,10 +2833,29 @@ server <- function(input, output, session) {
       rownames(stock) <- c("1º semana", "2º semana", "3º semana", "4º semana")
       
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
-      stock
-    }, digits = 0, rownames = TRUE, caption = "Tabela de Stock")
+      datatable(stock, options = list(
+        paging = FALSE,       # Desativar a paginação
+        searching = FALSE,    # Desativar a barra de busca
+        info = FALSE,         # Desativar a informação da tabela
+        ordering = FALSE,     # Desativar a ordenação
+        dom = 't',
+        # Não permitir seleção de linhas,       # Apenas a tabela, sem outros componentes
+        initComplete = JS("
+      function(settings, json) {
+        $(this.api().table().header()).css({
+          'background-color': '#1fbda8', // Cor de fundo do cabeçalho
+          'color': 'white'               // Cor do texto do cabeçalho
+        });
+      }
+    ")
+      ), rownames = TRUE, caption = tags$caption(
+        style = 'caption-side: top; text-align: center; font-size: 20px; color: white; font-weight: bold; background-color: #303c54;',
+        'STOCK'
+      ))
+    })
     
-    output$sales_uni <- renderTable({
+    
+    output$sales_uni <- renderDT({
       if(input$otimizacao_uni != "NGSA-II"){
         sales <- round(optimization_results$sales)
       }else{
@@ -1863,14 +2891,54 @@ server <- function(input, output, session) {
       
       
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
-      sales
-    }, digits = 0, rownames = TRUE, caption = "Tabela de Vendas Atuais")
+      datatable(sales, options = list(
+        paging = FALSE,       # Desativar a paginação
+        searching = FALSE,    # Desativar a barra de busca
+        info = FALSE,         # Desativar a informação da tabela
+        ordering = FALSE,     # Desativar a ordenação
+        dom = 't',
+        # Não permitir seleção de linhas,       # Apenas a tabela, sem outros componentes
+        initComplete = JS("
+      function(settings, json) {
+        $(this.api().table().header()).css({
+          'background-color': '#1fbda8', // Cor de fundo do cabeçalho
+          'color': 'white'               // Cor do texto do cabeçalho
+        });
+      }
+    ")
+      ), rownames = TRUE, caption = tags$caption(
+        style = 'caption-side: top; text-align: center; font-size: 20px; color: white; font-weight: bold; background-color: #303c54;',
+        'VENDAS EFETIVAS'
+      ))
+    })
+    
+    
     
     #output$sales_table_uni <<- renderTable(optimization_results$sales)
     
-    output$monthly_profit_output_uni <<- renderText({
+    output$monthly_profit_output_uni <<- renderUI({
       if(input$otimizacao_uni != "NGSA-II"){
-        paste("Profit Mensal: ", round(optimization_results$monthly_profit))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem; background-color:#1fbda8',
+          tags$div(
+            class = "card-header",
+            "Lucro"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(optimization_results$monthly_profit))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
       }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
@@ -1888,13 +2956,55 @@ server <- function(input, output, session) {
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
         sales          <- calculate_sales(DataFrame, hired_workers, product_orders)
         monthly_profit <- sales_in_usd(sales) - total_costs(hired_workers, product_orders, sales)
-        paste("Profit Mensal:", round(monthly_profit))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem; background-color:#1fbda8',
+          tags$div(
+            class = "card-header",
+            "Lucro"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(monthly_profit))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
+        
+
       }
     })
     
-    output$total_number_workers_output_uni <<- renderText({
+    output$total_number_workers_output_uni <<- renderUI({
       if(input$otimizacao_uni != "NGSA-II"){
-        paste("Número Trabalhadores: ", round(total_number_of_workers(round(optimization_results$hired_workers))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Trabalhadores"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_number_of_workers(round(optimization_results$hired_workers))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "Nº"
+          )
+        )
       }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
@@ -1909,13 +3019,56 @@ server <- function(input, output, session) {
         Pareto <- P[st$ix, ]
         x <- ceiling(G$par[Pareto[1, 3],])
         hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
-        paste("Número Trabalhadores:", round(total_number_of_workers(round(hired_workers))))
+        
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Trabalhadores"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste((round(total_number_of_workers(round(hired_workers))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "Nº"
+          )
+        )
+          )
+        
       }
     })
     
-    output$total_number_orders_output_uni <<- renderText({
+    output$total_number_orders_output_uni <<- renderUI({
       if(input$otimizacao_uni != "NGSA-II"){
-        paste("Número Encomendas: ", round(total_number_of_orders(round(optimization_results$product_orders))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Encomendas"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_number_of_orders(round(optimization_results$product_orders))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "Nº"
+          )
+        )
       }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
@@ -1930,13 +3083,55 @@ server <- function(input, output, session) {
         Pareto <- P[st$ix, ]
         x <- ceiling(G$par[Pareto[1, 3],])
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
-        paste("Número Encomendas: ", round(total_number_of_orders(round(product_orders))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Encomendas"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_number_of_orders(round(product_orders))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "Nº"
+          )
+        )
+        
       }
     })
     
-    output$total_cost_workers_output_uni <<- renderText({
+    output$total_cost_workers_output_uni <<- renderUI({
       if(input$otimizacao_uni != "NGSA-II"){
-        paste("Custo Trabalhadores: ", round(total_cost_workers(round(optimization_results$hired_workers))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Custo Trabalhadoress"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_cost_workers(round(optimization_results$hired_workers))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
+        
       }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
@@ -1951,13 +3146,54 @@ server <- function(input, output, session) {
         Pareto <- P[st$ix, ]
         x <- ceiling(G$par[Pareto[1, 3],])
         hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
-        paste("Custo Trabalhadores: ", round(total_cost_workers(round(hired_workers))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Custo Trabalhadoress"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_cost_workers(round(hired_workers))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
       }
     })
     
-    output$total_cost_orders_output_uni <<- renderText({
+    output$total_cost_orders_output_uni <<- renderUI({
       if(input$otimizacao_uni != "NGSA-II"){
-        paste("Custo Encomendas: ", round(total_cost_orders(round(optimization_results$product_orders))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Custo Encomendas"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_cost_orders(round(optimization_results$product_orders))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
+        
       }else{
         G <- optimization_results$nsga_results
         I <- which(G$pareto.optimal)
@@ -1972,11 +3208,33 @@ server <- function(input, output, session) {
         Pareto <- P[st$ix, ]
         x <- ceiling(G$par[Pareto[1, 3],])
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
-        paste("Custo Encomendas: ", round(total_cost_orders(round(product_orders))))
+        
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Custo Encomendas"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste((round(total_cost_orders(round(product_orders)))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
+        
       }
     })
     
-    output$total_cost_stock_output_uni <<- renderText({
+    output$total_cost_stock_output_uni <<- renderUI({
       if(input$otimizacao_uni != "NGSA-II"){
         product_orders <- round(optimization_results$product_orders)
         sales <- round(optimization_results$sales)
@@ -1998,10 +3256,31 @@ server <- function(input, output, session) {
         sales          <- calculate_sales(DataFrame, hired_workers, product_orders)
       }
       stock <- calculate_stock_in_usd(product_orders, sales)
-      paste("Custo Stock: ", round(stock))
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem;',
+        tags$div(
+          class = "card-header",
+          "Custo Stock"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            
+            paste(round(stock))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "US$"
+        )
+      )
     })
     
-    output$total_cost_output_uni <<- renderText({
+    output$total_cost_output_uni <<- renderUI({
       if(input$otimizacao_uni != "NGSA-II"){
         product_orders <- round(optimization_results$product_orders)
         sales <- round(optimization_results$sales)
@@ -2024,10 +3303,31 @@ server <- function(input, output, session) {
         sales          <- calculate_sales(DataFrame, hired_workers, product_orders)
       }
       total = total_costs(hired_workers,product_orders, sales)
-      paste("Custo Total: ", round(total))
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem; background-color:#1fbda8',
+        tags$div(
+          class = "card-header",
+          "Custo Total"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            
+            paste(round(total))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "US$"
+        )
+      )
     })
     
-    output$monthly_effort_output_uni <<- renderText({
+    output$monthly_effort_output_uni <<- renderUI({
       if(input$otimizacao_uni != "NGSA-II"){
         product_orders <- round(optimization_results$product_orders)
         hired_workers <- round(optimization_results$hired_workers)
@@ -2050,10 +3350,31 @@ server <- function(input, output, session) {
       total_number_of_workers = total_number_of_workers(hired_workers)
       total_number_of_orders = total_number_of_orders(product_orders)
       total = total_number_of_workers + total_number_of_orders
-      paste("Effort Mensal: ", round(total))
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem; background-color:#1fbda8',
+        tags$div(
+          class = "card-header",
+          "Esforço total"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            
+            paste(round(total))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "Nº"
+        )
+      )
     })
     
-    output$total_sales_output_uni <<- renderText({
+    output$total_sales_output_uni <<- renderUI({
       if(input$otimizacao_uni != "NGSA-II"){
         sales <- round(optimization_results$sales)
       }else{
@@ -2074,7 +3395,28 @@ server <- function(input, output, session) {
         sales          <- calculate_sales(DataFrame, hired_workers, product_orders)
       }
       sales = sales_in_usd(sales)
-      paste("Vendas Totais: ", round(sales))
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem;',
+        tags$div(
+          class = "card-header",
+          "Vendas"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            
+            paste(round(sales))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "US$"
+        )
+      )
     })
     # column(12, textOutput("total_cost_workers_output_uni")),
     # column(12, textOutput("total_cost_orders_output_uni")),
@@ -2133,7 +3475,7 @@ server <- function(input, output, session) {
       
       output$rmse_uni <- renderText({ 
         if (any(selected_values != 0)) {
-          paste("MAE: ", NMAE)
+          paste("MAE: ", MAE)
         } else {
           ""
         }
@@ -2316,7 +3658,7 @@ server <- function(input, output, session) {
       }
     })
     
-    output$hired_workers_table_multi <- renderTable({
+    output$hired_workers_table_multi <- renderDT({
       if(input$otimizacao_multi != "NGSA-II"){
         hired_workers <- round(optimization_results_multi$hired_workers)
       }else{
@@ -2350,10 +3692,27 @@ server <- function(input, output, session) {
       # Adiciona a linha "Total" ao data frame
       hired_workers <- rbind(hired_workers, Total = total)
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
-      hired_workers
-    }, digits = 0, rownames = TRUE, caption = "Tabela de Trabalhadores a Contratar")
+      datatable(hired_workers, options = list(
+        paging = FALSE,       # Desativar a paginação
+        searching = FALSE,    # Desativar a barra de busca
+        info = FALSE,         # Desativar a informação da tabela
+        ordering = FALSE,     # Desativar a ordenação
+        dom = 't',         # Apenas a tabela, sem outros componentes
+        initComplete = JS("
+      function(settings, json) {
+        $(this.api().table().header()).css({
+          'background-color': '#1fbda8', // Cor de fundo do cabeçalho
+          'color': 'white'               // Cor do texto do cabeçalho
+        });
+      }
+    ")
+      ), rownames = TRUE, caption = tags$caption(
+        style = 'caption-side: top; text-align: center; font-size: 20px; color: white; font-weight: bold; background-color: #303c54;',
+        'TRABALHADORES A CONTRATAR'
+      ))
+    })
     
-    output$product_orders_table_multi <- renderTable({
+    output$product_orders_table_multi <- renderDT({
       if(input$otimizacao_multi != "NGSA-II"){
         product_orders <- round(optimization_results_multi$product_orders)
       }else{
@@ -2387,11 +3746,29 @@ server <- function(input, output, session) {
       product_orders <- rbind(product_orders, Total = total)
       
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
-      product_orders
-    }, digits = 0, rownames = TRUE, caption = "Tabela de Produtos a Encomendar")
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      datatable(product_orders, options = list(
+        paging = FALSE,       # Desativar a paginação
+        searching = FALSE,    # Desativar a barra de busca
+        info = FALSE,         # Desativar a informação da tabela
+        ordering = FALSE,     # Desativar a ordenação
+        dom = 't',         # Apenas a tabela, sem outros componentes
+        initComplete = JS("
+      function(settings, json) {
+        $(this.api().table().header()).css({
+          'background-color': '#1fbda8', // Cor de fundo do cabeçalho
+          'color': 'white'               // Cor do texto do cabeçalho
+        });
+      }
+    ")
+      ), rownames = TRUE, caption = tags$caption(
+        style = 'caption-side: top; text-align: center; font-size: 20px; color: white; font-weight: bold; background-color: #303c54;',
+        'PRODUTOS A ENCOMENDAR'
+      ))
+    })
     
     
-    output$stock_multi <- renderTable({
+    output$stock_multi <- renderDT({
       if(input$otimizacao_multi != "NGSA-II"){
         product_orders <- round(optimization_results_multi$product_orders)
         sales <- round(optimization_results_multi$sales)
@@ -2425,10 +3802,29 @@ server <- function(input, output, session) {
       rownames(stock) <- c("1º semana", "2º semana", "3º semana", "4º semana")
       
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
-      stock
-    }, digits = 0, rownames = TRUE, caption = "Tabela de Stock")
+      # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
+      datatable(stock, options = list(
+        paging = FALSE,       # Desativar a paginação
+        searching = FALSE,    # Desativar a barra de busca
+        info = FALSE,         # Desativar a informação da tabela
+        ordering = FALSE,     # Desativar a ordenação
+        dom = 't',
+        # Não permitir seleção de linhas,       # Apenas a tabela, sem outros componentes
+        initComplete = JS("
+      function(settings, json) {
+        $(this.api().table().header()).css({
+          'background-color': '#1fbda8', // Cor de fundo do cabeçalho
+          'color': 'white'               // Cor do texto do cabeçalho
+        });
+      }
+    ")
+      ), rownames = TRUE, caption = tags$caption(
+        style = 'caption-side: top; text-align: center; font-size: 20px; color: white; font-weight: bold; background-color: #303c54;',
+        'STOCK'
+      ))
+    })
     
-    output$sales_multi <- renderTable({
+    output$sales_multi <- renderDT({
       if(input$otimizacao_multi != "NGSA-II"){
         sales <- round(optimization_results_multi$sales)
       }else{
@@ -2465,13 +3861,51 @@ server <- function(input, output, session) {
       
       
       # Retorna a tabela com os nomes das colunas e das linhas alterados e valores arredondados
-      sales
-    }, digits = 0, rownames = TRUE, caption = "Tabela de Vendas Atuais")
+      datatable(sales, options = list(
+        paging = FALSE,       # Desativar a paginação
+        searching = FALSE,    # Desativar a barra de busca
+        info = FALSE,         # Desativar a informação da tabela
+        ordering = FALSE,     # Desativar a ordenação
+        dom = 't',
+        # Não permitir seleção de linhas,       # Apenas a tabela, sem outros componentes
+        initComplete = JS("
+      function(settings, json) {
+        $(this.api().table().header()).css({
+          'background-color': '#1fbda8', // Cor de fundo do cabeçalho
+          'color': 'white'               // Cor do texto do cabeçalho
+        });
+      }
+    ")
+      ), rownames = TRUE, caption = tags$caption(
+        style = 'caption-side: top; text-align: center; font-size: 20px; color: white; font-weight: bold; background-color: #303c54;',
+        'VENDAS EFETIVAS'
+      ))
+    })
     
-    output$sales_table_multi <<- renderTable(optimization_results_multi$sales)
-    output$monthly_profit_output_multi <<- renderText({
+    
+    output$monthly_profit_output_multi <<- renderUI({
       if(input$otimizacao_multi != "NGSA-II"){
-        paste("Profit Mensal: ", round(optimization_results_multi$monthly_profit))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem; background-color:#1fbda8',
+          tags$div(
+            class = "card-header",
+            "Lucro"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(optimization_results_multi$monthly_profit))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
       }else{
         G <- optimization_results_multi$nsga_results
         I <- which(G$pareto.optimal)
@@ -2489,12 +3923,52 @@ server <- function(input, output, session) {
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
         sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
         monthly_profit <- sales_in_usd(sales) - total_costs(hired_workers, product_orders, sales)
-        paste("Profit Mensal:", round(monthly_profit))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem; background-color:#1fbda8',
+          tags$div(
+            class = "card-header",
+            "Lucro"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(monthly_profit))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
       }
     })
-    output$total_number_workers_output_multi <<- renderText({
+    output$total_number_workers_output_multi <<- renderUI({
       if(input$otimizacao_multi != "NGSA-II"){
-        paste("Número Trabalhadores: ", round(total_number_of_workers(round(optimization_results_multi$hired_workers))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Trabalhadores"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_number_of_workers(round(optimization_results_multi$hired_workers))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "Nº"
+          )
+        )
       }else{
         G <- optimization_results_multi$nsga_results
         I <- which(G$pareto.optimal)
@@ -2509,12 +3983,52 @@ server <- function(input, output, session) {
         Pareto <- P[st$ix, ]
         x <- ceiling(G$par[Pareto[1, 3],])
         hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
-        paste("Número Trabalhadores:", round(total_number_of_workers(round(hired_workers))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Trabalhadores"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_number_of_workers(round(hired_workers))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "Nº"
+          )
+        )
       }
     })
-    output$total_number_orders_output_multi <<- renderText({
+    output$total_number_orders_output_multi <<- renderUI({
       if(input$otimizacao_multi != "NGSA-II"){
-        paste("Número Encomendas: ", round(total_number_of_orders(round(optimization_results_multi$product_orders))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Encomendas"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_number_of_orders(round(optimization_results_multi$product_orders))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "Nº"
+          )
+        )
       }else{
         G <- optimization_results_multi$nsga_results
         I <- which(G$pareto.optimal)
@@ -2529,12 +4043,53 @@ server <- function(input, output, session) {
         Pareto <- P[st$ix, ]
         x <- ceiling(G$par[Pareto[1, 3],])
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
-        paste("Número Encomendas: ", round(total_number_of_orders(round(product_orders))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Encomendas"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_number_of_orders(round(total_number_of_orders(round(product_orders))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "Nº"
+          )
+        )
+          ))
       }
     })
-    output$total_cost_workers_output_multi <<- renderText({
+    output$total_cost_workers_output_multi <<- renderUI({
       if(input$otimizacao_multi != "NGSA-II"){
-        paste("Custo Trabalhadores: ", round(total_cost_workers(round(optimization_results_multi$hired_workers))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Custo Trabalhadoress"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_cost_workers(round(optimization_results_multi$hired_workers))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
       }else{
         G <- optimization_results_multi$nsga_results
         I <- which(G$pareto.optimal)
@@ -2550,11 +4105,52 @@ server <- function(input, output, session) {
         x <- ceiling(G$par[Pareto[1, 3],])
         hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
         paste("Custo Trabalhadores: ", round(total_cost_workers(round(hired_workers))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Custo Trabalhadoress"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_cost_workers(round(hired_workers))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
       }
     })
-    output$total_cost_orders_output_multi <<- renderText({
+    output$total_cost_orders_output_multi <<- renderUI({
       if(input$otimizacao_multi != "NGSA-II"){
-        paste("Custo Encomendas: ", round(total_cost_orders(round(optimization_results_multi$product_orders))))
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Custo Encomendas"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste(round(total_cost_orders(round(optimization_results_multi$product_orders))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
       }else{
         G <- optimization_results_multi$nsga_results
         I <- which(G$pareto.optimal)
@@ -2569,11 +4165,32 @@ server <- function(input, output, session) {
         Pareto <- P[st$ix, ]
         x <- ceiling(G$par[Pareto[1, 3],])
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
-        paste("Custo Encomendas: ", round(total_cost_orders(round(product_orders))))
+
+        tags$div(
+          class = "card text-white bg-primary mb-3",
+          style = 'max-width: 18rem;',
+          tags$div(
+            class = "card-header",
+            "Custo Encomendas"
+          ),
+          tags$div(
+            class = "card-body",
+            tags$p(
+              class = "card-text",
+              style = 'text-align: center; font-size: 24px;',
+              paste( round(total_cost_orders(round(product_orders))))
+            )
+          ),
+          tags$div(
+            class = "card-footer text-muted",
+            style = 'text-align: center; font-size: 12px;',
+            "US$"
+          )
+        )
       }
     })
     
-    output$total_cost_stock_output_multi <<- renderText({
+    output$total_cost_stock_output_multi <<- renderUI({
       if(input$otimizacao_multi != "NGSA-II"){
         product_orders <- round(optimization_results_multi$product_orders)
         sales <- round(optimization_results_multi$sales)
@@ -2595,10 +4212,31 @@ server <- function(input, output, session) {
         sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
       }
       stock = calculate_stock_in_usd(product_orders, sales)
-      paste("Custo Stock: ", round(stock))
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem;',
+        tags$div(
+          class = "card-header",
+          "Custo Stock"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            
+            paste(round(stock))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "US$"
+        )
+      )
     })
     
-    output$total_cost_output_multi <<- renderText({
+    output$total_cost_output_multi <<- renderUI({
       if(input$otimizacao_multi != "NGSA-II"){
         product_orders <- round(optimization_results_multi$product_orders)
         sales <- round(optimization_results_multi$sales)
@@ -2621,10 +4259,31 @@ server <- function(input, output, session) {
         sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
       }
       total = total_costs(hired_workers,product_orders, sales)
-      paste("Custo Total: ", round(total))
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem; background-color:#1fbda8',
+        tags$div(
+          class = "card-header",
+          "Custo Total"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            
+            paste(round(total))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "US$"
+        )
+      )
     })
     
-    output$monthly_effort_output_multi <<- renderText({
+    output$monthly_effort_output_multi <<- renderUI({
       if(input$otimizacao_multi != "NGSA-II"){
         product_orders <- round(optimization_results_multi$product_orders)
         hired_workers <- round(optimization_results_multi$hired_workers)
@@ -2647,10 +4306,31 @@ server <- function(input, output, session) {
       total_number_of_workers = total_number_of_workers(hired_workers)
       total_number_of_orders = total_number_of_orders(product_orders)
       total = total_number_of_workers + total_number_of_orders
-      paste("Effort Mensal: ", round(total))
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem; background-color:#1fbda8',
+        tags$div(
+          class = "card-header",
+          "Esforço total"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            
+            paste(round(total))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "Nº"
+        )
+      )
     })
     
-    output$total_sales_output_multi <<- renderText({
+    output$total_sales_output_multi <<- renderUI({
       if(input$otimizacao_multi != "NGSA-II"){
         sales <- round(optimization_results_multi$sales)
       }else{
@@ -2671,7 +4351,28 @@ server <- function(input, output, session) {
         sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
       }
       sales = sales_in_usd(sales)
-      paste("Vendas Totais: ", round(sales))
+      tags$div(
+        class = "card text-white bg-primary mb-3",
+        style = 'max-width: 18rem;',
+        tags$div(
+          class = "card-header",
+          "Vendas"
+        ),
+        tags$div(
+          class = "card-body",
+          tags$p(
+            class = "card-text",
+            style = 'text-align: center; font-size: 24px;',
+            
+            paste(round(sales))
+          )
+        ),
+        tags$div(
+          class = "card-footer text-muted",
+          style = 'text-align: center; font-size: 12px;',
+          "US$"
+        )
+      )
     })
     
     output$predictions_table_multi <- renderDT({
