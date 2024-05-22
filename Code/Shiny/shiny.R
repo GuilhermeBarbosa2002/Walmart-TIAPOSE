@@ -58,6 +58,78 @@ ui <- navbarPage(
              mainPanel(
                tabsetPanel(
                  tabPanel("Previsões",
+                          tags$div(
+                            style = "display: flex; justify-content: center; gap: 4rem;",
+                            
+                          tags$div(
+                            class = "card text-white bg-primary mb-3",
+                            style = "text-align: center; width: 20rem; background-color:#1fbda8",
+                            tags$div(
+                              class = "card-header",
+                              "Departamento 1:"
+                            ),
+                            tags$div(
+                              class = "card-body",
+                              tags$p(
+                                class = "card-text",
+                                style = 'text-align: center; font-size: 24px;',
+                                "KSVM"
+                              )
+                            ),
+                            actionButton("infoBtnDep1", "Mais info"),
+                          ),
+                          tags$div(
+                            class = "card text-white bg-primary mb-3",
+                            style = "text-align: center; width: 20rem; background-color:#1fbda8",
+                            tags$div(
+                              class = "card-header",
+                              "Departamento 2:"
+                            ),
+                            tags$div(
+                              class = "card-body",
+                              tags$p(
+                                class = "card-text",
+                                style = 'text-align: center; font-size: 24px;',
+                                "LM"
+                              )
+                            ),
+                            actionButton("infoBtnDep2", "Mais info"),
+                          ),
+                          tags$div(
+                            class = "card text-white bg-primary mb-3",
+                            style = "text-align: center; width: 20rem; background-color:#1fbda8",
+                            tags$div(
+                              class = "card-header",
+                              "Departamento 3:"
+                            ),
+                            tags$div(
+                              class = "card-body",
+                              tags$p(
+                                class = "card-text",
+                                style = 'text-align: center; font-size: 24px;',
+                                "Mars"
+                              )
+                            ),
+                            actionButton("infoBtnDep3", "Mais info"),
+                          ),
+                          tags$div(
+                            class = "card text-white bg-primary mb-3",
+                            style = "text-align: center; width: 20rem; background-color:#1fbda8",
+                            tags$div(
+                              class = "card-header",
+                              "Departamento 4:"
+                            ),
+                            tags$div(
+                              class = "card-body",
+                              tags$p(
+                                class = "card-text",
+                                style = 'text-align: center; font-size: 24px;',
+                                "LM"
+                              )
+                            ),
+                            actionButton("infoBtnDep4", "Mais info"),
+                          )),
+                          
                           fluidRow(
                             column(12,
                                    DTOutput("predictions_table_best_model")
@@ -417,8 +489,49 @@ ui <- navbarPage(
 
 
 
+
+
 # Define a lógica do servidor
 server <- function(input, output, session) {
+  
+  #botoes de informacao do melhor modelo por departamento
+  
+  observeEvent(input$infoBtnDep1, {
+    showModal(modalDialog(
+      title = "Mais informação",
+      "O melhor cenário é com o K=4, TS=1,2,4,8 e S=H=4, com Runs=8",
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+  
+  observeEvent(input$infoBtnDep2, {
+    showModal(modalDialog(
+      title = "Mais informação",
+      "O melhor cenário é com o K=4, TS=1:4 e S=H=4, com Runs=8",
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+  
+  observeEvent(input$infoBtnDep3, {
+    showModal(modalDialog(
+      title = "Mais informação",
+      "O melhor cenário é com o K=4, TS=1:4 e S=H=4, com Runs=8",
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+  
+  observeEvent(input$infoBtnDep4, {
+    showModal(modalDialog(
+      title = "Mais informação",
+      "O melhor cenário é com o K=4, TS=1:4 e S=H=4, com Runs=8",
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+  
   output$model_selector_uni <- renderUI({
     if (input$package == "rminer") {
       selectInput("model_uni", "Modelo de Previsão:",
@@ -429,6 +542,7 @@ server <- function(input, output, session) {
     }
     
   })
+  
   output$type_selector <- renderUI({
     if (input$variable_type == "Endogenas") {
       tagList(
@@ -3601,6 +3715,21 @@ server <- function(input, output, session) {
     }
     
     
+    
+    
+    
+    if (model %in% c("ARIMAX")) {
+      Pred1 <- MultivariadoExogen(departamento = d1, nomedepartamento = "Departamento 1", modelo = "ARIMAX", D = selected_inverse_index)
+      Pred2 <- MultivariadoExogen(departamento = d2, nomedepartamento = "Departamento 2", modelo = "ARIMAX", D = selected_inverse_index)
+      Pred3 <- MultivariadoExogen(departamento = d3, nomedepartamento = "Departamento 3", modelo = "ARIMAX", D = selected_inverse_index)
+      Pred4 <- MultivariadoExogen(departamento = d4, nomedepartamento = "Departamento 4", modelo = "ARIMAX", D = selected_inverse_index)
+    }
+    
+    
+    
+
+    
+
     # Update the predictions reactive value
     predictions_multi = data.frame(
       Department = c(1,2,3,4),

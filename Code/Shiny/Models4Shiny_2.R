@@ -234,6 +234,43 @@ Multivariado = function(departamento, nomedepartamento, modelo, D,variaveis){
 }
 
 
+
+#-------------Multivariado Exógenas
+MultivariadoExogenas = function(departamento, nomedepartamento, D) {
+  
+  data = read.csv("walmart.csv", header = TRUE, sep = ",")
+  data$Week <- week(as.Date(data$Date))
+  K = 4 
+  LTS = K 
+  
+  ts <- ts(departamento, frequency = K)
+  L <- length(ts)
+  NTR <- L - D   
+  
+  TR <- 1:NTR 
+  
+  # Variável exógena: IsHoliday
+  exogenas <- data[TR, "IsHoliday"]
+  
+  # Preparar dados para modelagem
+  mtr <- ts(departamento[TR], frequency = K)
+  
+  # Forecast usando autoARIMAX
+  arimax <- autoARIMAX(mtr, frequency = 4, xreg = exogenas)
+  Pred <- forecast(arimax, h = LTS)
+  
+  # Plot
+ # plot(Pred, type = "l", col = "black", lwd = 2, xlab = "Time", ylab = "Value", main = paste("Forecast for Department ", nomedepartamento, "\n ARIMAX"))
+  #legend("topright", legend = "Pred", col = "black", lwd = 2)
+  
+  print(Pred)
+  return(Pred)
+}
+
+
+
+
+   
 #-------------Uniobjetivo
 
 Uniobjetivo=function(df,algoritmo,func){
