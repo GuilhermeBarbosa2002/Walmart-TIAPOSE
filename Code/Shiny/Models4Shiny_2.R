@@ -23,7 +23,8 @@ d2=data[,"WSdep2"]
 d3=data[,"WSdep3"]  
 d4=data[,"WSdep4"]
 week=data[,"Week"] 
-
+exogen3 <- NA
+exog_future_df <- NA
 bits_workers <- 0
 bits_orders  <- 0
 nsga_results <- NA
@@ -166,7 +167,7 @@ return(Pred)
 
 }
 
-#-------------Multivariado
+#-------------Multivariado endógenas
 Multivariado = function(departamento, nomedepartamento, modelo, D,variaveis){
   
   data=read.csv("walmart.csv",header=TRUE,sep=",")
@@ -185,7 +186,7 @@ Multivariado = function(departamento, nomedepartamento, modelo, D,variaveis){
   
   ts = ts(departamento,frequency = K)
   L = length(ts)
-  NTR = L - D   
+  NTR = L - D*4  
   
   TR = 1: NTR 
  
@@ -235,40 +236,70 @@ Multivariado = function(departamento, nomedepartamento, modelo, D,variaveis){
 
 
 
-#-------------Multivariado Exógenas
-MultivariadoExogenas = function(departamento, nomedepartamento, D) {
-  
-  data = read.csv("walmart.csv", header = TRUE, sep = ",")
+#-------------Multivariado Exógenas------------------------------
+
+MultivariadoExogenas = function(departamento, D) {
+  data=read.csv("walmart.csv",header=TRUE,sep=",")
   data$Week <- week(as.Date(data$Date))
-  K = 4 
-  LTS = K 
-  
-  ts <- ts(departamento, frequency = K)
-  L <- length(ts)
-  NTR <- L - D   
-  
+  data$IsHoliday <- ifelse(data$IsHoliday == TRUE, 1, 0)
+  K=4
+  L <- 143
+  NTR <- L - D*4   
   TR <- 1:NTR 
+  data=data[TR,]
   
-  # Variável exógena: IsHoliday
-  exogenas <- data[TR, "IsHoliday"]
+
+  fuel_price = data[,"Fuel_Price"]
+  IsHoliday = data[,"IsHoliday"]
+  Week = data[,"Week"]
+  d1=data[,"WSdep1"] # employment
+  d2=data[,"WSdep2"] # employment
+  d3=data[,"WSdep3"] # employment
+  d4=data[,"WSdep4"] # employment
   
-  # Preparar dados para modelagem
-  mtr <- ts(departamento[TR], frequency = K)
+  # Variável exógena: IsHoliday e Week
+  hd=holdout(d1,ratio = 4, mode="order")
+  cdata=cbind(d1,d2,d3,d4)
+  cdata2=cbind(Week,IsHoliday)
   
-  # Forecast usando autoARIMAX
-  arimax <- autoARIMAX(mtr, frequency = 4, xreg = exogenas)
-  Pred <- forecast(arimax, h = LTS)
+  mtr = ts(cdata[hd$tr,],frequency=4 )
+  exogen3<<-ts(cdata2[hd$tr,],frequency=K)
   
-  # Plot
- # plot(Pred, type = "l", col = "black", lwd = 2, xlab = "Time", ylab = "Value", main = paste("Forecast for Department ", nomedepartamento, "\n ARIMAX"))
-  #legend("topright", legend = "Pred", col = "black", lwd = 2)
+  exog_future=ts(cdata2[hd$ts,],frequency=4)
+  exog_future_df<<-data.frame(exog_future)
   
-  print(Pred)
-  return(Pred)
+  print("TA AQUI")
+  print(exogen3)
+  
+    # Forecast usando var
+  mvar=VAR(mtr, lag.max = 16, exogen=exogen3)
+
+  FV <- forecast(mvar, h = 4, dumvar=exog_future_df)
+  print(FV)
+  
+  
+  Pred1 <- FV$forecast$d1$mean
+  Pred2 <- FV$forecast$d2$mean
+  Pred3 <- FV$forecast$d3$mean
+  Pred4 <- FV$forecast$d4$mean
+  
+  if(departamento==1){
+    return (Pred1)
+  }
+  
+  if(departamento==2){
+    return (Pred2)
+  }
+  
+  if(departamento==3){
+    return (Pred3)
+  }
+  
+  if(departamento==4){
+    return (Pred4)
+  }
+
 }
-
-
-
 
    
 #-------------Uniobjetivo

@@ -554,7 +554,7 @@ server <- function(input, output, session) {
       )
     } else if (input$variable_type == "Exogenas") {
       selectInput("model_multi", "Modelo de Previsão:",
-                  choices = c("ARIMAX"))
+                  choices = c("AUTO.VAR"))
     }
   })
   
@@ -3718,12 +3718,15 @@ server <- function(input, output, session) {
     
     
     
-    if (model %in% c("ARIMAX")) {
-      Pred1 <- MultivariadoExogen(departamento = d1, nomedepartamento = "Departamento 1", modelo = "ARIMAX", D = selected_inverse_index)
-      Pred2 <- MultivariadoExogen(departamento = d2, nomedepartamento = "Departamento 2", modelo = "ARIMAX", D = selected_inverse_index)
-      Pred3 <- MultivariadoExogen(departamento = d3, nomedepartamento = "Departamento 3", modelo = "ARIMAX", D = selected_inverse_index)
-      Pred4 <- MultivariadoExogen(departamento = d4, nomedepartamento = "Departamento 4", modelo = "ARIMAX", D = selected_inverse_index)
-    }
+    if (model %in% c("AUTO.VAR")) {
+      print("PRED ZERO AQUI_::")
+      Pred1 <- MultivariadoExogenas(departamento=1, D = selected_inverse_index)
+      Pred2 <- MultivariadoExogenas(departamento=2, D = selected_inverse_index)
+      Pred3 <- MultivariadoExogenas(departamento=3, D = selected_inverse_index)
+      Pred4 <- MultivariadoExogenas(departamento=4, D = selected_inverse_index)
+      
+      
+      }
     
     
     
