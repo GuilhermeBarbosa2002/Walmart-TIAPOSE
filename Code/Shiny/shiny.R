@@ -468,27 +468,7 @@ ui <- navbarPage(
              )
            )
   )
-  #,
-  # tabPanel("Vendas totais por departamento",
-  #          fluidRow(
-  #            column(6, plotlyOutput("gauge_WSdep1")),
-  #            column(6, plotlyOutput("gauge_WSdep2")),
-  #            column(6, plotlyOutput("gauge_WSdep3")),
-  #            column(6, plotlyOutput("gauge_WSdep4"))
-  #          )
-  # ),
-  # tabPanel("Correlação de Spearman",
-  #          fluidRow(
-  #            column(12,
-  #                   plotlyOutput("spearman_correlation_plot")
-  #            )
-  #          )
-  # )
 )
-
-
-
-
 
 
 
@@ -4616,14 +4596,7 @@ server <- function(input, output, session) {
     
   })    
   
-  # Função para calcular a correlação de Spearman e renderizar o gráfico
-  output$spearman_correlation_plot <- renderPlotly({
-    spearman_correlation <- cor(walmart_data[, c("WSdep1", "WSdep2", "WSdep3", "WSdep4")], method = "spearman")
-    plot_ly(x = colnames(spearman_correlation), y = colnames(spearman_correlation), z = as.matrix(spearman_correlation), type = "heatmap") %>%
-      layout(title = "Correlação de Spearman entre departamentos")
-  })
-  
-  
+
   
   output$data_table <- renderDT({
     datatable(walmart_data, options = list(lengthMenu = c(5, 10, 15), pageLength = 5))
@@ -4639,21 +4612,6 @@ server <- function(input, output, session) {
                Mean = c(mean_WSdep1, mean_WSdep2, mean_WSdep3, mean_WSdep4))
   })
   
-  output$gauge_WSdep1 <- renderPlotly({
-    render_gauge_plot("WSdep1", mean_values())
-  })
-  
-  output$gauge_WSdep2 <- renderPlotly({
-    render_gauge_plot("WSdep2", mean_values())
-  })
-  
-  output$gauge_WSdep3 <- renderPlotly({
-    render_gauge_plot("WSdep3", mean_values())
-  })
-  
-  output$gauge_WSdep4 <- renderPlotly({
-    render_gauge_plot("WSdep4", mean_values())
-  })
   
   render_gauge_plot <- function(department, mean_values) {
     mean_value <- mean_values[mean_values$Department == department, "Mean"]
