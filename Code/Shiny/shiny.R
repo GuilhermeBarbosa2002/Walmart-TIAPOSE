@@ -467,22 +467,23 @@ ui <- navbarPage(
                     DTOutput("data_table")
              )
            )
-  ),
-  tabPanel("Vendas totais por departamento",
-           fluidRow(
-             column(6, plotlyOutput("gauge_WSdep1")),
-             column(6, plotlyOutput("gauge_WSdep2")),
-             column(6, plotlyOutput("gauge_WSdep3")),
-             column(6, plotlyOutput("gauge_WSdep4"))
-           )
-  ),
-  tabPanel("Correlação de Spearman",
-           fluidRow(
-             column(12,
-                    plotlyOutput("spearman_correlation_plot")
-             )
-           )
   )
+  #,
+  # tabPanel("Vendas totais por departamento",
+  #          fluidRow(
+  #            column(6, plotlyOutput("gauge_WSdep1")),
+  #            column(6, plotlyOutput("gauge_WSdep2")),
+  #            column(6, plotlyOutput("gauge_WSdep3")),
+  #            column(6, plotlyOutput("gauge_WSdep4"))
+  #          )
+  # ),
+  # tabPanel("Correlação de Spearman",
+  #          fluidRow(
+  #            column(12,
+  #                   plotlyOutput("spearman_correlation_plot")
+  #            )
+  #          )
+  # )
 )
 
 
@@ -554,7 +555,7 @@ server <- function(input, output, session) {
       )
     } else if (input$variable_type == "Exogenas") {
       selectInput("model_multi", "Modelo de Previsão:",
-                  choices = c("AUTO.VAR"))
+                  choices = c("VAR"))
     }
   })
   
@@ -766,7 +767,7 @@ server <- function(input, output, session) {
         sales          <- calculate_sales(DataFrame, hired_workers, product_orders)
         
       }
-      stock = calculate_stock(product_orders, sales)
+      stock = ceiling(calculate_stock(product_orders, sales))
       # Se optimization_results$hired_workers for uma matriz, converta-a em um data frame
       stock <- as.data.frame(stock)
       
@@ -816,7 +817,7 @@ server <- function(input, output, session) {
         x <- ceiling(G$par[Pareto[input$pareto_numeric, 3],])
         hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
-        sales          <- calculate_sales(DataFrame, hired_workers, product_orders)
+        sales          <- ceiling(calculate_sales(DataFrame, hired_workers, product_orders))
       }
       sales <- as.data.frame(sales)
       
@@ -1512,7 +1513,7 @@ server <- function(input, output, session) {
         sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
         
       }
-      stock = calculate_stock(product_orders, sales)
+      stock = ceiling(calculate_stock(product_orders, sales))
       # Se optimization_results$hired_workers for uma matriz, converta-a em um data frame
       stock <- as.data.frame(stock)
       
@@ -1563,7 +1564,7 @@ server <- function(input, output, session) {
         x <- ceiling(G$par[Pareto[input$pareto_numeric_multi, 3],])
         hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
-        sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
+        sales          <- ceiling(calculate_sales(DataFrame_multi, hired_workers, product_orders))
       }
       sales <- as.data.frame(sales)
       
@@ -2933,10 +2934,10 @@ server <- function(input, output, session) {
         x <- ceiling(G$par[Pareto[1, 3],])
         hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
-        sales          <- calculate_sales(DataFrame, hired_workers, product_orders)
+        sales          <- ceiling(calculate_sales(DataFrame, hired_workers, product_orders))
         
       }
-      stock = calculate_stock(product_orders, sales)
+      stock = ceiling(calculate_stock(product_orders, sales))
       # Se optimization_results$hired_workers for uma matriz, converta-a em um data frame
       stock <- as.data.frame(stock)
       
@@ -2987,7 +2988,7 @@ server <- function(input, output, session) {
         x <- ceiling(G$par[Pareto[1, 3],])
         hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
-        sales          <- calculate_sales(DataFrame, hired_workers, product_orders)
+        sales          <- ceiling(calculate_sales(DataFrame, hired_workers, product_orders))
       }
       sales <- as.data.frame(sales)
       
@@ -3718,7 +3719,7 @@ server <- function(input, output, session) {
     
     
     
-    if (model %in% c("AUTO.VAR")) {
+    if (model %in% c("VAR")) {
       print("PRED ZERO AQUI_::")
       Pred1 <- MultivariadoExogenas(departamento=1, D = selected_inverse_index)
       Pred2 <- MultivariadoExogenas(departamento=2, D = selected_inverse_index)
@@ -3923,7 +3924,7 @@ server <- function(input, output, session) {
         
       }
       
-      stock = calculate_stock(product_orders, sales)
+      stock = ceiling(calculate_stock(product_orders, sales))
       # Se optimization_results$hired_workers for uma matriz, converta-a em um data frame
       stock <- as.data.frame(stock)
       
@@ -3974,7 +3975,7 @@ server <- function(input, output, session) {
         x <- ceiling(G$par[Pareto[1, 3],])
         hired_workers  <- matrix(x[1:12], ncol = 4, nrow = 3)
         product_orders <- matrix(x[13:28], ncol = 4, nrow = 4)
-        sales          <- calculate_sales(DataFrame_multi, hired_workers, product_orders)
+        sales          <- ceiling(calculate_sales(DataFrame_multi, hired_workers, product_orders))
       }
       
       sales <- as.data.frame(sales)

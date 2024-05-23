@@ -18,14 +18,14 @@ actual_sales <- data.frame(
 
 ###################################### DEFINE PARAMETERS ##############################
 D = 28
-N = 1000
-Ni = 300 # iterations to get the s0 at montecarlo
+N = 10000
+Ni = 1000 # iterations to get the s0 at montecarlo
 N2 = N - Ni # Iteractios to HC and SAN
 
 # Binary
 bits_workers <- 0
 bits_orders  <- 0
-
+a <- 0
 
 F2 <- function(s){
   hired_workers = matrix(s[1:12],nrow=3,ncol=4)
@@ -159,7 +159,7 @@ simulatedAnnealing_growing <- function(){
   }
   
   # Definição dos parâmetros do Simulated Annealing
-  CSANN <- list(maxit = N2, temp = 500, trace = FALSE)
+  CSANN <- list(maxit = N2, temp = 900, trace = FALSE)
   
   for (i in 1:length(grupos)) {
     lower <- rep(0,D) # limites inferiores
@@ -179,7 +179,7 @@ simulatedAnnealing_growing <- function(){
     simulatedAnnealing_effort[i] <- F2(sol)
     
   }
-
+  
   return(list(
     median_value = median(simulatedAnnealing_values),
     median_profit = median(simulatedAnnealing_profit),
@@ -193,7 +193,7 @@ rgba_growing <- function(){
   rgba_value_profit = vector(length = 8)
   rgba_value_effort = vector(length = 8)
   
-  popSize <- 200
+  popSize <- 100
   size    <- 28
   
   # Loop para percorrer todas as matrizes
@@ -208,7 +208,7 @@ rgba_growing <- function(){
                 mutationChance = 1 / (size + 1), 
                 elitism        = popSize * 0.2, 
                 evalFunc       = eval_mix_min, 
-                iter           = N)
+                iter           = N/popSize)
     
     bs <- rga$population[rga$evaluations == min(rga$evaluations)]
     bs = ceiling(bs)
@@ -216,7 +216,7 @@ rgba_growing <- function(){
     rgba_value_profit[i] <- F1(bs)
     rgba_value_effort[i] <- F2(bs)
   }
-
+  
   return(list(
     rgba_values = median(rgba_values),
     rgba_value_profit = median(rgba_value_profit),
@@ -251,7 +251,7 @@ evaltabu <- function(solution){
   
   sales          <- calculate_sales(actual_sales, hired_workers, product_orders)
   monthly_profit <- sales_in_usd(sales) - total_costs(hired_workers, product_orders, sales)
-
+  
   return(monthly_profit)
 }
 
@@ -286,7 +286,7 @@ eval_mix_tabu <- function(solution){
   w1=0.5
   w2=w1
   
-  return(w1*evaltabu(solution) - (w2*F2tabu(solution)*50000))
+  return(w1*evaltabu(solution) - (w2*F2tabu(solution)*10000))
   
 }
 
@@ -296,6 +296,7 @@ tabu_growing <- function(){
   tabu_value_effort = vector(length = 8)
   
   for (i in 1:length(grupos)) {
+    a <<- a + 1
     lower <- rep(0,D) # limites inferiores
     upper <- calculate_uppers(grupos[[i]])# limites superiores
     bits_workers <<- ceiling(max(log(upper[1:12] , 2))) # Bits for Hired Workers
@@ -305,22 +306,22 @@ tabu_growing <- function(){
     initial_config <- c() # Building Initial configuration
     initial_config <- initial_config_build(config = initial_config, n_bits = bits_workers, dimensions = 12) # Building Initial configuration for Hired Workers
     initial_config <- initial_config_build(config = initial_config, n_bits = bits_orders , dimensions = 16) # Building Initial configuration for Product Orders
-    solution <- tabuSearch(size, iters = 3, objFunc = eval_mix_tabu, config = initial_config, verbose = F)
+    solution <- tabuSearch(size, iters = N/100, objFunc = eval_mix_tabu, config = initial_config, verbose = F)
     
     b  <- which.max(solution$eUtilityKeep) # best index
     bs  <- solution$configKeep[b,]
-
+    
     hired_workers <- matrix_transform(solution       = bs, 
-                                     start           = 1, 
-                                     elements        = 12,
-                                     dimension_start = 1,
-                                     bits            = bits_workers)
+                                      start           = 1, 
+                                      elements        = 12,
+                                      dimension_start = 1,
+                                      bits            = bits_workers)
     product_orders <- matrix_transform(solution        = bs, 
                                        start           = 12 * bits_workers + 1, 
                                        elements        = 16, 
                                        dimension_start = 13, 
                                        bits            = bits_orders)
-
+    
     tabu_values[i] <- eval_mix_max(c(hired_workers, product_orders))
     tabu_value_profit[i] <- F1(c(hired_workers, product_orders))
     tabu_value_effort[i] <- F2(c(hired_workers, product_orders)) 
@@ -351,6 +352,7 @@ eval_rbga <- function(solution){
   
   sales          <- calculate_sales(actual_sales, hired_workers, product_orders)
   monthly_profit <- sales_in_usd(sales) - total_costs(hired_workers, product_orders, sales)
+  return(-monthly_profit)
 }
 
 F2RGBA <- function(solution){
@@ -373,7 +375,7 @@ F2RGBA <- function(solution){
 eval_mix_rbga <- function(solution){
   w1=0.5
   w2=w1
-  return(w1*eval_rbga(solution) + (w2*F2RGBA(solution)*50000))
+  return(w1*eval_rbga(solution) + (w2*F2RGBA(solution)*10000))
   
 }
 
@@ -391,16 +393,16 @@ rbga_bin_growing <- function(){
     bits_orders    <<- ceiling(max(log(Up[13:28], 2))) # Bits for Product Orders
     size           <- 12 * bits_workers + 16 * bits_orders # solution size
     mutationChance <- 1 / (size + 1)
-    popsize        <- 200
+    popsize        <- 100
     elitism        <- popsize * 0.2
     
     rga <- rbga.bin(size           = size,
                     popSize        = popsize,
-                    iters          = N,
+                    iters          = N/popsize,
                     mutationChance = mutationChance,
                     elitism        = elitism,
                     zeroToOneRatio = 10,
-                    evalFunc       = eval_bin_min,
+                    evalFunc       = eval_mix_rbga,
                     verbose        = FALSE)
     
     
@@ -416,7 +418,7 @@ rbga_bin_growing <- function(){
                                        elements        = 16, 
                                        dimension_start = 13, 
                                        bits            = bits_orders)
-
+    
     rbga_bin_values[i] <- eval_mix_max(c(hired_workers, product_orders))
     rbga_bin_value_profit[i] <- F1(c(hired_workers, product_orders))
     rbga_bin_value_effort[i] <- F2(c(hired_workers, product_orders)) 
@@ -450,13 +452,13 @@ print(paste("profit - ", san[[2]]))
 print(paste("effort - ", san[[3]]))
 
 rgba_genetic = rgba_growing()
-print("***** RGBA GENETIC ********")
+print("***** RBGA GENETIC ********")
 print(paste("total - ", rgba_genetic[[1]]))
 print(paste("profit - ", rgba_genetic[[2]]))
 print(paste("effort - ", rgba_genetic[[3]]))
 
 rgba_bin = rbga_bin_growing()
-print("***** RGBA.BIN ********")
+print("***** RBGA.BIN ********")
 print(paste("total - ", rgba_bin[[1]]))
 print(paste("profit - ", rgba_bin[[2]]))
 print(paste("effort - ", rgba_bin[[3]]))

@@ -50,47 +50,31 @@ d4=d[,7]
 L=length(d1)
 K = 4 
 H = 4 
-
 NTR = L - D*4   
-  
 TR = 1: NTR 
-  
-
-
 Pred = NULL
-
 dtr = ts(departamento[TR], frequency = K)
 
 if(modelo == "Holtwinters") {
-  
   HW = HoltWinters(dtr)
   Pred=forecast(HW,h=4)$mean  
 }
 
 if(modelo == "Arima") {
-  
   ARIMA = suppressWarnings(auto.arima(dtr))
   Pred=forecast(ARIMA,h=4)$mean  
 }
 
 if(modelo == "NN") {
-  
   NN = nnetar(dtr,P=1,repeats=3)
   Pred=forecast(NN,h=4)$mean  
 }
 
-
 if(modelo == "ETS") {
-  
   ETS = ets(dtr) 
   Pred=forecast(ETS,h=4)$mean  
 }
-
-
 return(Pred)
-
-
-
 }
 
 Univariado_Rminer = function(departamento, nomedepartamento, modelo, D){
@@ -100,71 +84,47 @@ d2=d[,5]
 d3=d[,6] 
 d4=d[,7] 
 
-
 C = CasesSeries(departamento,c(1:4))
-
 K = 4 
 H = 4 
-
 L=nrow(C)
-
 NTR = L - D*4   
-
 TR = 1: NTR 
-
-
-
 Pred = NULL
-
-
-
-
 LTS=4 # length of the test set
 START=length(C[TR,])+1
 
 if(modelo == "Random Forest") {
-  
   RF=fit(y~.,C[TR,],model="randomForest")
   Pred=lforecast(RF,C,start=START,horizon=LTS) 
 }
 
 if(modelo == "mlpe") {
-  
   MLPE=fit(y~.,C[TR,],model="mlpe")
   Pred=lforecast(MLPE,C,start=START,horizon=LTS) 
 }
 
 if(modelo == "mars") {
-  
   mars <- fit(y~., C[TR,], model = "mars")
   Pred=lforecast(mars,C,start=START,horizon=LTS) 
 }
 
-
 if(modelo == "ksvm") {
-  
   ksvm <- fit(y~., C[TR,], model = "ksvm")
   Pred=lforecast(ksvm,C,start=START,horizon=LTS)  
 }
 
-
 if(modelo == "xgboost") {
-  
   XG=fit(y~.,C[TR,],model="xgboost")
   Pred=lforecast(XG,C,start=START,horizon=LTS)   
 }
 
-
 if(modelo == "lm") {
-  
   LM=fit(y~.,C[TR,],model="lm")
   Pred=lforecast(LM,C,start=START,horizon=LTS)  
 }
 
-
 return(Pred)
-
-
 }
 
 #-------------Multivariado endógenas
@@ -226,10 +186,7 @@ Multivariado = function(departamento, nomedepartamento, modelo, D,variaveis){
     Pred=Pred[[1]]
   
   }
-  # 
-  # plot(Pred, type="l", col="black", lwd=2, xlab="Time", ylab="Value", main=paste("Forecast for Department ", nomedepartamento, "\n ", modelo))
-  # legend("topright", legend="Pred", col="black", lwd=2)
-  # 
+
   print(Pred)
   return(Pred)
 }
@@ -267,16 +224,11 @@ MultivariadoExogenas = function(departamento, D) {
   
   exog_future=ts(cdata2[hd$ts,],frequency=4)
   exog_future_df<<-data.frame(exog_future)
-  
-  print("TA AQUI")
-  print(exogen3)
-  
+
     # Forecast usando var
   mvar=VAR(mtr, lag.max = 16, exogen=exogen3)
 
   FV <- forecast(mvar, h = 4, dumvar=exog_future_df)
-  print(FV)
-  
   
   Pred1 <- FV$forecast$d1$mean
   Pred2 <- FV$forecast$d2$mean
@@ -318,7 +270,6 @@ Uniobjetivo=function(df,algoritmo,func){
   
   algoritmo = algoritmo
   print(algoritmo)
-  
   
   ## Define the eval function
   eval_min <- function(s){
@@ -390,7 +341,6 @@ Uniobjetivo=function(df,algoritmo,func){
     c(F1(x), F2(x))
   }
   
-  
   eval_mix_max<- function(s){
     s <- round(s)
     hired_workers = matrix(s[1:12],nrow=3,ncol=4)
@@ -410,7 +360,7 @@ Uniobjetivo=function(df,algoritmo,func){
     effort=F2(s)
     
     
-    return((0.5 * monthly_profit)-(50000*effort*0.5))
+    return((0.5 * monthly_profit)-(10000*effort*0.5))
   }
   
   
@@ -433,7 +383,7 @@ Uniobjetivo=function(df,algoritmo,func){
     effort=F2(s)
     
     
-    return((-0.5 * monthly_profit)+(50000*effort*0.5))
+    return((-0.5 * monthly_profit)+(10000*effort*0.5))
   }
   
   
@@ -455,11 +405,108 @@ Uniobjetivo=function(df,algoritmo,func){
   }
   
   
+  ##################### MONTECARLO_SEARCH #################
+  montecarlo <- function(eval_max, lower, upper, N, type){
+    
+    EV    <<- 0 #  initial evaluation point is zero.
+    BEST  <<- -Inf # initial best is -Inf
+    curve <<- rep(NA,N) # vector with the convergence values
+    
+    MC <- mcsearch(fn = eval_max, lower = lower, upper = upper, N = N, type = type)
+    
+    best_solution <- ceiling(MC$sol)
+    
+    cat("\n ******** MONTECARLO ******\n")
+    cat("Melhor solução:", best_solution, "Função de avaliação:", MC$eval, " (encontrado na iteração:", MC$index, ")\n")
+  
+    return(best_solution)
+  }
+  
+  ##################### HILL_CLIMBING #################
+  hill_climbing <- function(eval, lower, upper, N2, type){
+    
+    # slight change of a real par under a normal u(0,0.5) function:
+    rchange1 <- function(par, lower, upper) { 
+      new_par <- hchange(par, lower = lower, upper = upper, rnorm, mean = 1, sd = 0.2, round = FALSE)
+      rounded_par <- ceiling(new_par)
+      return(rounded_par)
+    }
+    
+    EV    <<- 0 #  initial evaluation point is zero.
+    BEST  <<- -Inf # initial best is -Inf
+    curve <<- rep(NA,N) # vector with the convergence values
+    
+    #get s0 from montecarlo with 1000 iteration
+    MC <- mcsearch(fn = eval_max, lower = lower, upper = upper, N = Ni, type = "max")
+    s0 <- ceiling(MC$sol)
+    HC <- hclimbing(par = s0, fn = eval_max, change = rchange1, lower = lower, upper = upper, type = "max",
+                    control = list(maxit = N2, REPORT = 0, digits = 2, trace = TRUE))
+    
+    
+    cat("\n ******** HILL CLIMBING ******\n")
+    cat("best solution:",HC$sol,"evaluation function",HC$eval,"\n")
+    
+    return(ceiling(HC$sol))
+  }
+  
+  
+  ##################### Simulated Annealing #################  
+  SimulatedAnnealing <- function(eval, lower, upper){
+    
+    #eval_values <- numeric(N)
+
+    #Função de mudança para o Simulated Annealing
+    rchange2 <- function(par) {
+      new_par <- hchange(par, lower = lower, upper = upper, rnorm, mean = 1, sd = 0.2, round = FALSE)
+      rounded_par <- ceiling(new_par)
+      return(rounded_par)
+    }
+    
+    # Definição dos parâmetros do Simulated Annealing
+    CSANN <- list(maxit = N2, temp = 900, trace = FALSE)
+    
+    EV    <<- 0 #  initial evaluation point is zero.
+    BEST  <<- -Inf # initial best is -Inf
+    curve <<- rep(NA,N2) # vector with the convergence values
+    
+    #get s0 from montecarlo with 1000 iteration
+    MC <- mcsearch(fn = eval_max, lower = lower, upper = upper, N = Ni, type = "max")
+    s0 <- MC$sol
+    # Execução do Simulated Annealing
+    SA <- optim(par = s0, fn = eval_min, method = "SANN", gr = rchange2, control = CSANN)
+    
+    cat("Melhor solução encontrada:", SA$par, "Valor da função de avaliação:", -SA$value, "\n")  
+    
+    return(SA$par)
+  }
+  
+  
+  ###############RGBA-Genetic#####################
+  RBGA = function(eval, lower, upper, N){
+    
+    size    <- 28
+    
+    EV    <<- 0 #  initial evaluation point is zero.
+    BEST  <<- -Inf # initial best is -Inf
+    curve <<- rep(NA,100) # vector with the convergence values
+
+    rga <- rbga(stringMin      = lower, 
+                stringMax      = upper, 
+                popSize        = 100, 
+                mutationChance = 1 / (size + 1), 
+                elitism        = 100 * 0.2, 
+                evalFunc       = eval, 
+                iter           = 100)
+    
+    
+    bindex=which.min(rga$evaluations)
+    
+    return(ceiling(rga$population[bindex,]))
+  }
+  
   ############# RGBA.BIN ################
   
   RBGABIN = function(){
-    
-    
     
     eval_rbga <- function(solution){
       hired_workers  <- matrix(matrix_transform(solution        = solution, 
@@ -504,7 +551,7 @@ Uniobjetivo=function(df,algoritmo,func){
                                                 bits            = bits_orders), nrow = 4, ncol = 4)
       
       monthly_effort <- total_number_of_workers(hired_workers) + total_number_of_orders(product_orders)
-      return(monthly_effort) # needs to be negative because tabuSearch only maximizes
+      return(monthly_effort)
     }
     
     eval_mix_rbga <- function(solution){
@@ -512,7 +559,7 @@ Uniobjetivo=function(df,algoritmo,func){
       w1=0.5
       w2=w1
       
-      return(w1*eval_rbga(solution) + (w2*F2(solution)*50000))
+      return(w1*eval_rbga(solution) + (w2*F2(solution)*10000))
       
     }
     
@@ -522,146 +569,39 @@ Uniobjetivo=function(df,algoritmo,func){
       func= eval_rbga
     }
     
-    
     # global variables (can be used inside the functions):
+    popsize        <- 100
     D              <- 28 # dimension
-    Low            <- rep(0, D) # Lower
-    Up             <- calculate_uppers(actual_sales) # Upper
-    N              <- 100 # number of iterations
+    N              <- 10000/popsize # number of iterations
     Low            <- rep(0, D) # Lower
     Up             <- calculate_uppers(actual_sales) # Upper
     bits_workers   <<- ceiling(max(log(Up[1:12] , 2))) # Bits for Hired Workers
     bits_orders    <<- ceiling(max(log(Up[13:28], 2))) # Bits for Product Orders
     size           <- 12 * bits_workers + 16 * bits_orders # solution size
     mutationChance <- 1 / (size + 1)
-    popsize        <- 200
     elitism        <- popsize * 0.2
-    #ITER           <- 1
     
     EV    <<- 0 #  initial evaluation point is zero.
     BEST  <<- -Inf # initial best is -Inf
-    curve <<- rep(NA,N) # vector with the convergence values
+    curve <<- rep(NA,N/popsize) # vector with the convergence values
     
     rga <- rbga.bin(size           = size,
                     popSize        = popsize,
-                    iters          = N, 
+                    iters          = N/popsize, 
                     mutationChance = mutationChance,
                     elitism        = elitism, 
                     zeroToOneRatio = 10,
-                    #monitorFunc    = NULL, 
                     evalFunc       = eval_rbga,
                     verbose        = FALSE)
     
     print(rga)
     
-    
     bs <- rga$population[rga$evaluations == min(rga$evaluations), ]
     print(bs)
-    
-    
-    
     
     return(bs)
   }
   
-  
-  ##################### MONTECARLO_SEARCH #################
-  montecarlo <- function(eval_max, lower, upper, N, type){
-    
-    EV    <<- 0 #  initial evaluation point is zero.
-    BEST  <<- -Inf # initial best is -Inf
-    curve <<- rep(NA,N) # vector with the convergence values
-    
-    MC <- mcsearch(fn = eval_max, lower = lower, upper = upper, N = N, type = type)
-    
-    best_solution <- round(MC$sol)
-    
-    cat("\n ******** MONTECARLO ******\n")
-    cat("Melhor solução:", best_solution, "Função de avaliação:", MC$eval, " (encontrado na iteração:", MC$index, ")\n")
-  
-    
-    return(best_solution)
-  }
-  
-  ##################### HILL_CLIMBING #################
-  hill_climbing <- function(eval, lower, upper, N, type, s0, REPORT){
-    
-    # slight change of a real par under a normal u(0,0.5) function:
-    rchange1 <- function(par, lower, upper) { 
-      new_par <- hchange(par, lower = lower, upper = upper, rnorm, mean = 0, sd = 0.25, round = FALSE)
-      rounded_par <- ceiling(new_par)
-      return(rounded_par)
-    }
-    
-    # ##with report
-    # HC=hclimbing(par=s0,fn=eval,change=rchange1,lower=lower,upper=upper,type=type,
-    #              control=list(maxit=N,REPORT=REPORT,digits=2))
-    
-    EV    <<- 0 #  initial evaluation point is zero.
-    BEST  <<- -Inf # initial best is -Inf
-    curve <<- rep(NA,N) # vector with the convergence values
-    
-    ##without report
-    HC = hclimbing(par = s0, fn = eval, change = rchange1, lower = lower, upper = upper, type = type,
-                   control = list(maxit = N, REPORT = 0, digits = 2, trace = TRUE))
-    
-    cat("\n ******** HILL CLIMBING ******\n")
-    cat("best solution:",HC$sol,"evaluation function",HC$eval,"\n")
-    
-   
-    
-    return(HC$sol)
-  }
-  
-  
-  ##################### Simulated Annealing #################  
-  SimulatedAnnealing <- function(eval, lower, upper, s0, type){
-    
-    eval_values <- numeric(N)
-    
-    
-    #Função de mudança para o Simulated Annealing
-    rchange2 <- function(par) {
-      new_par <- hchange(par, lower = lower, upper = upper, rnorm, mean = 0, sd = 0.5, round = FALSE)
-      rounded_par <- ceiling(new_par)
-      return(rounded_par)
-    }
-    
-    cat("\n ******** Simulated Annealing ******\n")
-    
-    # Definição dos parâmetros do Simulated Annealing
-    CSANN <- list(maxit = N, temp = 100, trace = FALSE)
-    
-    EV    <<- 0 #  initial evaluation point is zero.
-    BEST  <<- -Inf # initial best is -Inf
-    curve <<- rep(NA,N) # vector with the convergence values
-    
-    # Execução do Simulated Annealing
-    SA <- optim(par = s0, fn = eval_min, method = "SANN", gr = rchange2, control = CSANN)
-    
-    cat("Melhor solução encontrada:", SA$par, "Valor da função de avaliação:", -SA$value, "\n")  
-    
-    
-    
-    return(SA$par)
-  }
-  
-  
-  ###############RGBA-Genetic#####################
-  RBGA = function(eval, lower, upper, N){
-    
-    EV    <<- 0 #  initial evaluation point is zero.
-    BEST  <<- -Inf # initial best is -Inf
-    curve <<- rep(NA,N) # vector with the convergence values
-    
-    rga=rbga(lower,upper,popSize=200,mutationChance=0.33,elitism=10,evalFunc=eval,iter=N)
-    
-    bindex=which.min(rga$evaluations)
-    
-   
-    return(ceiling(rga$population[bindex,]))
-    
-  }
   
   ##################Tabu########################
   Tabu = function(){
@@ -709,7 +649,7 @@ Uniobjetivo=function(df,algoritmo,func){
                                                 bits            = bits_orders), nrow = 4, ncol = 4)
       
       monthly_effort <- total_number_of_workers(hired_workers) + total_number_of_orders(product_orders)
-      return(monthly_effort) # needs to be negative because tabuSearch only maximizes
+      return(monthly_effort) 
     }
     
     eval_mix_tabu <- function(solution){
@@ -717,7 +657,7 @@ Uniobjetivo=function(df,algoritmo,func){
       w1=0.5
       w2=w1
       
-      return(w1*evaltabu(solution) - (w2*F2(solution)*50000))
+      return(w1*evaltabu(solution) - (w2*F2(solution)*10000))
       
     }
     
@@ -783,14 +723,14 @@ Uniobjetivo=function(df,algoritmo,func){
   
   ##################### PARAMETERS #################
   D=28 #dimension
-  N <- 10000 #número de pesquisas
+  N = 10000 
+  Ni = 1000 # iterations to get the s0 at montecarlo
+  N2 = N - Ni
   REPORT=N/20 #report results
   
   lower <- rep(0, D) # limites inferiores
   upper <- calculate_uppers(actual_sales)# limites superiores
   # define the initial solution for hill_climbing
-  
-  x2 = c(8, 38, 15, 24, 7, 22, 3, 5, 4, 3, 3, 13, 134101, 134441, 30785, 11860, 159979, 367501, 141060, 122515, 26920, 83112, 45240, 27495, 94235, 139555, 83043, 65082 )
   
   
   EV=0 #  initial evaluation point is zero.
@@ -799,12 +739,12 @@ Uniobjetivo=function(df,algoritmo,func){
   
   # Simulated Annealing
   if(algoritmo=="Simulated Annealing"){
-    s <- SimulatedAnnealing(funct,lower,upper,x2,"max")
+    s <- SimulatedAnnealing(funct,lower,upper)
   }
   
   # RGBA genetic
   if(algoritmo=="RBGA"){
-    s <- RBGA(funct,lower,upper,N=100)
+    s <- RBGA(funct,lower,upper,100)
   }
   
   # TabuSearch
@@ -824,7 +764,7 @@ Uniobjetivo=function(df,algoritmo,func){
 
   #Hill_Climbing
   if(algoritmo=="Hill Climbing"){
-    s <- hill_climbing(funct,lower, upper, N, "max", x2, REPORT)
+    s <- hill_climbing(funct,lower, upper, N, "max")
   }
   
   #NGSA-II
@@ -879,8 +819,3 @@ Uniobjetivo=function(df,algoritmo,func){
   ))
   
 }
-
-
-#-------------MultiObjetivo
-#-------------BestSolution
-

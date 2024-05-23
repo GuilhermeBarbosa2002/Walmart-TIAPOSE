@@ -17,8 +17,8 @@ actual_sales <- data.frame(
 
 ###################################### DEFINE PARAMETERS ##############################
 D = 28
-N = 1000 
-Ni = 300 # iterations to get the s0 at montecarlo
+N = 10000 
+Ni = 1000 # iterations to get the s0 at montecarlo
 N2 = N - Ni # Iteractios to HC and SAN
 BEST = 0
 EV = 0
@@ -116,7 +116,7 @@ hill_climbing_growing <- function(){
     upper <- calculate_uppers(grupos[[i]])# limites superiores
     actual_sales <- grupos[[i]]
     
-    #get s0 from montecarlo with 300 iteration
+    #get s0 from montecarlo with 1000 iteration
     MC <- mcsearch(fn = eval_max, lower = lower, upper = upper, N = Ni, type = "max")
     s0 <- MC$sol
     HC <- hclimbing(par = s0, fn = eval_max, change = rchange1, lower = lower, upper = upper, type = "max",
@@ -143,14 +143,14 @@ simulatedAnnealing_growing <- function(){
     return(rounded_par)
   }
   
-  CSANN <- list(maxit = N2, temp = 500, trace = FALSE)
+  CSANN <- list(maxit = N2, temp = 900, trace = FALSE)
   
   for (i in 1:length(grupos)) {
     lower <- rep(0,D) # limites inferiores
     upper <- calculate_uppers(grupos[[i]])# limites superiores
     actual_sales <- grupos[[i]]
     
-    #get s0 from montecarlo with 300 iteration
+    #get s0 from montecarlo with 1000 iteration
     MC <- mcsearch(fn = eval_max, lower = lower, upper = upper, N = Ni, type = "max")
     s0 <- MC$sol
     # Execução do Simulated Annealing
@@ -165,12 +165,15 @@ simulatedAnnealing_growing <- function(){
 rgba_growing <- function(){
   rgba_values <- vector(length=8) 
   
+  
+  popSize <- 100
+  size    <- 28
+  
   EV <<- 0
   BEST <<- -Inf
-  curve <<- rep(NA,N)
+  curve <<- rep(NA,N/popSize)
   
-  popSize <- 200
-  size    <- 28
+  
   
   # Loop para percorrer todas as matrizes
   for (i in 1:length(grupos)) {
@@ -184,12 +187,12 @@ rgba_growing <- function(){
                 mutationChance = 1 / (size + 1), 
                 elitism        = popSize * 0.2, 
                 evalFunc       = eval_min, 
-                iter           = N)
+                iter           = N/popSize)
     
     bs <- rga$population[rga$evaluations == min(rga$evaluations)]
     rgba_values[i] <- eval_max(bs)
   }
-  plot_iteration_means(curve, N, "RBGA Genetic", median(rgba_values))
+  plot_iteration_means(curve, N/popSize, "RBGA Genetic", median(rgba_values))
   return(median(rgba_values))
 }
 
@@ -248,7 +251,7 @@ tabu_growing <- function(){
   
   EV <<- 0
   BEST <<- -Inf
-  curve <<- rep(NA,N) 
+  curve <<- rep(NA,N/100) 
   
   for (i in 1:length(grupos)) {
     lower <- rep(0,D) # limites inferiores
@@ -260,14 +263,14 @@ tabu_growing <- function(){
     initial_config <- c() # Building Initial configuration
     initial_config <- initial_config_build(config = initial_config, n_bits = bits_workers, dimensions = 12) # Building Initial configuration for Hired Workers
     initial_config <- initial_config_build(config = initial_config, n_bits = bits_orders , dimensions = 16) # Building Initial configuration for Product Orders
-    solution <- tabuSearch(size, iters = N, objFunc = eval_bin, config = initial_config, verbose = F)
+    solution <- tabuSearch(size, iters = N/100, objFunc = eval_bin, config = initial_config, verbose = F)
     
     b  <- which.max(solution$eUtilityKeep) # best index
     bs <- solution$configKeep[b,]
     tabu_values[i] <- eval_bin(bs)
   }
   
-  plot_iteration_means(curve, N, "Tabu Search Binary", median(tabu_values))
+  plot_iteration_means(curve, N/100, "Tabu Search Binary", median(tabu_values))
   return(median(tabu_values))
   
 }
@@ -305,9 +308,11 @@ eval_bin_min <- function(solution){
 rbga_bin_growing <- function(){
   rbga_bin_values <- vector(length = 8)
   
+  popsize <- 100
+  
   EV    <<- 0
   BEST  <<- -Inf
-  curve <<- rep(NA,N) 
+  curve <<- rep(NA,N/popsize) 
   
   for(i in 1:length(grupos)) {
     
@@ -318,12 +323,11 @@ rbga_bin_growing <- function(){
     bits_orders    <<- ceiling(max(log(Up[13:28], 2))) # Bits for Product Orders
     size           <- 12 * bits_workers + 16 * bits_orders # solution size
     mutationChance <- 1 / (size + 1)
-    popsize        <- 200
     elitism        <- popsize * 0.2
     
     rga <- rbga.bin(size           = size,
                     popSize        = popsize,
-                    iters          = N,
+                    iters          = N/popsize,
                     mutationChance = mutationChance,
                     elitism        = elitism,
                     zeroToOneRatio = 10,
@@ -335,7 +339,7 @@ rbga_bin_growing <- function(){
     rbga_bin_values[i] <- eval_bin(bs)
   }
   
-  plot_iteration_means(curve, N, "RBGA.bin Binary", median(rbga_bin_values))
+  plot_iteration_means(curve, N/popsize, "RBGA.bin Binary", median(rbga_bin_values))
   return(median(rbga_bin_values))
 }
 
@@ -365,10 +369,10 @@ san = simulatedAnnealing_growing()
 print(paste("Simulated Annealing - ", san))
 
 rgba_genetic = rgba_growing()
-print(paste("RGBA genetic - ", rgba_genetic))
+print(paste("RBGA genetic - ", rgba_genetic))
 
 rgba_bin = rbga_bin_growing()
-print(paste("RGBA binary - ", rgba_bin))
+print(paste("RBGA binary - ", rgba_bin))
 
 tabu = tabu_growing()
 print(paste("Tabu - ", tabu))
@@ -378,8 +382,8 @@ results <- data.frame(
   MonteCarlo = monte_carlo,
   HillClimbing = hill_climbing,
   SimulatedAnnealing = san,
-  RGBAGenetic = rgba_genetic,
-  RGBABinary = rgba_bin,
+  RBGAGenetic = rgba_genetic,
+  RBGABinary = rgba_bin,
   Tabu = tabu
 )
 
